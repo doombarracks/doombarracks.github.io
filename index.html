@@ -1,7 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant"></html>
 <html>
 <head>
-	<title>Doom Barracks</title>
+	<title>Doom Barracks - 毀滅戰士營</title>
+	<meta charset="utf-8"/>
+	<style>
+		@font-face {
+			font-family: 'DooM';
+			src: url('Fonts/DooM.eot');
+			src: url('Fonts/DooM.woff2') format('woff2'),
+					url('Fonts/DooM.woff') format('woff'),
+					url('Fonts/DooM.ttf') format('truetype'),
+					url('Fonts/DooM.svg#DooM') format('svg'),
+					url('Fonts/DooM.eot?#iefix') format('embedded-opentype');
+			font-weight: normal;
+			font-style: normal;
+		}
+
+		@font-face {
+			font-family: 'AmazDooMLeft';
+			src: url('Fonts/AmazDooMLeft.eot');
+			src: url('Fonts/AmazDooMLeft.woff2') format('woff2'),
+					url('Fonts/AmazDooMLeft.woff') format('woff'),
+					url('Fonts/AmazDooMLeft.ttf') format('truetype'),
+					url('Fonts/AmazDooMLeft.svg#AmazDooMLeft') format('svg'),
+					url('Fonts/AmazDooMLeft.eot?#iefix') format('embedded-opentype');
+			font-weight: normal;
+			font-style: normal;
+		}
+
+		@font-face {
+			font-family: 'AmazDooMRight';
+			src: url('Fonts/AmazDooMRight.eot');
+			src: url('Fonts/AmazDooMRight.woff2') format('woff2'),
+					url('Fonts/AmazDooMRight.woff') format('woff'),
+					url('Fonts/AmazDooMRight.ttf') format('truetype'),
+					url('Fonts/AmazDooMRight.svg#AmazDooMRight') format('svg'),
+					url('Fonts/AmazDooMRight.eot?#iefix') format('embedded-opentype');
+			font-weight: normal;
+			font-style: normal;
+		}
+
+		body {
+			position: relative;
+			margin: 0;
+			padding: 0;
+			background-color: #222;
+			color: #eee;
+			line-height: 200%;
+			min-width: 640px;
+			max-width: 1920px;
+			font-family: sans-serif;
+		}
+
+		.full-screen {
+			pointer-events: none;
+			position: fixed;
+			width: 100vw;
+			height: 100vh;
+			left: 0;
+			top: 0;
+			overflow: hidden;
+		}
+
+		#logo {
+			position: absolute;
+			top: 50%;
+    	width: 100%;
+			font-size: 20vw;
+			text-align: center;
+			line-height: 100%;
+			transform: translateY(-50%);
+		}
+
+		#coming-soon {
+			position: absolute;
+			bottom: 5%;
+    	width: 100%;
+			font-size: 3vw;
+			font-family: 'DooM', Tahoma, Geneva, Verdana, sans-serif;
+			text-align: center;
+			line-height: 100%;
+		}
+
+		.amazdoom-font .left { font-family: 'AmazDooMLeft', Tahoma, Geneva, Verdana, sans-serif; }
+		.amazdoom-font .left-outline { font-family: 'AmazDooMLeftOutline', Tahoma, Geneva, Verdana, sans-serif; }
+		.amazdoom-font .right { font-family: 'AmazDooMRight', Tahoma, Geneva, Verdana, sans-serif; }
+		.amazdoom-font .right-outline { font-family: 'AmazDooMRightOutline', Tahoma, Geneva, Verdana, sans-serif; }
+	</style>
 </head>
 <body>
+	<div class="full-screen">
+		<div id="logo" class="amazdoom-font">
+			<div><span class="left">Do</span><span class="right">oM</span></div>
+			<div><span class="left">Barr</span><span class="right">ackS</span></div>
+		</div>
+		<div id="coming-soon">Coming soon...</div>
+	</div>
 </body>
 </html>

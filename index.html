@@ -66,21 +66,20 @@
 		#logo {
 			position: absolute;
 			top: 50%;
-    	width: 100%;
+			width: 100%;
 			font-size: 20vw;
 			text-align: center;
-			line-height: 100%;
 			transform: translateY(-50%);
 		}
 
+		#logo > * {
+			line-height: 100%;
+		}
+
 		#coming-soon {
-			position: absolute;
-			bottom: 5%;
-    	width: 100%;
 			font-size: 3vw;
 			font-family: 'DooM', Tahoma, Geneva, Verdana, sans-serif;
 			text-align: center;
-			line-height: 100%;
 		}
 
 		.amazdoom-font .left { font-family: 'AmazDooMLeft', Tahoma, Geneva, Verdana, sans-serif; }
@@ -93,9 +92,9 @@
 	<div class="full-screen">
 		<div id="logo" class="amazdoom-font">
 			<div><span class="left">Do</span><span class="right">oM</span></div>
-			<div><span class="left">Barr</span><span class="right">ackS</span></div>
+			<div style="line-height:80%"><span class="left">Barr</span><span class="right">ackS</span></div>
+			<div id="coming-soon">Coming soon...</div>
 		</div>
-		<div id="coming-soon">Coming soon...</div>
 	</div>
 </body>
 </html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant"></html>
+<html>
+<head>
+	<title>模擬器與地圖設計</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans+SC');
+		
+		.portal-orb {
+			background-image: url('Images/Animation/Doom_Megasphere_R1.gif');
+		}
+
+		.separator {
+			display: block;
+			margin: 16px 0;
+			padding: 0;
+			background-image: url('Images/Application/W106_1a.png');
+			background-size: auto 100%;
+			height: 64px;
+		}
+
+		h1 {
+			padding: 16px;
+			font-family: 'Alegreya Sans SC', sans-serif;
+			text-align: center;
+		}
+
+		section {
+			display: block;
+			position: relative;
+			border: 0;
+			margin: 0;
+			padding: 0;
+		}
+
+		div.body {
+			position: relative;
+			margin: 0 1.5em;
+		}
+
+		/* Suggested apps at top of the page. */
+		div.table {
+			display: table;
+			margin-left: 2em;
+		}
+
+		div.table > div {
+			display: table-row;
+		}
+
+		div.table > div > div {
+			display: table-cell;
+			vertical-align: middle;
+			padding: 8px;
+		}
+
+		div.table > div > div > a:first-child {
+			font-size: 1.25em;
+			color: #ee0;
+		}
+
+		.app-logo {
+			width: 48px;
+			height: 48px;
+			border: outset;
+			border-radius: 8px;
+			background-color: #ccc;
+			background-size: contain;
+		}
+		/* End of suggested apps. */
+
+		div.body > hr {
+			height: 2px;
+			border: 0;
+			background: linear-gradient(to right, rgba(224,224,224,0), rgba(224,224,224,1), rgba(224,224,224,0));
+		}
+
+		div.content {
+			position: relative;
+			display: table;
+		}
+		div.content > div {
+			display: table-cell;
+			padding: 4px 12px;
+			vertical-align: top;
+		}
+		div.content hr{
+			height: 2px;
+			border: 0;
+			background: linear-gradient(to right, rgba(224,224,224,1), rgba(224,224,224,0));
+		}
+		div.content > .left { /* Keep it as wide as possible so the second child will be always on the right. */
+			width: 100%;
+		}
+		div.content > .right > hr {
+			display: none;
+		}
+		@media only screen and (max-width: 1024px) {
+			div.content > .left {
+				width: auto;
+				margin-right: 16px; /* For avoidig portal orbs. */
+			}
+			div.content > .left,
+			div.content > .right,
+			div.content > .right > hr {
+				display: block !important;
+			}
+			.img-display {
+				display: table !important; /* This !important is necessary. */
+			}
+		}
+
+		a:link, a:visited, a:hover, a:active { color: #0d0; }
+
+		ul.game-mode {
+			list-style-image: url("Images/DoomCommon/CELLA0.png");
+		}
+		ul.game-mode > li {
+			border-bottom: 1px dashed #888;
+		}
+		ul.game-mode.no-border > li {
+			border-bottom: 0;
+		}
+		ul.game-mode > li:last-child {
+			border-bottom: 0;
+		}
+		ul.game-mode mode {
+			font-size: 1.2em;
+			font-weight: bold;
+			display: block;
+			color: #ee0
+		}
+
+		ul.links {
+			list-style-image: url("Images/DoomCommon/SHELA0.png");
+		}
+
+		ul.detail {
+			list-style-image: url("Images/DoomCommon/MISLA5.png");
+		}
+
+		.img-display {
+			margin: 12px auto;
+			padding: 8px;
+			border: 2px solid rgba(192, 192, 192, 0.2);
+			background-color: rgba(128, 128, 128, 0.2);
+			text-align: center;
+			transition: all 0.25s;
+		}
+		.img-display:hover {
+			border: 2px solid rgba(192, 192, 192, 0.5);
+			background-color: rgba(128, 128, 128, 0.5);
+		}
+		.img-display * {
+			display: block;
+			margin: 4px;
+			max-width: 400px;
+			box-shadow: 0 0 6px black;
+		}
+		.img-display iframe
+		{
+			width: 400px;
+			height: 225px;
+		}
+		.img-display a {
+			padding-top: 0; /* So it stays close to the target on the top. */
+			text-shadow: 0 0 1em black, 0 0 0.75em black, 0 0 0.5em black, 0 0 0.25em black, 0 0 0.2em black, 0 0 0.1em black;
+			box-shadow: none;
+			transition: all 1s;
+		}
+		.img-display:hover a {
+			color: #ff0; /* Makes it brighter since the background gets brighter. */
+		}
+		.img-display > img:not(:first-child) { /* Kind of hack to make images no too close. */
+			margin-top: 12px;
+		}
+
+		@media only screen and (max-width: 1024px) {
+			div.table { margin-left: 1.75em; }
+			div.body { margin: 0 1.25em; }
+		}
+		@media only screen and (max-width: 896px) {
+			div.table { margin-left: 1.5em; }
+			div.body { margin: 0 1em; }
+		}
+		@media only screen and (max-width: 768px) {
+			div.table { margin-left: 1.25em; }
+			div.body { margin: 0 0.75em; }
+		}
+	</style>
+</head>
+<body>
+	<div class="portal-orb-container">
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="zandronum"><div>Zandronum</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="skulltag"><div>Skulltag</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="zdaemon"><div>ZDaemon</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="gzdoom"><div>GZDoom</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="legacy"><div>Doom Legacy</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="slade"><div>Slade</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="gzdb"><div>GZDoom Builder - bugfix</div></div></div>
+	</div>
+	
+	<div class="page-title-container jarallax cover" data-img-src="Images/Application/Title_Back.png">
+		<div class="page-title">模擬器與地圖設計</div>
+		<div class="page-title-text">
+			<p>這裡會介紹營裡常用到的模擬器及地圖製作時會使用到的工具。</p>
+			<p>
+				除了等等會提到的應用程式以外，有些也是必備工具。例如：
+				<div class="table">
+					<div>
+						<div>
+							<div class="app-logo" style="background-image:url('Images/Application/7-zip.png')"></div>
+						</div>
+						<div>
+							<a href="https://7-zip.org/" target="_blank">7-zip</a><br>
+							壓縮軟體。免費，壓縮率高、普及性高且支援各種不論是玩地圖或設計地圖時所需的壓縮格式。
+						</div>
+					</div>
+					<div>
+						<div>
+							<div class="app-logo" style="background-image:url('Images/Application/paint.net.png')"></div>
+						</div>
+						<div>
+							<a href="https://www.getpaint.net/" target="_blank">paint.net</a><br>
+							繪圖軟體。免費，可取代原本內建的小畫家，進行圖片基本操作。
+						</div>
+					</div>
+					<div>
+						<div>
+							<div class="app-logo" style="background-image:url('Images/Application/Notepad++.png')"></div>
+						</div>
+						<div>
+							<a href="https://notepad-plus-plus.org/" target="_blank">Notepad++</a><br>
+							腳本軟體。免費，可取代原本內建的記事本，支援<a href="https://zh.wikipedia.org/wiki/%E8%AA%9E%E6%B3%95%E7%AA%81%E9%A1%AF" target="_blank">語法突顯</a>，更可以<a href="http://docs.notepad-plus-plus.org/index.php/User_Defined_Languages" target="_blank">自定義語言</a>。
+						</div>
+					</div>
+					<div>
+						<div>
+							<div class="app-logo" style="background-image:url('Images/Application/VSCode.png')"></div>
+						</div>
+						<div>
+							<a href="https://code.visualstudio.com/" target="_blank">Visual Studio Code</a><br>
+							腳本軟體。免費，適合熟悉寫程式的玩家使用，也是本網站的開發工具。
+						</div>
+					</div>
+				</div>
+			</p>
+			<p>以下就開始介紹各個模擬器及應用程式吧！</p>
+		</div>
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+	</div>
+
+	<div class="separator"></div>
+
+	<section id="zandronum" class="jarallax" data-img-src="Images/Application/Zandronum_Logo.png">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> Zandronum <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>營內常用的連線模擬器，作者亦為 Skulltag(ST) 開發者之一。當 ST 停止開發後，Zandronum 就成為了後繼的模擬器，也繼承了所有 ST 的功能。</p>
+					<p>
+						Zandronum 除了支援所有 ST 的遊戲模式，另外還新增了以下模式。
+						<ul class="game-mode">
+							<li>
+								<mode>Domination</mode>
+								占領模式。地圖上有許多「占領點」讓玩家占領，當玩家接觸占領點後，該點的顏色就會從白色轉變成占領玩家所屬的隊伍顏色。
+								玩家占領該點後，所屬隊伍每 3 秒就可獲得 1 分。
+							</li>
+							<li>
+								<mode>Buckshot</mode>
+								此模式限制玩家只能使用超級散彈槍進行死鬥。
+							</li>
+						</ul>
+						其它模式請參考 ST 介紹。
+					</p>
+					<hr>
+					<ul class="links">
+						<li><a href="https://zandronum.com/" target="_blank">網站</a></li>
+						<li><a href="https://zandronum.com/forum/" target="_blank">論壇</a></li>
+						<li><a href="https://www.youtube.com/channel/UCcCFbudBciQ-oTV6-ffv25g" target="_blank">YouTube 頻道</a></li>
+						<li><a href="https://doomwiki.org/wiki/Zandronum" target="_blank">介紹 (維基)</a></li>
+						<li><a href="https://wiki.zandronum.com/Main_Page" target="_blank">Zandronum 維基 (設計者專區)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<iframe src="https://www.youtube.com/embed/5mLDugjh0Ro?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+						<a href="https://www.youtube.com/channel/UCcCFbudBciQ-oTV6-ffv25g">Welcome To Zandronum! (YouTube 頻道)</a>
+					</div>
+					<div class="img-display">
+						<iframe src="https://www.youtube.com/embed/AIg-kn8_yc4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+						<a href="https://zandronum.com/forum/viewtopic.php?t=6365">入侵模式 (Complex Doom Invasion)</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="skulltag" class="jarallax" data-img-src="Images/Application/Skulltag_Logo.jpg">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> Skulltag <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>營內過去常用的連線模擬器，支援 OpenGL 與部分 ZDoom 功能。已於 2012 年停止更新並由 Zandronum 後繼。</p>
+					<p>
+						ST 擁有許多種原始遊戲之外的模式供玩家選擇，包含了
+						<ul class="game-mode">
+							<li>
+								<mode>FFA - Free for All (Deathmatch)</mode>
+								大亂鬥！基本的<a href="https://zh.wikipedia.org/wiki/%E6%AD%BB%E4%BA%A1%E7%AB%9E%E8%B5%9B" target="_blank">死鬥</a>模式，人人都是藍波。只要看到會動的玩家，射下去就對了 XD。任何玩家到達指定殺敵數後即勝利並結束關卡。
+							</li>
+							<li>
+								<mode>Team Deathmatch</mode>
+								隊伍死鬥模式。將 FFA 模式分成紅、藍兩隊互相較勁，單個玩家的殺敵數會計算到所屬隊伍的總殺敵殺，其中一隊達到指定總殺敵數後即勝利並結束關卡。
+							</li>
+							<li>
+								<mode>Duel</mode>
+								單挑模式。玩家一對一死鬥，其它玩家只能觀戰。
+							</li>
+							<li>
+								<mode>Instagib</mode>
+								即刻肉泥！同 FFA，但整個死鬥地圖只有一種武器，軌道槍。只要被軌道槍射到，肉泥是唯一下場。這個模式考驗了玩家的速度與準度。
+							</li>
+							<li>
+								<mode>Terminator</mode>
+								終結者。在關卡開始時，會在地圖的隨機地點產生一顆終結者球。玩家拾起後會獲得滿血與滿盔甲(同超級球效果)，且該玩家的傷害輸出會變成 4 倍。<br>
+								當有玩家成為終結者時，除了記分板上的名子變成紅色以外，實際看到該玩家時，他的頭上會漂浮著終結者球。<br>
+								當終結者被擊倒後，球即會落下，等待下一位玩家成為終結者。而擊倒終結者的玩家會獲得 10 點殺敵數。
+							</li>
+							<li>
+								<mode>Oldschool</mode>
+								復古式死鬥。無法跳躍、視野無法上下觀看、貼圖不含透明度、沒有電腦玩家、沒有記分板、沒有 skin、不顯示玩家名稱。讓遊戲體驗更趨近於原始的 doom2.exe。
+							</li>
+							<li>
+								<mode>CTF (Capture the Flag)</mode>
+								<a href="https://zh.wikipedia.org/wiki/%E5%A4%BA%E6%97%97" target="_blank">奪旗</a>模式。每一隊的玩家要到敵方大本營去奪走對方的旗子，並帶回家裡放到自己隊伍的旗台上。當自己的旗子還在旗台上時，放下敵方旗子後就會得分。
+							</li>
+							<li>
+								<mode>Single Flag CTF</mode>
+								奪單旗(陷害)模式。整個地圖只有一支白旗在中央，各隊要想盡辦法把白旗插到敵方旗台上去陷害對方投降 XD。陷害成功後即得分。
+							</li>
+							<li>
+								<mode>Skulltag (ST)</mode>
+								類似 CTF 模式，但玩家是要到敵方陣營搶奪骷髏然後放到指定的骷髏台上。一個地圖可能有好幾個骷髏台，放在不同骷髏台所獲得的分數也不會相同，甚至是只有敵方才可以使用的骷髏台。
+							</li>
+							<li>
+								<mode>Invasion</mode>
+								入侵模式。玩家要合作抵擋一波又一波越來越來硬的怪物群。
+							</li>
+							<li>
+								<mode>Possesion</mode>
+								遊戲會隨機在一個死鬥重生點產生地獄之石(Hellstone)，拾起的玩家就會變全民公敵，其他玩家會被通知來殺掉這個玩家。<br>
+								玩家擁有地獄之石後，遊戲將會開始倒數，當時間數到零且該玩家尚未被殺掉，他就會得分。被殺掉就會落下地獄之石，等待下一位(受害)玩家。<br>
+								擁有地獄之石的玩家會因為石頭的重量而無法舉起任何武器。<br>
+								此模式亦可以隊伍為單位進行。
+							</li>
+							<li>
+								<mode>Survival</mode>
+								(合作)<a href="https://zh.wikipedia.org/wiki/%E6%AD%BB%E4%BA%A1%E7%AB%9E%E8%B5%9B#%E7%94%9F%E5%AD%98%E6%A8%A1%E5%BC%8F" target="_blank">生存模式</a>。如同合作模式，玩家們攜手殲滅地獄大軍。但玩家一死亡後就必須等到所有隊友也都死亡或過關以後才能重生。
+							</li>
+							<li>
+								<mode>Last Man Standing (LMS)</mode>
+								大逃殺模式。如同 DM，但玩家從頭到尾都不能被殺掉。只有金字塔頂端的那一位玩家，才能得到那珍貴的一分。<br>
+								此模式亦可以隊伍為單位進行，最後一位生存玩家所屬的隊伍，獲得那一分。
+							</li>
+						</ul>
+					</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://www.skulltag.com/" target="_blank">網站</a></li>
+						<li><a href="https://doomwiki.org/wiki/Skulltag" target="_blank">介紹 (維基)</a></li>
+						<li><a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-SkullTagSetup.html" target="_blank">設定教學 (Doom Barracks)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/Skulltag_FFA.png">
+						<a href="http://doom.wikia.com/wiki/Skulltag">FFA (官方地圖)</a>
+					</div>
+					<div class="img-display">
+						<img src="Images/Application/Skulltag_SpaceDM9.png">
+						<a href="https://www.doomworld.com/forum/topic/54855-spacedm9-10-release-download-now/">遊戲畫面 (SpaceDM9)</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="zdaemon" class="jarallax" data-img-src="Images/Application/ZDaemon_Logo.png">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> ZDaemon <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>營內常用的連線模擬器，從 ZDoom 1.23 分支出去後開始自己發展。主要目標是提供更好的連線遊戲體驗。</p>
+					<p>營內最著名的作品為 Doom Barracks Zone，由本營戰士 Tails 主導開發，共有 8 個地圖。</p>
+					<p>
+						ZDaemon 提供了幾項遊戲模式，這些模式 ST 都有支援，包含了
+						<ul class="game-mode no-border">
+							<li>單挑模式(Duel)</li>
+							<li>大亂鬥模式(FFA)</li>
+							<li>隊伍死鬥模式(Team DM)</li>
+							<li>合作模式(Cooperative)</li>
+							<li>奪旗模式(CTF)</li>
+						</ul>
+					</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://atonisfreak.byethost12.com/doompages/zdea.htm" target="_blank">介紹 (Doom Never Dies)</a></li>
+						<li><a href="https://www.zdaemon.org/" target="_blank">網站</a> (若無法連線至網站，請參考<a href="http://www.pcdiy.com.tw/detail/1412" target="_blank">此篇文章</a>設定。)</li>
+						<li><a href="https://forums.zdaemon.org/" target="_blank">論壇</a> (若無法連線至網站，請參考上面文章設定。)</li>
+						<li><a href="https://doomwiki.org/wiki/ZDaemon" target="_blank">介紹 (維基)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/ZDaemon_DBZone_01.jpg">
+						<img src="Images/Application/ZDaemon_DBZone_02.png">
+						<a href="123.html">Doom Barracks Zone (下載)</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="gzdoom" class="jarallax" data-img-src="Images/Application/GZDoom_Logo.png">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> GZDoom / ZDoom <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>ZDoom 是各模擬器中功能數一數二強大的佼佼者。除了支援毀滅戰士(Doom)，更支援異教徒(Heretic)、毀滅巫師(Hexen)及 Strife。</p>
+					<p>重點特色如下：
+						<ul class="detail">
+							<li>延伸毀滅巫師開始使用的遊戲腳本語言 ACS(Action Code Script)功能</li>
+							<li>DECORATE，玩家開始可自訂義角色(Actor)。使全新怪物、武器及創造全新物件變成可能，而不必再侷限於 <a href="https://doomwiki.org/wiki/DeHackEd" target="_blank">DeHackEd</a></li>
+							<li>通用化各種定義使玩家能使用更大的彈性創造模組(MOD)，事實上 ZDoom 已將整個遊戲所使用到的設定都<a href="https://zdoom.org/wiki/Special_lumps" target="_blank">通用化並延伸其功能</a></li>
+							<li>UDMF(Universal Doom Map Format)，使地圖不再侷限於<a href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6" target="_blank">二進制檔案</a>所定義的格式。地圖演變為以文字檔案儲存，這樣未來若需要擴充地圖相關的功能，就不會有問題</li>
+							<li>ZScript(過去稱為 DoomScript)，開放了更底層的遊戲控制，其功能就像是 ACS 與 DECORATE 的綜合加強版</li>
+						</ul>
+					</p>
+					<p>GZDoom 為 ZDoom 增加 OpenGL 與延伸功能的模擬器。自 ZDoom 從 <a href="https://forum.zdoom.org/viewtopic.php?t=54883" target="_blank">2017 年宣布停止更新</a>後，GZDoom 就成為了 ZDoom 系列的開發主線，且 ZDoom 的資源都有全數繼承(網站、資料、論壇等)。</p>
+					<p>ZDoom 還有一個分支模擬器稱為 <a href="https://qzdoom.drdteam.org/" target="_blank">QZDoom</a>，為 ZDoom 增加了全彩軟體渲染。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://atonisfreak.byethost12.com/doompages/zdooms.htm" target="_blank">介紹 (Doom Never Dies)</a></li>
+						<li><a href="https://zdoom.org/" target="_blank">ZDoom 網站</a></li>
+						<li><a href="https://forums.zdaemon.org/" target="_blank">ZDoom 論壇</a></li>
+						<li><a href="https://devbuilds.drdteam.org/" target="_blank">各模擬器最新版下載區</a> (<a href="https://devbuilds.drdteam.org/gzdoom/" target="_blank">GZDoom</a>)</li>
+						<li><a href="https://doomwiki.org/wiki/GZDoom" target="_blank">GZDoom 介紹 (維基)</a></li>
+						<li><a href="https://doomwiki.org/wiki/ZDoom" target="_blank">ZDoom 介紹 (維基)</a></li>
+						<li><a href="https://zdoom.org/wiki/" target="_blank">ZDoom 維基 (設計者專區)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<iframe src="https://www.youtube.com/embed/OrUu9gy4V8o?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+						<a href="https://forum.zdoom.org/viewtopic.php?t=46799">3D 地板、動態光源、特效</a>
+					</div>
+					<div class="img-display">
+						<img src="Images/Application/GZDoom_Voxel.png">
+						<a href="https://forum.zdoom.org/viewtopic.php?t=58059">立體像素</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="legacy" class="jarallax" data-img-src="Images/Application/DoomLegacy_Logo.png">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> Doom Legacy <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>營區初期最常用的模擬器，掀起了營區弟兄瘋狂連線與設計地圖的旋風。在毀滅戰士營網站的各種 Demo，若為 Legacy 錄製，則播放時版本必須為 1.42。現在雖然還在持續開發，但功能已被後起之星陸續追上，逐漸失去大家的使用意願。但是它絕對扮演了大家無法忘記的一段熱血回憶。</p>
+					<p>
+						Doom Legacy 在推出的時候是個很前衛的模擬器，具有以下特色：
+						<ul class="detail">
+							<li>支援了大於 320x200 的解析度顯示，這在當時只有 <a href="https://doomwiki.org/wiki/Doom95">Doom95</a> 支援更高解析度的時代是很吸引人的特色</li>
+							<li>動態光源。讓遊戲畫面看起來更有明暗感，但有些人偏好原始(無動態光源)的樣子</li>
+							<li>濃霧效果。想要製造懸疑、驚悚氣氛就不能錯過這個功能</li>
+							<li>3D 地板。大幅提升了地圖的複雜性，Phobia 就是一個使用大量 3D 地板創造驚人氣氛的作品。營內作品 3ddm01 運用 3D 地板使單純的 MAP07 產生了上下兩層的多樣性，增加死鬥的趣味</li>
+							<li>FraggleScript。相似 C 語法的直譯語言，可撰寫腳本進行遊戲控制。其功能如同毀滅巫師的 ACS</li>
+							<li>MD2 模組支援</li>
+						</ul>
+					</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://doomlegacy.sourceforge.net/" target="_blank">網站</a></li>
+						<!--<li><a href="http://forums.newdoom.com/forumdisplay.php?s=&forumid=56" target="_blank">論壇</a></li>-->
+						<li><a href="http://atonisfreak.byethost12.com/doompages/dl01.htm" target="_blank">介紹 (Doom Never Dies)</a></li>
+						<li><a href="https://sourceforge.net/projects/doomlegacy/files/" target="_blank">模擬器下載</a></li>
+						<li><a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-LegacyQuickStart.html" target="_blank">單機設定教學 (Doom Barracks)</a></li>
+						<li><a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-LegacyQuickStart.html#Multiplayer" target="_blank">多人連線設定教學 (Doom Barracks)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/Legacy_3DFloors.jpg">
+						<a href="https://sourceforge.net/projects/doomlegacy/">3D 地板</a>
+					</div>
+					<div class="img-display">
+						<img src="Images/Application/Legacy_DynamicLight.png">
+						<a href="https://www.doomworld.com/files/file/14248-phobia-the-age/">動態光源 (Phobia)</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="slade" class="jarallax" data-img-src="Images/Application/Slade_Logo.png">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> Slade <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>可謂是 WAD 界的開膛手捷克，可以開啟 WAD 內各個檔案(lump)。不論是圖片、音效、音樂、壓縮檔或是其他格式，Slade 都可以執行合理的編輯和輸出，讓檔案管理變得更輕鬆簡單。Slade 亦可進行地圖編輯，但提到地圖編輯，就絕對不能移漏掉下面的 GZDoom Builder。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://slade.mancubus.net/" target="_blank">網站</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/Slade_gfx.png">
+						<img src="Images/Application/Slade_Map3D.png">
+						<a href="http://slade.mancubus.net/index.php?page=screenies">程式畫面</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="gzdb" class="jarallax" data-img-src="Images/Application/DoomBuilder2_Logo.png">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> GZDoom Builder(GZDB) - bugfix / Doom Builder 2(DB2) <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<div class="content">
+				<div class="left">
+					<p>若要設計地圖，GZDoom Builder 應該是不二人選。GZDoom Builder 為 Doom Builder 2 的後繼專案，而 DB2 即是過去著名地圖編輯軟體 Doom Builder(DB) 作者的下一個作品，可惜的是當時 DB 會因為作業系統語言為中文的關係而無法正常執行。</p>
+					<p>DB2 除了沿襲前作的功能，更增加了 3D 模式，使設計者能在如遊戲般的 3D 畫面中即時修改地圖，這對於像是選擇及對齊貼圖等操作能大幅提升效率。</p>
+					<p>後來有人將 DB2 增加了 GZDoom 相關的各項功能，如動態光源、3D 模型、支援更多圖片格式等等，也修正並改進了 DB2。正好在那時，DB2 宣布停止更新。</p>
+					<p>直到 2017，GZDB 在作者消失的情況下停止更新。不過還是有人繼續進行各種更新及修正，也就是現在的 GZDB - bugfix 版本。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="https://forum.zdoom.org/viewtopic.php?t=54957" target="_blank">GZDB - bugfix 於 ZDoom 論壇頁面</a></li>
+						<li><a href="https://forum.zdoom.org/viewtopic.php?t=32392" target="_blank">GZDB 於 ZDoom 論壇頁面</a></li>
+						<li><a href="https://devbuilds.drdteam.org/gzdbbf/" target="_blank">GZDB - bugfix 軟體下載</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/GZDoom_Builder_01.jpg">
+						<a href="https://forum.zdoom.org/viewtopic.php?t=32392">GZDoom Builder 2.3 (論壇頁面)</a>
+					</div>
+					<div class="img-display">
+						<iframe src="https://www.youtube.com/embed/HFyENEL4BO4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+						<a href="https://www.youtube.com/watch?v=HFyENEL4BO4">GZDoom Builder - Time Lapse | UAC Base-Thingy</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<footer>此頁面於 2018 年 06 月 25 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			// Creates parallax effect.
+			$(".jarallax").each(function() {
+				var t = $(this);
+				t.jarallax({
+					speed: 0,
+					imgSize: t.hasClass("cover") ? "cover" : "contain"
+				});
+			});
+			
+			// Sets opacity.
+			$(".jarallax div")
+				.filter(function() {
+					var id = $(this).attr("id");
+					return typeof(id) === "string" ? id.startsWith("jarallax-container-") : false;
+				})
+				.each(function() {
+					$(this).addClass("bg-img");
+				});
+
+			// Initialize portal.
+			$(".portal-orb").click(function() { OrbPortal($(this)); } );
+			UpdateOrbs();
+		});
+
+		function ScrollToID(name) {
+			$("html, body")
+				.stop(true)
+				.animate({ scrollTop: $("#" + name).offset().top }, 1000);
+		}
+
+		function OrbPortal(jq) {
+			ScrollToID(jq.attr("orb-target"));
+		}
+
+		function UpdateOrbs() {
+			var y = window.scrollY + window.innerHeight * 0.5;
+
+			$(".portal-orb").each(function() {
+				var orb = $(this);
+				var story = $("#" + orb.attr("orb-target"));
+				var top = story.offset().top;
+				var bottom = top + story.height();
+				if (y >= top && y <= bottom) {
+					orb.addClass("selected");
+				}
+				else {
+					orb.removeClass("selected");
+				}
+			});
+		}
+
+		$(document)
+			.scroll(function() { UpdateOrbs(); })
+			.resize(function() { UpdateOrbs(); });
+	</script>
+</body>
+</html>

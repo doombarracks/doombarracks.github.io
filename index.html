@@ -55,6 +55,7 @@
 
 		.full-screen {
 			pointer-events: none;
+			user-select: none;
 			position: fixed;
 			width: 100vw;
 			height: 100vh;
@@ -70,22 +71,56 @@
 			font-size: 20vw;
 			text-align: center;
 			transform: translateY(-50%);
+			z-index: 0;
 		}
 
 		#logo > * {
 			line-height: 100%;
 		}
 
-		#coming-soon {
+		#alpha {
 			font-size: 3vw;
 			font-family: 'DooM', Tahoma, Geneva, Verdana, sans-serif;
 			text-align: center;
+			line-height: 0%;
 		}
 
 		.amazdoom-font .left { font-family: 'AmazDooMLeft', Tahoma, Geneva, Verdana, sans-serif; }
 		.amazdoom-font .left-outline { font-family: 'AmazDooMLeftOutline', Tahoma, Geneva, Verdana, sans-serif; }
 		.amazdoom-font .right { font-family: 'AmazDooMRight', Tahoma, Geneva, Verdana, sans-serif; }
 		.amazdoom-font .right-outline { font-family: 'AmazDooMRightOutline', Tahoma, Geneva, Verdana, sans-serif; }
+
+		.title-spacer {
+			display: block;
+			height: 110vh;
+		}
+
+		.demo-container {
+			position: relative;
+			display: table;
+			margin: 15vw auto;
+			padding: 4vw;
+			border: 0.3vw solid white;
+			border-radius: 1vw;
+			box-shadow: 0 0 3vw 1.5vw black;
+			background-color: rgba(0, 0, 0, 0.85);
+			z-index: 1;
+		}
+		.demo {
+			color: #ddd;
+			text-decoration: none;
+			display: inline-block;
+			padding: 4vw 4vw;
+			font-size: 3vw;
+			font-family: sans-serif, DFKai-sb, 標楷體;
+			border: none;
+			border-radius: 1.5vw;
+			transition: color 1s, background-color 1s;
+		}
+		.demo:hover {
+			color: #fff;
+			background-color: #444;
+		}
 	</style>
 </head>
 <body>
@@ -93,8 +128,14 @@
 		<div id="logo" class="amazdoom-font">
 			<div><span class="left">Do</span><span class="right">oM</span></div>
 			<div style="line-height:80%"><span class="left">Barr</span><span class="right">ackS</span></div>
-			<div id="coming-soon">Coming soon...</div>
+			<div id="alpha">Alpha</div>
 		</div>
+	</div>
+	<div class="title-spacer"></div>
+	<div class="demo-container">
+		<a class="demo" href="Story.html">遊戲故事</a>
+		<a class="demo" href="Application.html">模擬器</a>
+		<a class="demo" href="GameResource.html">遊戲資源</a>
 	</div>
 </body>
 </html>

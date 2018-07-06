@@ -1,0 +1,197 @@
+@font-face {
+	font-family: 'DooM';
+	src: url('../Fonts/DooM.eot');
+	src: url('../Fonts/DooM.woff2') format('woff2'),
+		url('../Fonts/DooM.woff') format('woff'),
+		url('../Fonts/DooM.ttf') format('truetype'),
+		url('../Fonts/DooM.svg#DooM') format('svg'),
+		url('../Fonts/DooM.eot?#iefix') format('embedded-opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'AmazDooMLeft';
+	src: url('../Fonts/AmazDooMLeft.eot');
+	src: url('../Fonts/AmazDooMLeft.woff2') format('woff2'),
+		url('../Fonts/AmazDooMLeft.woff') format('woff'),
+		url('../Fonts/AmazDooMLeft.ttf') format('truetype'),
+		url('../Fonts/AmazDooMLeft.svg#AmazDooMLeft') format('svg'),
+		url('../Fonts/AmazDooMLeft.eot?#iefix') format('embedded-opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'AmazDooMLeftOutline';
+	src: url('../Fonts/AmazDooMLeftOutline.eot');
+	src: url('../Fonts/AmazDooMLeftOutline.woff2') format('woff2'),
+		url('../Fonts/AmazDooMLeftOutline.woff') format('woff'),
+		url('../Fonts/AmazDooMLeftOutline.ttf') format('truetype'),
+		url('../Fonts/AmazDooMLeftOutline.svg#AmazDooMLeftOutline') format('svg'),
+		url('../Fonts/AmazDooMLeftOutline.eot?#iefix') format('embedded-opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'AmazDooMRight';
+	src: url('../Fonts/AmazDooMRight.eot');
+	src: url('../Fonts/AmazDooMRight.woff2') format('woff2'),
+		url('../Fonts/AmazDooMRight.woff') format('woff'),
+		url('../Fonts/AmazDooMRight.ttf') format('truetype'),
+		url('../Fonts/AmazDooMRight.svg#AmazDooMRight') format('svg'),
+		url('../Fonts/AmazDooMRight.eot?#iefix') format('embedded-opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'AmazDooMRightOutline';
+	src: url('../Fonts/AmazDooMRightOutline.eot');
+	src: url('../Fonts/AmazDooMRightOutline.woff2') format('woff2'),
+		url('../Fonts/AmazDooMRightOutline.woff') format('woff'),
+		url('../Fonts/AmazDooMRightOutline.ttf') format('truetype'),
+		url('../Fonts/AmazDooMRightOutline.svg#AmazDooMRightOutline') format('svg'),
+		url('../Fonts/AmazDooMRightOutline.eot?#iefix') format('embedded-opentype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	background-color: #222;
+	color: #eee;
+	line-height: 200%;
+	min-width: 640px;
+	max-width: 1920px;
+	font-family: sans-serif;
+}
+
+.page-title-container {
+	margin: 0;
+	padding: 0 0 32px 0;
+	width: 100%;
+}
+
+.page-title {
+	padding: 1em;
+	display: block;
+	font-size: 3em;
+	font-family: sans-serif, DFKai-sb, 標楷體;
+	font-weight: bold;
+	text-align: center;
+}
+
+.page-title-text {
+	margin: 0 10%;
+}
+
+/*
+ * Gradient Top and Bottom Borders
+ */
+.top-gradient,
+.bottom-gradient {
+	position: absolute;
+	width: 100%;
+	height: 64px;
+	left: 0;
+	z-index: -1;
+}
+.top-gradient {
+	top: 0;
+	background: linear-gradient(to top, rgba(34,34,34,0), rgba(34,34,34,1));
+}
+.bottom-gradient {
+	bottom: 0;
+	background: linear-gradient(to bottom, rgba(34,34,34,0), rgba(34,34,34,1));
+}
+
+.bg-img {
+	opacity: 0.3;
+	z-index: -2; /* So it can be blocked by gradients. */
+}
+
+/*
+ * Footer
+ */
+footer {
+	margin: 1em;
+	text-align: right;
+	font-style: italic;
+}
+footer:after {
+	content: "毀滅戰士營所有。";
+}
+
+/*
+ * Protal Orb
+ */
+
+.portal-orb-container {
+	position: fixed;
+	right: 8px; /* So we interfere less contents. */
+	top: 50%; /* width is determined by box size automatically. */
+	transform: translate(0, -50%);
+	transition: right 0.5s; /* When it moves back, make it fast. */
+	z-index: 1048576;
+}
+.portal-orb-container:hover {
+	right: 16px;
+	transition: right 2s; /* Make it slow because people can lose hover. */
+}
+.portal-orb-box {
+	position: relative;
+	display: block;
+	margin: 12px 0;
+	padding: 0;
+	width: 24px; /* Defines full size of orb. */
+	height: 24px; /* Defines full size of orb. */
+}
+.portal-orb {
+	position: absolute;
+	cursor: pointer;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	
+	border: 8px solid rgba(0, 170, 255, 0.5);
+	background-image: url('../Images/Animation/Doom_Blursphere_R1.gif');
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center; 
+	width: 0px;
+	height: 0px;
+	border-radius: 100px; /* Just use a large number. */
+	text-decoration: none;
+	transition: all 1s;
+}
+.portal-orb.selected {
+	border: 3px solid rgba(0, 96, 128, 0.5);
+	width: 100%; /* Defined by box. */
+	height: 100%; /* Defined by box. */
+}
+
+.portal-orb > div {
+	pointer-events: none;
+	padding: 0 16px;
+	position: absolute;
+	top: 50%;
+	right: 50%;
+	height: 48px;
+	font-size: 1.2em;
+	line-height: 48px;
+	white-space: nowrap;
+	opacity: 0;
+	transform: translateY(-50%);
+	border: 2px solid rgba(128, 192, 224, 0.75);
+	border-radius: 4px;
+	background-color: rgba(0, 96, 160, 0.75);
+	transition: all 0.3s;
+}
+.portal-orb:hover > div {
+	right: calc(50% + 32px);
+	opacity: 1;
+}

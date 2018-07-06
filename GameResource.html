@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+	<title>遊戲資源</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans+SC');
+		@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
+
+		preloader {
+			pointer-events: none;
+			position: fixed;
+			left: 0px;
+			top: 0px;
+			width: 100%;
+			height: 100%;
+			opacity: 0;
+			overflow: hidden;
+		}
+
+		hr {
+			margin: 1em 0;
+			width: 100%;
+			height: 8px;
+			border: 0px;
+		}
+
+		ul {
+			margin-right: 16px;
+		}
+
+		div.title {
+			display: table;
+			margin: 1em;
+			width: calc(100% - 2em);
+		}
+		div.title > div {
+			display: table-cell;
+			vertical-align: middle;
+			text-align: center;
+			font-family: sans-serif, DFKai-sb, 標楷體;
+			font-size: 2em;
+		}
+		div.title > div img {
+			margin: 2px 8px;
+		}
+
+		li a:link, a:visited, a:hover, a:active { color: #0d0; }
+		li a.dead-link {
+			text-decoration: line-through;
+			color: gray;
+		}
+
+		div.source-port {
+			display: block;
+			min-height: 24px;
+		}
+
+		div.table {
+			display: table;
+			border-collapse: collapse;
+			width: 100%;
+			max-width: 1920px;
+		}
+		div.table > div {
+			display: table-row;
+		}
+		div.table > div > div {
+			display: table-cell;
+			text-align: left;
+			vertical-align: middle;
+			padding: 8px;
+			/*border: solid 1px white;*/
+		}
+
+		div.table > div > div:nth-child(1) {
+			text-align: center;
+			word-wrap: none;
+			width: 20%;
+			min-width: 200px;
+		}
+		/* Title. */
+		div.table > div > div:nth-child(1) p {
+			margin: 8px;
+			font-family: 'Alegreya Sans SC', sans-serif;
+			font-size: 1.25em;
+			font-weight: bold;
+			color: #eee;
+			transition: all 0.5s;
+		}
+		div.table > div > div:nth-child(1) p:hover {
+			transform: scale(1.2);
+		}
+		/* Source port images. */
+		div.table > div > div:nth-child(1) img {
+			margin: 2px;
+			height: 24px;
+			transition: transform 0.5s;
+		}
+		div.table > div > div:nth-child(1) img:hover {
+			transform: scale(1.35);
+		}
+
+		@media only screen and (max-width: 1024px) {
+			div.table > div > div:nth-child(1) { min-width: 180px; }
+		}
+		@media only screen and (max-width: 896px) {
+			div.table > div > div:nth-child(1) { min-width: 160px; }
+		}
+		@media only screen and (max-width: 768px) {
+			div.table > div > div:nth-child(1) { min-width: 140px; }
+		}
+
+		/* Base game IWAD. */
+		div.table > div > div:nth-child(2) > img {
+			margin: 8px;
+			width: 72px;
+			height: auto;
+			transition: transform 0.5s;
+		}
+		div.table > div > div:nth-child(2) > img:hover {
+			transform: scale(1.25);
+		}
+
+		div.table > div > div:nth-child(3) > img {
+			transition: transform 0.5s;
+		}
+		div.table > div > div:nth-child(3) > img:hover {
+			transform: scale(1.25);
+		}
+
+		div.table > div > div:nth-child(4) {
+			width: 64px;
+		}
+		div.table > div > div:nth-child(4) > a {
+			display: inline-block;
+			text-decoration: none;
+			width: 64px;
+			height: 64px;
+			background-color: white;
+			background-image: url('Images/GameResource/SW1SKULL.png');
+		}
+		div.table > div > div:nth-child(4) > a:hover {
+			background-image: url('Images/GameResource/SW2SKULL.png');
+		}
+		div.table > div > div:nth-child(4) > a.dead-link,
+		div.table > div > div:nth-child(4) > a.dead-link:hover {
+			background-image: url('Images/GameResource/SW1SKULL.png');
+			filter: grayscale(1);
+			transition: filter 1s;
+		}
+		div.table > div:nth-child(even) {
+			background-color: #333;
+		}
+
+		map {
+			color: #9CDCFE;
+			font-family: 'Source Code Pro', monospace;
+		}
+
+		#floated-layer,
+		#player,
+		#face,
+		#blanket {
+			pointer-events: none;
+			position: fixed;
+			left: 0px;
+			top: 0px;
+			overflow: hidden;
+			z-index: 1048576;
+		}
+		#floated-layer {
+			width: 100vw;
+			height: 100vh;
+		}
+		#player,
+		#face,
+		#blanket {
+			width: 100%;
+			height: 100%;
+		}
+		#face {
+			background-color: red;
+			opacity: 0;
+			z-index: 1048575;
+		}
+		#blanket {
+			background-color: black;
+			opacity: 0;
+			transition: opacity 1s;
+			z-index: 1048574;
+		}
+		#scoreboard {
+			pointer-events: none;
+			user-select: none;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 100%;
+			color: #666;
+			font-family: "DooM";
+			font-size: 15vw;
+			text-align: center;
+			line-height: 100%;
+			transform: translate(-50%, -50%);
+		}
+
+		projectile {
+			/*border: 1px solid black;*/
+			pointer-events: all;
+			position: absolute;
+			min-width: 100px;
+			min-height: 100px;
+			/* Sets initial position outside. */
+			left: 100%;
+			top: 100%;
+		}
+
+		projectile > div {
+			/*border: 1px solid cyan;*/
+			pointer-events: none;
+			position: relative;
+		}
+
+		projectile > div > div {
+			/*border: 1px solid magenta;*/
+			background-repeat: no-repeat;
+			position: absolute;
+		}
+
+.SAni_Doom_ArachnotronPlasma_Fly_R1 {
+	width: 37px;
+	height: 33px;
+	background: url('Images/SpriteSheet/Doom_ArachnotronPlasma_Fly.png');
+	animation: SKF_Doom_ArachnotronPlasma_Fly_R1 0.286s step-end infinite;
+}
+@keyframes SKF_Doom_ArachnotronPlasma_Fly_R1 {
+	0.00% { background-position: 37px 0px }
+	50.00% { background-position: 37px -33px }
+}
+
+.SAni_Doom_ArachnotronPlasma_Hit_R1 {
+	width: 37px;
+	height: 33px;
+	background: url('Images/SpriteSheet/Doom_ArachnotronPlasma_Hit.png');
+	animation: SKF_Doom_ArachnotronPlasma_Hit_R1 0.714s step-end 1 forwards;
+}
+@keyframes SKF_Doom_ArachnotronPlasma_Hit_R1 {
+	0.00% { background-position: 37px 0px }
+	20.00% { background-position: 37px -33px }
+	40.00% { background-position: 37px -66px }
+	60.00% { background-position: 37px -99px }
+	80.00% { background-position: 37px -132px }
+	100.00% { background-position: 37px -165px }
+}
+
+.SAni_Doom_BaronBall_Fly_R3 {
+	width: 54px;
+	height: 40px;
+	background: url('Images/SpriteSheet/Doom_BaronBall_Fly.png');
+	animation: SKF_Doom_BaronBall_Fly_R3 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_BaronBall_Fly_R3 {
+	0.00% { background-position: -54px 0px }
+	50.00% { background-position: -54px -40px }
+}
+
+.SAni_Doom_BaronBall_Fly_R7 {
+	width: 54px;
+	height: 40px;
+	background: url('Images/SpriteSheet/Doom_BaronBall_Fly.png');
+	animation: SKF_Doom_BaronBall_Fly_R7 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_BaronBall_Fly_R7 {
+	0.00% { background-position: -108px 0px }
+	50.00% { background-position: -108px -40px }
+}
+
+.SAni_Doom_BaronBall_Hit_R1 {
+	width: 54px;
+	height: 40px;
+	background: url('Images/SpriteSheet/Doom_BaronBall_Hit.png');
+	animation: SKF_Doom_BaronBall_Hit_R1 0.514s step-end 1 forwards;
+}
+@keyframes SKF_Doom_BaronBall_Hit_R1 {
+	0.00% { background-position: 54px 0px }
+	33.33% { background-position: 54px -40px }
+	66.67% { background-position: 54px -80px }
+	100.00% { background-position: 54px -120px }
+}
+
+.SAni_Doom_CacodemonBall_Fly_R1 {
+	width: 53px;
+	height: 48px;
+	background: url('Images/SpriteSheet/Doom_CacodemonBall_Fly.png');
+	animation: SKF_Doom_CacodemonBall_Fly_R1 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_CacodemonBall_Fly_R1 {
+	0.00% { background-position: 53px 0px }
+	50.00% { background-position: 53px -48px }
+}
+
+.SAni_Doom_CacodemonBall_Hit_R1 {
+	width: 53px;
+	height: 48px;
+	background: url('Images/SpriteSheet/Doom_CacodemonBall_Hit.png');
+	animation: SKF_Doom_CacodemonBall_Hit_R1 0.514s step-end 1 forwards;
+}
+@keyframes SKF_Doom_CacodemonBall_Hit_R1 {
+	0.00% { background-position: 53px 0px }
+	33.33% { background-position: 53px -48px }
+	66.67% { background-position: 53px -96px }
+	100.00% { background-position: 53px -144px }
+}
+
+.SAni_Doom_ImpBall_Fly_R1 {
+	width: 50px;
+	height: 44px;
+	background: url('Images/SpriteSheet/Doom_ImpBall_Fly.png');
+	animation: SKF_Doom_ImpBall_Fly_R1 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_ImpBall_Fly_R1 {
+	0.00% { background-position: 50px 0px }
+	50.00% { background-position: 50px -44px }
+}
+
+.SAni_Doom_ImpBall_Hit_R1 {
+	width: 50px;
+	height: 44px;
+	background: url('Images/SpriteSheet/Doom_ImpBall_Hit.png');
+	animation: SKF_Doom_ImpBall_Hit_R1 0.514s step-end 1 forwards;
+}
+@keyframes SKF_Doom_ImpBall_Hit_R1 {
+	0.00% { background-position: 50px 0px }
+	33.33% { background-position: 50px -44px }
+	66.67% { background-position: 50px -88px }
+	100.00% { background-position: 50px -132px }
+}
+
+.SAni_Doom_BFGBall_Fly_R1 {
+	width: 143px;
+	height: 114px;
+	background: url('Images/SpriteSheet/Doom_BFGBall_Fly.png');
+	animation: SKF_Doom_BFGBall_Fly_R1 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_BFGBall_Fly_R1 {
+	0.00% { background-position: 143px 0px }
+	50.00% { background-position: 143px -114px }
+}
+
+.SAni_Doom_BFGBall_Hit_R1 {
+	width: 143px;
+	height: 114px;
+	background: url('Images/SpriteSheet/Doom_BFGBall_Hit.png');
+	animation: SKF_Doom_BFGBall_Hit_R1 1.371s step-end 1 forwards;
+}
+@keyframes SKF_Doom_BFGBall_Hit_R1 {
+	0.00% { background-position: 143px 0px }
+	16.67% { background-position: 143px -114px }
+	33.33% { background-position: 143px -228px }
+	50.00% { background-position: 143px -342px }
+	66.67% { background-position: 143px -456px }
+	83.33% { background-position: 143px -570px }
+	100.00% { background-position: 143px -684px }
+}
+
+.SAni_Doom_PlasmaBall_Fly_R1 {
+	width: 39px;
+	height: 41px;
+	background: url('Images/SpriteSheet/Doom_PlasmaBall_Fly.png');
+	animation: SKF_Doom_PlasmaBall_Fly_R1 0.343s step-end infinite;
+}
+@keyframes SKF_Doom_PlasmaBall_Fly_R1 {
+	0.00% { background-position: 39px 0px }
+	50.00% { background-position: 39px -41px }
+}
+
+.SAni_Doom_PlasmaBall_Hit_R1 {
+	width: 39px;
+	height: 41px;
+	background: url('Images/SpriteSheet/Doom_PlasmaBall_Hit.png');
+	animation: SKF_Doom_PlasmaBall_Hit_R1 0.571s step-end 1 forwards;
+}
+@keyframes SKF_Doom_PlasmaBall_Hit_R1 {
+	0.00% { background-position: 39px 0px }
+	20.00% { background-position: 39px -41px }
+	40.00% { background-position: 39px -82px }
+	60.00% { background-position: 39px -123px }
+	80.00% { background-position: 39px -164px }
+	100.00% { background-position: 39px -205px }
+}
+
+.SAni_Doom_Rocket_Fly_R3 {
+	width: 103px;
+	height: 86px;
+	background: url('Images/SpriteSheet/Doom_Rocket_Fly.png');
+	animation: SKF_Doom_Rocket_Fly_R3 1.000s step-end infinite;
+}
+@keyframes SKF_Doom_Rocket_Fly_R3 {
+	0.00% { background-position: -103px 0px }
+}
+
+.SAni_Doom_Rocket_Fly_R7 {
+	width: 103px;
+	height: 86px;
+	background: url('Images/SpriteSheet/Doom_Rocket_Fly.png');
+	animation: SKF_Doom_Rocket_Fly_R7 1.000s step-end infinite;
+}
+@keyframes SKF_Doom_Rocket_Fly_R7 {
+	0.00% { background-position: -206px 0px }
+}
+
+.SAni_Doom_Rocket_Hit_R1 {
+	width: 103px;
+	height: 86px;
+	background: url('Images/SpriteSheet/Doom_Rocket_Hit.png');
+	animation: SKF_Doom_Rocket_Hit_R1 0.514s step-end 1 forwards;
+}
+@keyframes SKF_Doom_Rocket_Hit_R1 {
+	0.00% { background-position: 103px 0px }
+	44.44% { background-position: 103px -86px }
+	77.78% { background-position: 103px -172px }
+	100.00% { background-position: 103px -258px }
+}
+
+.SAni_Doom_MancubusBall_Fly_R3 {
+	width: 103px;
+	height: 86px;
+	background: url('Images/SpriteSheet/Doom_MancubusBall_Fly.png');
+	animation: SKF_Doom_MancubusBall_Fly_R3 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_MancubusBall_Fly_R3 {
+	0.00% { background-position: -103px 0px }
+	50.00% { background-position: -103px -86px }
+}
+
+.SAni_Doom_MancubusBall_Fly_R7 {
+	width: 103px;
+	height: 86px;
+	background: url('Images/SpriteSheet/Doom_MancubusBall_Fly.png');
+	animation: SKF_Doom_MancubusBall_Fly_R7 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_MancubusBall_Fly_R7 {
+	0.00% { background-position: -206px 0px }
+	50.00% { background-position: -206px -86px }
+}
+
+.SAni_Doom_MancubusBall_Hit_R1 {
+	width: 103px;
+	height: 86px;
+	background: url('Images/SpriteSheet/Doom_MancubusBall_Hit.png');
+	animation: SKF_Doom_MancubusBall_Hit_R1 0.514s step-end 1 forwards;
+}
+@keyframes SKF_Doom_MancubusBall_Hit_R1 {
+	0.00% { background-position: 103px 0px }
+	44.44% { background-position: 103px -86px }
+	77.78% { background-position: 103px -172px }
+	100.00% { background-position: 103px -258px }
+}
+
+.SAni_Doom_LostSoul_Fly_R3 {
+	width: 103px;
+	height: 90px;
+	background: url('Images/SpriteSheet/Doom_LostSoul_Fly.png');
+	animation: SKF_Doom_LostSoul_Fly_R3 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_LostSoul_Fly_R3 {
+	0.00% { background-position: -103px 0px }
+	50.00% { background-position: -103px -90px }
+}
+
+.SAni_Doom_LostSoul_Fly_R7 {
+	width: 103px;
+	height: 90px;
+	background: url('Images/SpriteSheet/Doom_LostSoul_Fly.png');
+	animation: SKF_Doom_LostSoul_Fly_R7 0.229s step-end infinite;
+}
+@keyframes SKF_Doom_LostSoul_Fly_R7 {
+	0.00% { background-position: -206px 0px }
+	50.00% { background-position: -206px -90px }
+}
+
+.SAni_Doom_LostSoul_Hit_R1 {
+	width: 103px;
+	height: 90px;
+	background: url('Images/SpriteSheet/Doom_LostSoul_Death.png');
+	animation: SKF_Doom_LostSoul_Death_R1 1.029s step-end 1 forwards;
+}
+@keyframes SKF_Doom_LostSoul_Death_R1 {
+	0.00% { background-position: 103px 0px }
+	16.67% { background-position: 103px -90px }
+	33.33% { background-position: 103px -180px }
+	50.00% { background-position: 103px -270px }
+	66.67% { background-position: 103px -360px }
+	83.33% { background-position: 103px -450px }
+	100.00% { background-position: 103px -540px }
+}
+
+.SAni_Doom_RevenantTracer_Fly_R3 {
+	width: 56px;
+	height: 40px;
+	background: url('Images/SpriteSheet/Doom_RevenantTracer_Fly.png');
+	animation: SKF_Doom_RevenantTracer_Fly_R3 0.114s step-end infinite;
+}
+@keyframes SKF_Doom_RevenantTracer_Fly_R3 {
+	0.00% { background-position: -56px 0px }
+	50.00% { background-position: -56px -40px }
+}
+
+.SAni_Doom_RevenantTracer_Fly_R7 {
+	width: 56px;
+	height: 40px;
+	background: url('Images/SpriteSheet/Doom_RevenantTracer_Fly.png');
+	animation: SKF_Doom_RevenantTracer_Fly_R7 0.114s step-end infinite;
+}
+@keyframes SKF_Doom_RevenantTracer_Fly_R7 {
+	0.00% { background-position: -112px 0px }
+	50.00% { background-position: -112px -40px }
+}
+
+.SAni_Doom_RevenantTracer_Hit_R1 {
+	width: 56px;
+	height: 40px;
+	background: url('Images/SpriteSheet/Doom_RevenantTracer_Hit.png');
+	animation: SKF_Doom_RevenantTracer_Hit_R1 0.514s step-end 1 forwards;
+}
+@keyframes SKF_Doom_RevenantTracer_Hit_R1 {
+	0.00% { background-position: 56px 0px }
+	44.44% { background-position: 56px -40px }
+	77.78% { background-position: 56px -80px }
+	100.00% { background-position: 56px -120px }
+}
+
+		#music {
+			display: block;
+			text-align: center;
+		}
+		#music > div {
+			position: relative;
+			display: inline-block;
+			vertical-align: middle;
+			background-position: center;
+			margin: 4px;
+			padding: 16px 4px;
+			width: 160px;
+			transition: all 0.2s;
+			z-index: 1;
+		}
+		#music > div > div {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			left: 0;
+			top: 0;
+			background-color: #000;
+			opacity: 0.7;
+			transition: all 0.5s;
+		}
+		#music > div > a {
+			position: relative;
+			font-family: 'Alegreya Sans SC', sans-serif;
+			font-size: 1.25em;
+			text-decoration: none;
+		}
+		#music > div > a:link,
+		#music > div > a:hover,
+		#music > div > a:active {
+			color: #ff0;
+		}
+		#music > div > a:visited {
+			color: magenta;
+		}
+
+		#music > div:hover {
+			transform: scale(1.25);
+			transition: all 0.5s;
+			z-index: 2;
+		}
+		#music > div:hover > a {
+			text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 3px, #000 0px 0px 3px, #000 0px 0px 4px, #000 0px 0px 4px;
+		}
+		#music > div:hover > div {
+			opacity: 0;
+		}
+
+		li a.dead-link {
+			text-decoration: line-through;
+			color: gray;
+		}
+		
+		ul.links {
+			list-style-image: url("Images/DoomCommon/SHELA0.png");
+		}
+	</style>
+</head>
+<body>
+
+	<div class="page-title-container jarallax" data-img-src="Images/GameResource/E1M8.jpg">
+		<div class="page-title">遊戲資源</div>
+		<div class="page-title-text">
+			<p>這裡蒐集了營區戰士們推薦的作品，包含地圖和音樂。內容主要參考自原始毀滅戰士營網站並重新整理而成，有幾個連結已失效且回復不了檔案，但還是將資料留下來做為記錄。</p>
+			<p>
+				除了戰士們推薦的作品，以下列出其它相關的中文網站：
+				<ul class="links">
+					<li>
+						<a href="https://home.gamer.com.tw/creationCategory.php?owner=gx2002&c=336807" target="_blank">毀滅戰士小屋創作介紹 (巴哈姆特)</a>
+					</li>
+				</ul>
+			</p>
+		</div>
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+	</div>
+
+	<div id="floated-layer">
+		<div id="face"></div>
+		<div id="player"></div>
+		<div id="blanket"><div id="scoreboard">Score<div id="score">0</div></div></div>
+	</div>
+
+	<hr>
+	<div class="title">推薦作品</div>
+	<div>
+		<ul>
+			<li>WAD 檔需搭配模擬器才能進行遊戲。</li>
+			<li>這些遊戲的 IWAD 檔版權均屬 id Software 所有，為鼓勵合法軟體，除非您有購買正版軟體，否則請在下載後 24 小時內刪除，如未照法律程序執行而觸法，本營概不負責。</li>
+			<li>
+				部分地圖檔轉載來源：
+				<a href="http://w2.loxa.edu.tw/ly80657/" target="_blank">Doom's Page</a>、
+				<a class="dead-link" href="http://www.ult-doomlegacy.url.tw/" target="_blank">Ultimate Doom Legacy</a>、
+				<a href="http://www.doomworld.com/" target="_blank">Doom World</a>、
+				<a class="dead-link" href="http://www.planetdoom.com/" target="_blank">Plant Doom</a>、
+				<a class="dead-link" href="http://wadaholic.tripod.com/doomtournament2004/id6.html" target="_blank">Doom Tournament</a>
+				網站。
+			</li>
+			<li>
+				若對於地圖設計有興趣，可使用
+				<a href="https://devbuilds.drdteam.org/gzdbbf/" target="_blank">GZDoom Builder - bugfix</a>
+				搭配
+				<a href="http://slade.mancubus.net/index.php?page=downloads" target="_blank">Slade</a>
+				開發。
+			</li>
+		</ul>
+	</div>
+	<div class="table" id="wads1"></div>
+
+	<hr>
+	<div class="title">本營弟兄作品</div>
+	<div class="table" id="wads2"></div>
+
+	<hr>
+	<div class="title">地圖音樂</div>
+	<div>
+		<ul>
+			<li>此區所提供的遊戲背景音樂都是由 IWAD 或是 PWAD 檔案中所取出的 MIDI 檔案格式，可以用任何支援撥放 *.mid 的軟體撥放這些好聽的 MIDI 音樂。</li>
+			<li>
+				大部分遊戲音樂皆可從
+				<a href="https://www.youtube.com/results?search_query=doom+1993+music" target="_blank">YouTube</a>
+				線上收聽，像是
+				<a href="https://www.youtube.com/watch?v=18TTxhoF_EI&list=PLE8CC1C212133823C" target="_blank">DOOM</a>、
+				<a href="https://www.youtube.com/watch?v=7ytyxR-Gu9o&list=PL7C23A0444911513D" target="_blank">DOOM2</a>
+				等。
+			</li>
+			<li>
+				更多關於音樂的
+				<a href="http://doom.wikia.com/wiki/Doom_music" target="_blank">故事資料</a>
+				及
+				<a href="https://zdoom.org/wiki/Software_synthesizer" target="_blank">技術資料</a>
+				 。
+			</li>
+			<li>
+				若想要自己擷取遊戲檔案內的音樂檔，可使用
+				<a href="http://slade.mancubus.net/index.php?page=downloads" target="_blank">Slade</a>
+				協助輸出 。
+			</li>
+		</ul>
+	</div>
+	<div id="music"></div>
+
+	<footer>此頁面於 2018 年 06 月 17 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<script>
+		var Debug = false;
+
+		$(document).ready(function() {
+			// Randomize horizontal lines.
+			$("hr").css("background-image",
+				"url('" +
+				"Images/DoomCommon/STEP" + ("0" + (3 + Math.floor(Math.random() * 7))).slice(-2) +
+				".png')");
+
+			// Build titles.
+			$("div.title").each(function() {
+				var img;
+				switch (Math.floor(Math.random() * 4)) {
+					case 0: default: img ="Images/Animation/Doom_Soulsphere_R1.gif"; break;
+					case 1: img ="Images/Animation/Doom_Megasphere_R1.gif"; break;
+					case 2: img ="Images/Animation/Doom_Blursphere_R1.gif"; break;
+					case 3: img ="Images/Animation/Doom_InvulnerabilitySphere_R1.gif"; break;
+				}
+
+				var t = $(this);
+				var html =
+					'<div>' +
+						'<img src="' + img + '">' +
+						t.html() +
+						'<img src="' + img + '">' +
+					'</div>';
+				t.html(html);
+			})
+
+			// Build tables.
+			BuildMapTable($("#wads1"), CoopWads.concat(DMWads));
+			BuildMapTable($("#wads2"), DBWads);
+			BuildMusicTable();
+
+			InitializeMusicItemBackground();
+
+			// Initialize jarallax.
+			$(".jarallax").jarallax({ speed: 0 });
+			$(".jarallax div")
+				.filter(function() {
+					var id = $(this).attr("id");
+					return typeof(id) === "string" ? id.startsWith("jarallax-container-") : false;
+				})
+				.each(function() {
+					$(this).addClass("bg-img");
+				});
+
+			// For debugging.
+			if (Debug) {
+				$("#player").css("pointer-events", "all")
+					.click(function() {
+						SpawnProjectile();
+					});
+			}
+
+			// Start projectile shooter game loop.
+			ProtectileShooterLoop();
+		});
+
+		function GetPreloader() {
+			var pl = $("preloader");
+			if (pl.length === 0) {
+				$("body").prepend("<preloader></preloader>");
+				pl = $("preloader")
+			}
+			return pl;
+		}
+
+		function PreloadClass(tag, className) {
+			var pl = GetPreloader();
+			var selector = tag + "." + className;
+			if (pl.find(selector).length === 0) {
+				pl.append("<" + tag + " class=" + className + "></" + tag + ">");
+			}
+		}
+
+		var ProjectileSummonInterval = !Debug ? (10 + Math.random() * 10) : 5;
+		var ProjectileShooterTimeoutID = 0;
+
+		function ProtectileShooterLoop(spawn) {
+			if (ProjectileShooterTimeoutID !== 0) {
+				clearTimeout(ProjectileShooterTimeoutID);
+			}
+			ProjectileShooterTimeoutID = setTimeout(function() { ProtectileShooterLoop(true); }, ProjectileSummonInterval * 1000);
+			
+			if (spawn) {
+				SpawnProjectile();
+			}
+		}
+
+		var ProjectileInterceptCharge = 1;
+		var ProjectileIndex = 0;
+		var ProjectileBaseSpeedTime = 5;
+		var ProjectileInterceptCount = 0;
+		var ProjectileKeepInterceptingCount = 0;
+		var ProjectileHitWallCount = 0;
+		var ProjectileKeepHitingWallCount = 0;
+		var BlanketCharge = 0;
+		var BlanketChargeRecoveryTimerID = 0;
+		var GameScore = 0;
+
+		function SpawnProjectile() {
+			var ProjectileList = [
+				"SAni_Doom_ArachnotronPlasma_Fly_R1",
+				"SAni_Doom_BaronBall_Fly_R3",
+				"SAni_Doom_CacodemonBall_Fly_R1",
+				"SAni_Doom_ImpBall_Fly_R1",
+				"SAni_Doom_BFGBall_Fly_R1",
+				"SAni_Doom_PlasmaBall_Fly_R1",
+				"SAni_Doom_Rocket_Fly_R3",
+				"SAni_Doom_MancubusBall_Fly_R3",
+				"SAni_Doom_LostSoul_Fly_R3",
+				"SAni_Doom_RevenantTracer_Fly_R3",
+			];
+
+			var id = "p" + ProjectileIndex++; // Makes a unique ID.
+			var baseName = ProjectileList[Math.floor(ProjectileList.length * Math.random())]; // Randomly choose one class name.
+			var rotation = baseName.slice(-1); // Gets rotation from class name.
+			var right2left = Math.random() < 0.5; // Determine whether to spawn from the left border(false) or right border(true).
+			var name = rotation === "1"
+				? baseName // Universal rotation, so we don't need to find the opposite rotation.
+				: (rotation === "3" && right2left ? baseName : baseName.slice(0, -1) + "7"); // "7" is the opposite rotation of "3".
+			var hitName = baseName.substr(0, baseName.indexOf("_Fly_")) + "_Hit_R1"; // Gets class name when projectile hits.
+
+			// Preload sprite sheet for hit animation.
+			PreloadClass("div", hitName);
+
+			// Gets game player.
+			var player = $("#player");
+
+			// Initially creates projectile so it's size can be determined.
+			player.append('<projectile id="' + id + '"><div><div class="' + name + '"></div></div></projectile>');
+
+			// Gets jquery objects of projectile container and projectile itself.
+			var domCont = $("#" + id);
+			var domProj = domCont.find("div > div");
+
+			// Gets player size and projectile container size so we can determine where to spawn.
+			var sw = player.width(), sh = player.height(); // s: screen
+			var cw = domCont.width(), ch = domCont.height(); // c: contiainer
+			var pw = domProj.width(), ph = domProj.height(); // p: projectile
+
+			domProj.attr("fly-class", name) // Set information to retrieve later.
+				.attr("hit-class", hitName) // Set information to retrieve later.
+				.css("left", ((cw - pw) / 2) + "px") // Center align to container.
+				.css("top", ((ch - ph) / 2) + "px"); // Center align to container.
+
+			// Speed of projectile to fly.
+			var speed = (sw - cw) / (ProjectileBaseSpeedTime * (1 + Math.random() * 1.5));
+
+			domCont.css("left", (right2left ? sw - cw : 0) + "px") // Spawns at left or right border.
+				.css("top", ((sh - ch) * Math.random()).toFixed(0) + "px") // Spawns at rendom height within player.
+				.css("transform", "scale(" + (1 + Math.random() * 0.75).toFixed(2) + ")") // Makes it a little different in size.
+				.mouseover(ProjectileIntercept)
+				.click(ProjectileIntercept)
+				.animate({
+					left: (right2left ? 0 : sw - cw) + "px",
+				}, {
+					duration: (sw - cw) / speed * 1000,
+					easing: "linear",
+					done: ProjectileReachWall,
+				});
+		}
+
+		function Update_BlanketCharge(increment) {
+			BlanketCharge += increment;
+			BlanketCharge = Math.min(0.85, Math.max(0, BlanketCharge));
+			$("#blanket")
+				.css("opacity", BlanketCharge)
+				.css("pointer-events", BlanketCharge > 0 ? "auto" : "none");
+		}
+
+		function ProjectileReachWall(e) {
+			ProjectileHitWallCount++;
+			ProjectileKeepHitingWallCount++;
+			ProjectileKeepInterceptingCount = 0;
+
+			// Lengthen time to spawn the next projectile.
+			ProjectileInterceptCharge = Math.max(ProjectileInterceptCharge - Math.sqrt(ProjectileKeepHitingWallCount) * 0.2, 1); // So we will not decrease too much i the player is playing well already.
+			ProjectileSummonInterval = Math.min(ProjectileSummonInterval + 3 / ProjectileInterceptCharge, 30); // Spawns at longer interval.
+			ProjectileBaseSpeedTime = Math.min(ProjectileBaseSpeedTime + Math.sqrt(ProjectileKeepHitingWallCount) * 0.2 / ProjectileInterceptCharge, 5); // Flys slower.
+
+			// Decrease opacity if player don't wanna play anymore.
+			if (ProjectileKeepHitingWallCount > 1 && BlanketChargeRecoveryTimerID === 0) {
+				BlanketChargeRecoveryTimerID = setInterval(function() {
+					Update_BlanketCharge(-0.01);
+					if (BlanketCharge <= 0) { // We already reached out goal.
+						clearInterval(BlanketChargeRecoveryTimerID);
+						BlanketChargeRecoveryTimerID = 0;
+					}
+				}, 100);
+			}
+
+			// Determine.
+			Update_BlanketCharge(Math.pow(ProjectileKeepHitingWallCount, 0.75) * -0.02);
+
+			var pc = $(this); // Projectile container.
+			DamagePlayer(pc);
+			ProjectileExplode(pc);
+		}
+
+		function ProjectileIntercept(e) {
+			ProjectileInterceptCount++;
+			ProjectileKeepInterceptingCount++;
+			ProjectileKeepHitingWallCount = 0;
+
+			// Update score according to current status.
+			GameScore += 10 / ProjectileBaseSpeedTime * Math.sqrt(ProjectileKeepInterceptingCount);
+			$("#score").html(GameScore.toFixed(0));
+
+			// shorten time to spawn the next projectile.
+			ProjectileInterceptCharge = Math.min(ProjectileInterceptCharge + 0.1, 4);
+			ProjectileSummonInterval = Math.max(
+				ProjectileSummonInterval / 1.2,
+				Math.max(0.1, 0.25 - (Math.sqrt(ProjectileKeepHitingWallCount) * 0.01))); // Spawns at shorter interval.
+			ProjectileBaseSpeedTime = Math.max(ProjectileBaseSpeedTime - 0.01, 1); // Flys faster.
+
+			if (ProjectileKeepInterceptingCount > 10) {
+				Update_BlanketCharge(Math.sqrt(ProjectileKeepInterceptingCount - 10) * 0.01);
+			}
+
+			// Stop decreasing blanket charge.
+			clearInterval(BlanketChargeRecoveryTimerID);
+			BlanketChargeRecoveryTimerID = 0;
+
+			var pc = $(this); // Projectile container.
+			ProjectileExplode(pc);
+		}
+
+		function DamagePlayer(pc) { // Projectile container.
+			var f = $("#face");
+			var o = function() { return parseFloat(f.css("opacity")); };
+
+			f.stop(true)
+				.fadeTo(100, 0.25 + o(), function() { // Initial additive redness when damaged.
+					f.fadeTo(o() * 2000, o(), function() { // Keep redness for a while.
+						f.fadeTo(o() * 5000, 0); // Fading.
+					});
+				})
+		}
+
+		function ProjectileExplode(pc) { // Projectile container.
+			pc.stop() // Stop moving.
+				.css("pointer-events", "none"); // So we can click on any other projectiles under.
+
+			var p = pc.find("div > div"); // Projectile.
+			p.removeClass(p.attr("fly-class")) // Removes flying animation.
+				.addClass(p.attr("hit-class")) // Start playing hit animation.
+				.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
+				function(e) {
+					pc.remove(); // Removes projectile container when animation is complete.
+				}
+			);
+		}
+
+		function BuildSourcePorts(ports) {
+			// No port is defined.
+			if (typeof(ports) !== "string") ports = "";
+
+			var tokens = ports.split(",");
+
+			// Build html text.
+			var html = "";
+			if (tokens.indexOf("all") < 0) {
+				if (tokens.indexOf("gzdoom") > -1) html += '<img src="Images/GameResource/GZDoom.png" title="限定 GZDoom 模擬器">';
+				if (tokens.indexOf("zdoom") > -1) html += '<img src="Images/GameResource/ZDoom.png" title="限定 ZDoom 模擬器">';
+				if (tokens.indexOf("zandronum") > -1) html += '<img src="Images/GameResource/Zandronum.png" title="限定 Zandronum 模擬器">';
+				if (tokens.indexOf("skulltag") > -1) html += '<img src="Images/GameResource/Skulltag.png" title="限定 Skulltag 模擬器">';
+				if (tokens.indexOf("zdaemon") > -1) html += '<img src="Images/GameResource/ZDaemon.png" title="限定 ZDaemon 模擬器">';
+				if (tokens.indexOf("legacy") > -1) html += '<img src="Images/GameResource/Legacy.png" title="限定 Doom Legacy 模擬器">';
+			}
+			if (html === "") html = '<img src="Images/GameResource/STFGOD0.png" title="無模擬器限制"></sp>';
+
+			return html;
+		}
+
+		function BuildGame(game) {
+			switch (game) {
+				case "doom": return '<img src="Images/Doom/M_DOOM.png" title="以 DOOM 為 IWAD">';
+				case "doom2": default: return '<img src="Images/Doom2/M_DOOM.png" title="以 DOOM2 為 IWAD">';
+				case "tnt": return '<img src="Images/TNT/M_DOOM.png" title="以 TNT 為 IWAD">';
+				case "plutonia": return '<img src="Images/Plutonia/M_DOOM.png" title="以 Plutonia 為 IWAD">';
+			}
+			return "";
+		}
+
+		function BuildGameType(type) {
+			switch (type) {
+				case "coop": default: return '<img src="Images/GameResource/TROOG1.png" title="合作模式">';
+				case "dm": return '<img src="Images/GameResource/PLAYE1.png" title="死鬥模式">';
+				case "ctf": return '<img src="Images/GameResource/SFLSA0.png" title="搶旗模式">';
+			}
+			return "";
+		}
+
+		function BuildLink(link, isDeadLink) {
+			if (isDeadLink) {
+				return '<a class="dead-link" title="連結已失效"></a>';
+			}
+			
+			// Check if this link should be redirected.
+			if (link.startsWith("Music") || link.startsWith("MyBackup")) {
+				link = "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/" + link;
+			}
+			return '<a href="' + link + '" title="下載" target="_blank"></a>';
+		}
+
+		function BuildMapTable(div, data) {
+			var html = "";
+			for (var i in data) {
+				var d = data[i];
+				html +=
+					'<div>' +
+						'<div>' +
+							'<p>' + d.Title + '</p>' +
+							'<div>' + BuildSourcePorts(d.Ports) + '</div>' +
+						'</div>' +
+						'<div>' + BuildGame(d.Game) + '</div>' +
+						'<div>' + BuildGameType(d.Type) + '</div>' +
+						'<div>' +
+							BuildLink(d.Link, d.LinkDead) +
+						'</div>' +
+						'<div>' + d.Description + '</div>' +
+					'</div>';
+			}
+			div.html(html);
+		}
+
+		var CoopWads = [
+			{
+				Title: "10Years",
+				Game: "doom",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom/0-9/10years.zip",
+				Description: "DOOM 發行十週年慶，生日快樂 - 外掛地圖，<map>E1M4</map> 關。",
+			}, {
+				Title: "H2h-xmas",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/xmas/h2h-xmas.zip",
+				Description: "耶誕風格的地圖，關卡是越來越困難，適合多人闖關，包含 <map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Alien Vendetta-AV",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/megawads/av.zip",
+				Description: "超暴力，怪物超多，超變態地圖，包含 <map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Memento Mori I",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/mm/mm_allup.zip",
+				Description: "地形複雜，機關多，怪物也不少的地圖，包含 <map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Memento Mori II",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/mm/mm2.zip",
+				Description: "二代地形更複雜，機關更多，怪物也更多的地圖，包含 <map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Deus Vult",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/d-f/dv.zip",
+				Description: "地形超變態的大，怪物超級多的地圖，有點魔戒的味道，包含 <map>MAP01-MAP04</map> 關。",
+			}, {
+				Title: "Azagthoth",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/a-c/azgthth.zip",
+				Description: "超棒構圖特色的傑作，一定要試試看，包含 <map>MAP01-MAP12</map> 關。",
+			}, {
+				Title: "Vilecore",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/megawads/vilcore.zip",
+				Description: "蠻有特色的外掛地圖，包含 <map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Phobia",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/p-r/phobia.zip",
+				Description: "地形 3D，超大且複雜的外掛地圖，包含 <map>MAP01</map> 關。",
+			}, {
+				Title: "Icarus",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/TeamTNT/icarus/icarus.zip",
+				Description: "TeamTNT 力作，全新背景 MIDI 音樂，不可多得的一套外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Icerial 2",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/g-i/icerial2.zip",
+				Description: "非常非常難的一個獨立關卡，<map>MAP01</map> 關。",
+			}, {
+				Title: "Sekkusu",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/deathmatch/Ports/s-u/sekkusu.zip",
+				Description: "具有Legacy專屬的3D效果的關卡，<map>MAP01</map> 關。",
+			}, {
+				Title: "EOO-OldOrder",
+				Ports: "legacy",
+				Link: "MyBackup/CoopMaps/EOO.7z",
+				Description: "具有非常炫麗的3D效果的關卡，<map>MAP01</map> 關。",
+			}, {
+				Title: "Ninja",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom/m-o/ninja.zip",
+				Description: "一個蠻有趣的外掛地圖，<map>MAP01-MAP03</map> 關。",
+			}, {
+				Title: "Titan",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/s-u/titan.zip",
+				Description: "蠻肅穆可怕的外掛地圖，<map>MAP01-MAP09</map> 關。",
+			}, {
+				Title: "Spone 2",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/s-u/spone2.zip",
+				Description: "超酷的單人外掛地圖，<map>MAP01</map> 關。",
+			}, {
+				Title: "Wicked",
+				Ports: "legacy",
+				Link: "MyBackup/CoopMaps/Wicked.7z",
+				Description: "一個光影亮麗的外掛地圖，每個 WAD 含有一個關卡。",
+			}, {
+				Title: "Tvr!",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/megawads/tvr.zip",
+				Description: "陷阱多，意外多，驚訝多，完整關卡的外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Mars War",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/megawads/marsw301.zip",
+				Description: "發生於火星基地的另一個事件很有火星味道的外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Invasio 2",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/megawads/inva2_09b.zip",
+				Description: "外星異形入侵地球，怪物，機關防不勝防，很有故事性的外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Mummy 2",
+				Link: "MyBackup/CoopMaps/Mummy2.7z",
+				Description: "有濃厚-埃及-風格的地形，地物，非常有特色的外掛地圖，<map>MAP01-MAP10</map> 關。",
+			}, {
+				Title: "Blood Rust",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/a-c/bloodrst.zip",
+				Description: "國外很多人所愛玩的一個不錯的外掛地圖，<map>MAP01-MAP11</map> 關。",
+			}, {
+				Title: "Master",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/m-o/master.zip",
+				Description: "具有 Legacy 3D 效果，畫面炫麗，不錯玩的外掛地圖，<map>MAP01-MAP03</map> 關。",
+			}, {
+				Title: "The Twilight Zone II: Final Dreams",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/megawads/twzone2.zip",
+				Description: "場景塑造的很有氣氛搭配新的背景音樂與音效讓你不由自主的玩下去的外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Osiris",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/m-o/osiris.zip",
+				Description: "由 Howie 所推薦，地圖塑造的很有埃及氣氛，Osiris就是埃及死神的意思，<map>MAP01-MAP08</map> 關。",
+			}, {
+				Title: "Darken 2",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/megawads/darken2.zip",
+				Description: "由 E.F. 所推薦，場景塑造的很有氣氛，很有故事感的地圖，<map>MAP01-MAP12</map> 為任務地圖，<map>MAP13-MAP24</map> 為 PK 地圖。",
+			}, {
+				Title: "Dark Covenant",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/d-f/darkcvnt.zip",
+				Description: "由 E.F. 所推薦，又一個場景塑造的很有氣氛，很有故事感的地圖，<map>MAP01-MAP12</map> 關。",
+			}, {
+				Title: "Castle",
+				Link: "MyBackup/CoopMaps/Castle.7z",
+				Description: "由 QQW94 推薦的 城堡地形很有特色的外掛地圖，<map>MAP01</map> 關。",
+			}, {
+				Title: "A Fistful of DOOM",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/d-f/fistful3.zip",
+				Description: "由 QQW94 推薦的 哇~! DOOM變成西部牛仔的場景的外掛地圖，<map>MAP01-MAP02</map> 關。",
+			}, {
+				Title: "Equinox",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/d-f/equinox.zip",
+				Description: "由 E.F. 推薦的 地形地物嶄新面貌，使用很多新材質貼圖的外掛地圖，<map>MAP01-MAP13</map> 關。",
+			}, {
+				Title: "Hi-Tech Hell 2 - Alien Tech",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/g-i/hth2.zip",
+				Description: "由 Weow 所推薦，第一關為故事介紹，3D 光源非常漂亮，材質貼圖很棒，僅支援單人模式，<map>MAP01-MAP07</map> 關。(2006-04-21 修正版)",
+			}, {
+				Title: "Hell Revealed",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/hr/hr.zip",
+				Description: "一開始就怪物多，難度高的外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Hell Revealed II",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/hr/hr2final.zip",
+				Description: "由 Superman 推薦的 怪物更多更強，難度也更高的外掛地圖，<map>MAP01-MAP32</map> 關(Final 版)。",
+			}, {
+				Title: "Chris61",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/megawads/chris61.zip",
+				Description: "有趣，複雜多變的外掛地圖，<map>MAP01-MAP10</map> 為任務地圖，<map>MAP11-MAP30</map> 為 PK 地圖。",
+			}, {
+				Title: "Romero",
+				Link: "MyBackup/CoopMaps/Romero.7z",
+				Description: "由 id 設計 DOOM 工程師之一的 Romero 所設計的精采刺激超複雜的地圖，<map>MAP01</map> 關。",
+			}, {
+				Title: "Runriot",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/p-r/runriot.zip",
+				Description: "驚險刺激就看你怎麼讓怪物互鬥一定要玩看看，<map>MAP01</map> 關。",
+			}, {
+				Title: "Dsv 1",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/TeamTNT/return/dsv.zip",
+				Description: "畫面風格地形變化多端，怪物的安排出人意料，不可多得的外掛地圖(第一輯)，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Dsv 2 - Blackness",
+				Link: "MyBackup/CoopMaps/Dsv2_Blackness.7z",
+				Description: "畫面風格地形變化多端，怪物的安排出人意料，不可多得的外掛地圖(第二輯)，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Dsv 3 - War",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/megawads/war_3.zip",
+				Description: "畫面風格地形變化多端，怪物的安排出人意料，不可多得的外掛地圖(第三輯)，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Dsv 4 - Revolution",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/megawads/dsv4_rvltinL.zip",
+				Description: "畫面風格地形變化多端，怪物的安排出人意料，不可多得的外掛地圖(第四輯)，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Dsv 5 - The Final War",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/d-f/dsv5.zip",
+				Description: "畫面風格地形變化多端，怪物的安排出人意料，不可多得的外掛地圖(第五輯)，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Vile",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/megawads/vile.zip",
+				Description: "畫面華麗有3D效果的外掛地圖，<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Scythe 2",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/levels/doom2/Ports/megawads/scythe2.zip",
+				Description: "場景風格有3D華麗效果的外掛地圖，小心遇到紅色叛軍的偷襲! <map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Dib20b",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/CoopMaps/dib20b.7z",
+				Description: "地形複雜，怪物超級多的變態地圖喜歡刺激殺戮者一定要嘗試，<map>MAP01-MAP27</map> 關。",
+			}, {
+				Title: "Coopbuildlm",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/CoopMaps/coopbuildlm.7z",
+				Description: "怪物多到讓你殺到手軟，暴力加血腥，需要多人合作才能成功過關，<map>MAP01-MAP26</map> 關。",
+			}, {
+				Title: "Dest Unknown",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/CoopMaps/dest_unknown_v17b.7z",
+				Description: "又一個怪物超多，地形複雜的變態地圖，超暴力血腥，痛恨異形者千萬不可錯過，<map>MAP01-MAP17</map> 關，版本 v17b。",
+			}, {
+				Title: "Invasion UAC",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/CoopMaps/iu-part2.7z",
+				Description: "畫面華麗，怪物超多，佔地遼闊的地圖，既暴力且血腥，<map>MAP01-MAP16</map>、<map>MAP30-MAP32</map> 關，版本 Part2。",
+			}, {
+				Title: "ZBlood",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/CoopMaps/zbludv41.7z",
+				Description: "血祭! 風格與原來的 Blood 幾乎一模一樣，暴力又血腥，音效充滿詭異氣氛，<map>MAP01-MAP22</map>、<map>MAP31</map> 關，版本 V41。",
+			}, {
+				Title: "Schoold2 (All)",
+				Link: "ftp://ftp.fu-berlin.de/pc/games/idgames/themes/university/schoold2.zip",
+				Description: "很寫實的地圖(妖怪，貼圖，魍魎，聲音，音樂)! 讓人感到驚奇! 一切彷彿置身於被怪物入侵的學校，<map>MAP01-MAP06</map> 關。",
+			},
+		];
+		for (var i in CoopWads) { CoopWads[i].Type = "coop"; } // Not really necessary since this is the default type, but leave it here anyway.
+
+		var DMWads = [
+			{
+				Title: "Rail War 2",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "http://users2.titanichost.com/darway168/Db/Railwarz2.rar",
+				LinkDead: true,
+				Description: "有著各式各樣不同種類 Rail Gun 的對戰地圖，強力推薦！<map>MAP01-MAP09</map> 關。",
+			}, {
+				Title: "Aje-Cmbo",
+				Link: "MyBackup/DMMaps/aje-cmbo.7z",
+				Description: "由 Raw 所推薦，Team DM 專用的地圖，關卡地形幅員廣闊豐富多變，強力推薦！<map>MAP01-MAP29</map> 關。",
+			}, {
+				Title: "Stdom",
+				Ports: "zandronum,skulltag",
+				Link: "ftp://ftp.fu-berlin.de/pc/msdos/games/idgames/deathmatch/skulltag/stdom.zip",
+				Description: "由 E.F. 所推薦畫面與場景超酷的 CTF 對戰地圖，<map>MAP01-MAP11</map> 關。",
+			}, {
+				Title: "Sp-Quad",
+				Ports: "legacy",
+				Link: "http://youfailit.net/pub/idgames/levels/doom2/deathmatch/Ports/s-u/sp_quad.zip",
+				Description: "由 E.F. 所推薦的 PK 專用地圖，構圖很 3D 的地形支援 OpenGL，<map>MAP01</map> 關。",
+			}, {
+				Title: "Vex-Doom",
+				Link: "MyBackup/DMMaps/Vex-doom.7z",
+				Description: "由 QQW94 所推薦的 PK 專用地圖，<map>MAP01-MAP24</map> 關。",
+			}, {
+				Title: "Quicken 4",
+				Link: "MyBackup/DMMaps/quicken4.7z",
+				Description: "PK 地圖，包含很多關對戰專用地圖很值得一試。",
+			}, {
+				Title: "Cathedral",
+				Link: "ftp://ftp.fu-berlin.de/pc/msdos/games/idgames/levels/doom2/deathmatch/a-c/cathedrl.zip",
+				Description: "PK 地圖，大教堂地形很值得一試，<map>MAP01</map> 關。",
+			}, {
+				Title: "LGDM01",
+				Ports: "legacy",
+				Link: "MyBackup/DMMaps/LGDM01.7z",
+				Description: "PK 地圖，很有趣的對戰地圖，有很多的箱子，值得一試，<map>MAP01</map> 關。",
+			}, {
+				Title: "MRDIFIDE",
+				Ports: "legacy",
+				Link: "ftp://ftp.fu-berlin.de/pc/msdos/games/idgames/levels/doom2/deathmatch/Ports/m-o/mrdifide.zip",
+				Description: "PK 地圖，很有趣的對戰地圖，地形高低起伏，適合埋伏狙擊，<map>MAP01</map> 關。",
+			}, {
+				Title: "Dtour10",
+				Ports: "legacy",
+				Type: "ctf",
+				Link: "http://wadaholic.tripod.com/doomtournament2004/id6.html",
+				LinkDead: true,
+				Description: "由 Howie 所推薦之 PK 地圖，<map>MAP06-MAP10</map> 為 CTF 搶旗關，<map>MAP01-MAP05</map>、<map>MAP11-MAP30</map> 為對戰關。",
+			}, {
+				Title: "MRQ3DM17",
+				Ports: "legacy",
+				Link: "MyBackup/DMMaps/MRQ3DM17.7z",
+				Description: "由 E.F. 所推薦之非常像 Quake3 PK 地圖其中的一個場地，<map>MAP01</map> 關。",
+			}, {
+				Title: "Green War",
+				Link: "ftp://ftp.fu-berlin.de/pc/msdos/games/idgames/levels/doom2/deathmatch/Ports/g-i/greenwar.zip",
+				Description: "專門設計用來 PK 的地圖，地形非常的變化多端，強力推薦！<map>MAP01-MAP32</map> 關。",
+			}, {
+				Title: "Punishme",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/DMMaps/punishme.7z",
+				Description: "專門設計用來 PK 的地圖，地形非常的遼闊有深度，強力推薦！<map>MAP01-MAP05</map> 關。",
+			}, {
+				Title: "Dwango5",
+				Link: "http://www.doom2.net/doom2/wads/DWANGO5.zip",
+				Description: "Dwango 專門設計用來 PK 的地圖，地形非常的遼闊有深度，強力推薦！<map>MAP01-MAP18</map> 關。",
+			}, {
+				Title: "Dwango6",
+				Link: "http://www.doom2.net/doom2/wads/DWANGO6.zip",
+				Description: "專門設計用來 PK 的地圖，關卡地形比 Dwango5 又多了 6 關，強力推薦！<map>MAP01-MAP24</map> 關。",
+			}, {
+				Title: "Dwango8",
+				Link: "ftp://ftp.fu-berlin.de/pc/msdos/games/idgames/levels/doom2/deathmatch/d-f/dwango8.zip",
+				Description: "由 Dwango 所推出的 PK 專用地圖第八輯，<map>MAP01-MAP24</map> 關。",
+			}, {
+				Title: "Tlsd2004",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "ftp://ftp.fu-berlin.de/pc/msdos/games/idgames/levels/doom2/deathmatch/Ports/s-u/tlsd2004.zip",
+				Description: "專門設計用來 PK 的地圖，關卡地形多變，強力推薦！<map>MAP01-MAP18</map> 關。",
+			}
+		];
+		for (var i in DMWads) { if (typeof DMWads[i].Type !== "string") DMWads[i].Type = "dm"; }
+
+		var DBWads = [
+		{
+				Title: "DBZone",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Link: "MyBackup/DBMaps/DBZone.7z",
+				Description: "由 Tails 所創作，顛覆傳統地圖的怪異特色地形，適合有耐性的戰士闖關，<map>MAP01-MAP08</map> 關。",
+			}, {
+				Title: "Zdekill16",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Type: "dm",
+				Link: "MyBackup/DBMaps/zdekill16b.7z",
+				Description: "由 D.E. 所創作，超高難度的地形，怪物多到讓你殺到手軟，適合嗜血的戰士，<map>MAP01-MAP16</map> 關。Ver:B (2007-12-15)",
+			}, {
+				Title: "D2M7DM",
+				Ports: "gzdoom,zdoom,zdaemon",
+				Type: "dm",
+				Link: "MyBackup/DBMaps/D2M7DM.7z",
+				Description: "由 Howie 所創作，以 MAP07 為基礎衍生而出的加大地圖適合 FFA，新增武器 Rail Gun，<map>MAP01</map> 關。(2006-10-23)",
+			}, {
+				Title: "Home",
+				Link: "MyBackup/DBMaps/Home.7z",
+				Description: "由 Tails 所創作，假想自家週遭環境的地形遭受異形入侵的景象，<map>MAP01</map> 關。(2006-08-24)",
+			}, {
+				Title: "YouOnOne",
+				Link: "MyBackup/DBMaps/YouOnOne.7z",
+				Description: "由 Mario 所創作，精采刺激的地形，怪物擺放的地點讓人驚訝連連，<map>MAP01-MAP06</map> 關。(2006-03-25)",
+			}, {
+				Title: "Ares",
+				Link: "MyBackup/DBMaps/Ares.7z",
+				Description: "由日本 Masayan 所創作，豐富的地形，怪物的擺放令人意想不到，<map>MAP01-MAP11</map> 關。",
+			}, {
+				Title: "DOOM Arena 2",
+				Ports: "legacy",
+				Link: "MyBackup/DBMaps/DOOMarena2.7z",
+				Description: "由 Howie 所創作，怪物地獄的試煉場，所出來的怪物一次比一次強最後的 Boss 對決太久的話，會因為記憶體問題而跳出遊戲，似乎是個無法解決的問題。也是這個地圖美中不足的地方，<map>MAP01</map> 關。(2006-07-22)",
+			}, {
+				Title: "DE-Battle_Field01 Ver:A",
+				Type: "dm",
+				Link: "MyBackup/DBMaps/DE-Battle_Field01-A.7z",
+				Description: "由 D.E. 所創作，類似 MAP07 的 PK 地圖，<map>MAP01</map> 關。( A版 2005-04-12 )",
+			}, {
+				Title: "Cube Arena",
+				Ports: "legacy",
+				Link: "MyBackup/DBMaps/CubeArena.7z",
+				Description: "由 Howie 所設計的專門提供練習打怪物，並且也提供彈藥製造機的有趣外掛地圖，<map>MAP01</map> 關。開 OpenGL 顯示模式才能玩喔!!新版本已經最佳化",
+			}, {
+				Title: "Dark Mars V1.04",
+				Link: "MyBackup/DBMaps/DarkMars.7z",
+				Description: "由 PkmX 所設計的黑暗嚇人氣氛詭異，迷宮地形超級複雜的外掛地圖，<map>MAP01</map> 關。",
+			}, {
+				Title: "Z2",
+				Link: "MyBackup/DBMaps/z2.7z",
+				Description: "由 Link 所設計的怪物多，地形豐富 的外掛地圖，<map>MAP02</map> 關。",
+			}, {
+				Title: "Return",
+				Ports: "legacy",
+				Link: "MyBackup/DBMaps/Return.7z",
+				Description: "由 Howie 所設計重新闡述：你回到了地球，基地成了空城與滿地屍體...DOOM2 新劇情的外掛地圖，<map>MAP01-MAP03</map> 關。開OpenGL顯示模式才能玩喔!!",
+			}, {
+				Title: "CD2_1-11",
+				Ports: "legacy",
+				Link: "MyBackup/DBMaps/CD2_1-11.7z",
+				Description: "Weow、UAC、Howie 重新詮釋 DOOM2 的 <map>MAP01-MAP11</map> 關。需OpenGL顯示模式才能玩!! 強力推薦!!! (2006-07-22)",
+			}, {
+				Title: "Wct01",
+				Link: "MyBackup/DBMaps/wct01.7z",
+				Description: "WCT 的處女作，場景壯觀與複雜的地圖，<map>MAP01</map> 關。強力推薦!!!(2005-02-19)",
+			}, {
+				Title: "3DDM01",
+				Ports: "legacy",
+				Type: "dm",
+				Link: "MyBackup/DBMaps/3ddm01.7z",
+				Description: "PK 地圖 Weow 所創作，本營團練場地，強力推薦，<map>MAP01</map> 關。",
+			}, {
+				Title: "TD334",
+				Type: "dm",
+				Link: "MyBackup/DBMaps/TD334.7z",
+				Description: "由 Mario 所創作，精采刺激的地形有堡壘與哨站，適合 Team Play-PK，<map>MAP01</map> 關。",
+			}, {
+				Title: "Chainsaw Arena",
+				Type: "dm",
+				Link: "MyBackup/DBMaps/chainsawarea.7z",
+				Description: "由 D.E. 所創作，僅提供狂戰箱與電鋸的 PK 地圖，<map>MAP01</map> 關。",
+			}
+		];
+	
+		function BuildMusicTable() {
+			var html = "";
+			for (var i in MusicList) {
+				var m = MusicList[i];
+				var title = m.Title,
+					link = m.Link;
+				
+				html += '<div><div></div><a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/Music/' + link + '" title="下載音樂">' + title + '</a></div>';
+			}
+			$("#music").html(html);
+		}
+
+		var MusicItemBackgroundTable = [
+			"CEIL3_3.png",
+			"COMP03_2.png",
+			"FLAT1_1.png",
+			"FLAT5_2.png",
+			"FLOOR0_1.png",
+			"FLOOR0_3.png",
+			"FLOOR4_8.png",
+			"FLOOR6_2.png",
+			"FLOOR7_2.png",
+			"FWATER3.png",
+			"LAVA1.png",
+			"MFLR8_1.png",
+			"MFLR8_4.png",
+			"NUKAGE3.png",
+			"RROCK01.png",
+			"RROCK02.png",
+			"RROCK12.png",
+			"RROCK17.png",
+			"RROCK19.png",
+			"SFLR6_1.png",
+			"SFLR6_4.png",
+			"SLIME04.png",
+			"SLIME13.png",
+		];
+		var MusicItemBackgroundRadomizeList;
+
+		function InitializeMusicItemBackground() {
+			$("#music > div").each(function() {
+				if (!MusicItemBackgroundRadomizeList || MusicItemBackgroundRadomizeList.length === 0)
+				{
+					MusicItemBackgroundRadomizeList = MusicItemBackgroundTable.slice(0);
+				}
+
+				var i = Math.floor(Math.random() * MusicItemBackgroundRadomizeList.length);
+				$(this).css("background-image", "url('Images/GameResource/MusicBacks/" + MusicItemBackgroundRadomizeList[i] + "')");
+				MusicItemBackgroundRadomizeList.splice(i, 1);
+			});
+		}
+
+		var MusicList = [
+			{ Title: "DOOM I", Link: "Doom_m.7z" },
+			{ Title: "DOOM II", Link: "Doom2_m.7z" },
+			{ Title: "TNT", Link: "Tnt_m.7z" },
+			{ Title: "PLUTONIA", Link: "Plu_m.7z" },
+			{ Title: "HERETIC", Link: "Heretic_m.7z" },
+			{ Title: "HEXEN", Link: "Hexen_m.7z" },
+			{ Title: "Hell Revealed II", Link: "HR2_m.7z" },
+			{ Title: "Mars War", Link: "MarsWar_m.7z" },
+			{ Title: "2dmmaps", Link: "2dmmaps_m.7z" },
+			{ Title: "Dib20b", Link: "Dib20b_m.7z" },
+			{ Title: "Dwango5", Link: "Dwango5_m.7z" },
+			{ Title: "Dwango6", Link: "Dwango6_m.7z" },
+			{ Title: "Icarus", Link: "Icarus_m.7z" },
+			{ Title: "Memento Mori I", Link: "Mm_m.7z" },
+			{ Title: "Memento Mori II", Link: "Mm2_m.7z" },
+			{ Title: "Punishme", Link: "Punishme_m.7z" },
+			{ Title: "Scythe2", Link: "Scythe2_m.7z" },
+			{ Title: "Tlsd2004", Link: "Tlsd2004_m.7z" },
+			{ Title: "Vile", Link: "Vile_m.7z" },
+			{ Title: "Alien Vendetta", Link: "Av_m.7z" },
+			{ Title: "Destination Unknown", Link: "dest_unknown_v17_m.7z" },
+			{ Title: "Invasion Uac", Link: "iu_m.7z" },
+		];
+	</script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant"></html>
+<html>
+<head>
+	<title>遊戲故事</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		.separator {
+			display: block;
+			margin: 18px 0;
+			padding: 0;
+			height: 25px;
+			background-image: url('Images/DoomCommon/MWALL3_1_hr.png');
+			background-position: center;
+		}
+
+		.story {
+			width: 100%;
+			display: block;
+			margin-top: 32px;
+			margin-bottom: 32px;
+		}
+
+		.story h2 {
+			text-align: center;
+		}
+
+		.game-intro-container {
+			display: block;
+			position: relative;
+			width: auto;
+			height: 100vh;
+			overflow: hidden; /* So parallax image stays nicely inside. */
+			box-shadow: 0px 0px 4px black, 0px 0px 4px black, 0px 0px 4px black;
+		}
+
+		.game-intro-container h2 {
+			text-align: center;
+		}
+
+		.game-intro-text {
+			position: absolute;
+			left: 16px;
+			top: 16px;
+			width: calc(100% - 56px);
+			height: calc(100% - 32px);
+			overflow: auto;
+		}
+
+		.game-intro-text > div {
+			display: table;
+			width: 100%;
+			height: 100%;
+		}
+
+		.game-intro-text > div > div {
+			display: table-cell;
+			vertical-align: middle;
+		}
+
+		.game-intro-text p {
+			margin-left: 6px;
+			margin-right: 6px;
+		}
+
+		.game-intro-text p {
+			text-shadow: 0px 0px 2px black, 0px 0px 3px black, 0px 0px 4px black;
+		}
+
+		.story-table {
+			display: table;
+			margin: auto;
+			width: 100%;
+			max-width: 1024px;
+		}
+
+		.story-table.title {
+			width: auto;
+			max-width: 100% !important;
+		}
+
+		.story-table.bright {
+			background: linear-gradient(to right, #222 0%, #333 10%, #333 90%, #222 100%);
+		}
+		.story-table.brighter {
+			background: linear-gradient(to right, #222 0%, #444 10%, #444 90%, #222 100%);
+		}
+
+		.story-table > div {
+			display: table-cell;
+			text-align: center;
+			vertical-align: middle;
+			width: 0%;
+			padding: 1rem;
+		}
+
+		.story-table > div.context {
+			text-align: left;
+			width: 100%;
+		}
+
+		.doom-e3-end {
+			background-image: url('Images/Doom/PFUB.png');
+			width: 320px;
+			height: 200px;
+			animation: kf-doom-e3-end 40s linear infinite;
+		}
+		@keyframes kf-doom-e3-end {
+			0% { background-position: -320px 0px }
+			20% { background-position: -320px 0px }
+			80% { background-position: 0px 0px }
+		}
+		
+		.doom-vs-doomu {
+			background-image: url('Images/Doom/DOOMvsDOOMU.png');
+			width: 320px;
+			height: 200px;
+			animation: kf-doom-vs-doomu 6s step-end infinite;
+			
+		}
+		@keyframes kf-doom-vs-doomu {
+			0% { background-position: 0px 0px }
+			50% { background-position: 320px 0px }
+		}
+
+		.sky {
+			width: 256px;
+			height: 128px;
+		}
+
+		/* Style border. */
+		.doom-e3-end,
+		.doom-vs-doomu,
+		.sky,
+		.story-table img {
+			box-shadow: 0px 0px 8px red;
+			transition: transform 0.5s;
+		}
+		.story-table.title img {
+			box-shadow: none !important;
+		}
+
+		.doom-e3-end:hover,
+		.doom-vs-doomu:hover,
+		.sky:hover,
+		.story-table img:hover {
+			transform: scale(1.25);
+		}
+
+		.sky.x1-left {
+			animation: kf-sky-x1-left 10s linear infinite;
+		}
+		@keyframes kf-sky-x1-left {
+			0% { background-position: 0px 0px }
+			100% { background-position: -256px 0px }
+		}
+		.sky.x1-right {
+			animation: kf-sky-x1-right 10s linear infinite;
+		}
+		@keyframes kf-sky-x1-right {
+			0% { background-position: 0px 0px }
+			100% { background-position: 256px 0px }
+		}
+
+		.sky.x2-left {
+			animation: kf-sky-x2-left 20s linear infinite;
+		}
+		@keyframes kf-sky-x2-left {
+			0% { background-position: 0px 0px }
+			100% { background-position: -512px 0px }
+		}
+		.sky.x2-right {
+			animation: kf-sky-x2-right 20s linear infinite;
+		}
+		@keyframes kf-sky-x2-right {
+			0% { background-position: 0px 0px }
+			100% { background-position: 512px 0px }
+		}
+
+		.sky.x4-left {
+			animation: kf-sky-x4-left 40s linear infinite;
+		}
+		@keyframes kf-sky-x4-left {
+			0% { background-position: 0px 0px }
+			100% { background-position: -1024px 0px }
+		}
+		.sky.x4-right {
+			animation: kf-sky-x4-right 40s linear infinite;
+		}
+		@keyframes kf-sky-x4-right {
+			0% { background-position: 0px 0px }
+			100% { background-position: 1024px 0px }
+		}
+
+		.story-content-title {
+			padding: 1em;
+			display: block;
+			font-size: 1.5em;
+			text-align: center;
+		}
+
+		.story-content-title > img {
+			margin-left: 8px;
+			margin-right: 8px;
+			content: url('Images/Animation/M_SKULL.gif');
+		}
+	</style>
+</head>
+<body>
+	<div class="portal-orb-container">
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="doom"><div>Doom - 毀滅開始</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="doom2"><div>Doom2 - 重返地球</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="tnt"><div>Evilution(TNT) - 異星邪魔</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="plutonia"><div>Plutonia - 陰間的實驗</div></div></div>
+	</div>
+
+	<div class="page-title-container jarallax" data-img-src="Images/Doom/WIMAP0.png">
+		<div class="page-title">遊戲故事</div>
+		<div class="page-title-text">
+			<p>
+				以下資料都是從原始毀滅戰士營網站轉載過來。
+			</p>
+		</div>
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+	</div>
+
+	<div class="separator"></div>
+
+	<section id="doom" class="story">
+		<div class="story-table title">
+			<div><img src="Images/Doom/M_DOOM.png"></div>
+			<div><h2>毀滅開始【遊戲說明書－Darway 打字】</h2></div>
+		</div>
+		<div class="game-intro-container jarallax" data-img-src="Images/Doom/TITLEPIC.png">
+			<div class="game-intro-text">
+				<div>
+					<div>
+						<h3>【序】</h3>
+						<p>　　在地球受過各種嚴酷的訓練後，你成為太空軍中的一位佼佼者。三年前你奉秘密指令去襲擊某高級長官的辦公室，要他命令手下向無辜百姓開槍。在他的遺骸送往珍珠港的同時，你也被調離地球打入冷宮，到火星上的大氣層聯盟公司。這個公司主要的工作是在火星和它兩個衛星～Phobos 及 Diemos 處理各地送來的核子廢料。在這種單純的環境下，五千萬里範圍中都不會出現什麼重大的任務，你只有每天待在放映室中消磨無聊的時光。</p>
+						<p>　　在這最近的四年中，軍隊～這個大氣層聯盟公司最主要的供應商，開始在 Phobos 及 Diemos 上，採用遙控設備進行數個秘密計劃，包括了所謂的『裡空間』的星際航行實驗。利用這項新技術，它們可以在 Phobos 和 Diemos 之間開啟一道時空閘，從一端送入一個小型的偵測機，再從另一端接收。</p>
+						<p>　　但是最近時空閘的狀況變的非常不穩定。不少軍方的自願者進入時空閘後不是消失無蹤；就是回來後口中含糊不清的嘶喊、攻擊任何會動的東西，之後全身腫脹爆裂而死。但是軍方向上層單位例行報告時，仍以實驗受到一點小小的失敗，進度上延緩，但是一切仍在控制之下的說辭搪塞。</p>
+						<p>　　數小時前，火星收到一則來自 Phobos ，極為混雜的訊號：『我們迫切需要軍隊的支援。邪惡的生物不斷的從時空閘出現！電腦已經陷入狂亂！』之後的電訊則是完全沒有條理的資訊。很快的，這兩個衛星通訊一片死寂，完全沒有任何訊息傳出來。你和你的同伴是在這五千萬公里中唯一的軍方武力，到達了 Phobos 之後，你奉命監視基地附近的動態。在同伴進入基地數小時後，無線電傳來了部隊戰鬥的聲音，槍砲聲、同伴的喊叫聲、哀嚎聲、骨骼碎裂聲，之後的一片死寂似乎表示同伴們已無一生還。</p>
+						<p>　　事情越來越不妙。你絕對無法獨自導引飛行器回到火星，而所有的重型武器、通訊設備也都被帶入基地內，你身上只剩下一把手槍，如果手上有一把電漿槍或是散彈槍，或許活命的可能性會大得多。當你走入基地的大門時，一連串的吼叫聲從深處傳來。不管是什麼東西殺了你的同伴，它們已經知道你的存在，而且，你也沒有退路了。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="story-content-title">
+			<img>DOOM 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-01-23】<img>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x1-right" style="background-image:url('Images/Doom/SKY1.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【E1－勝利劇情】</h3>
+				<p>　　當你把壞蛋們全部從 Phobos 基地清空後，你應該勝利了。但是你的報酬呢？你回家的機票呢？在你思考這些的同時，Deimos 基地傳來了他們被攻擊的消息。你並沒有勝利，你只是剛登陸到地獄的海岸上而已，而你現在唯一的選擇就是硬著頭皮通過..... 如果想要繼續這段旅程，那就繼續玩 The Shores of Hell(DOOM E2) 和他的續集 Inferno(DOOM E3) 吧！</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【E2－勝利劇情】</h3>
+				<p>　　你成功了！領導入侵 Deimos 基地入侵計畫的機械巨魔已經被你擊倒。你站起來看著星空，該死！地獄已經來到 Deimos 附近了！你並沒有逃跑，你知道自己該做些什麼，你駕駛了一艘小型太空船登陸了地獄.....現在即將邁向 DOOM 的最後一個章節 - Inferno!!!</p>
+			</div>
+			<div>
+				<img src="Images/Doom/VICTORY2.png">
+			</div>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="doom-e3-end"></div>
+			</div>
+			<div class="context">
+				<h3>【E3－勝利劇情】</h3>
+				<p>　　那主導著整個進攻、令人憎恨的機械蜘蛛魔也在你面前化成灰燼，現在火星已經安全了。忽然在你面前打開了一道門，你走了進去，在眼前是你的家鄉 - 地球。你很想知道在這段你和地獄搏鬥時地球到底發生了些什麼事，回家的時候到了...</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【E4－勝利劇情】</h3>
+				<p>　　那隻機械蜘蛛魔一定在你把他幹掉前就先派出他的爪牙了，你忽然瞭解當英雄的痛苦 - 總是要面對如此邪惡的東西，現在，你準備踏上另一段旅程，另外，他們要為殺了你的寵物兔子付出代價。你已經能想像怪物們瘋狂的在城市中屠殺，但你也已經準備好了。下一站 - Hell on Earth!</p>
+			</div>
+			<div>
+				<img src="Images/Doom/ENDPIC.png">
+			</div>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="doom-vs-doomu"></div>
+			</div>
+			<div class="context">
+				<h3>【附註】</h3>
+				<p>　　雖然這大家都知道，但還是在此說明一下，為何 E1 的結尾 id 的人會那樣說呢？原因是 DOOM 的 E1 部分是 Shareware，也就是說下載就可以玩，而 E2 和 E3 則是需要購買的.....那在 E2 的時候為何說 E3 是最後一章呢？那 E4 是什麼？因為起初的 DOOM 只有到 E3，而 E4 是數年後 id 將 DOOM 重製加上 E4，包裝成 The Ultimate DOOM，也就是說 E3 和 E4 差了數年，所以 E2 才會說 E3 是最後一章。</p>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="doom2" class="story">
+		<div class="story-table title">
+			<div><img src="Images/Doom2/M_DOOM.png"></div>
+			<div><h2>重返地球【遊戲說明書－Doomnobody 打字】</h2></div>
+		</div>
+		<div class="game-intro-container jarallax" data-img-src="Images/Doom2/TITLEPIC.png">
+			<div class="game-intro-text">
+				<div>
+					<div>
+						<h3>【序】</h3>
+						<p>　　總算回來了。在經過數天漫長的戰鬥後，你終於回到了地球，準備在家鄉安享餘生。在上一波異形攻擊火星的戰鬥中，你是第一個挺身而出的戰士。在不斷的殺戮之後，你得到了最後的勝利，中止了異形的侵略，挽救了火星基地的倖存者，成為火星上的英雄人物，當然，就你自己而言，你只不過是個在戰鬥中生存下來的幸運兒。不過現在這些都過去了。你脫離了軍隊，朝著家鄉前進。當你的小型登陸艇碰到陸地之後，你打開出口的艙蓋，一股不祥的感覺在心中浮起：你面前熟悉的都市竟陷入一片火海！</p>
+						<p>　　該死！你喃喃的咒罵著，看著火光中的城市。就在這時，你的眼角似乎看到有些東西在移動－－是人！一些難民從城市飛奔而出，臉上卻佈滿著無法形容的恐懼。在難民後緊接著是一個身穿軍服的士兵，抬起手中的武器朝著難民展開無情的掃射，你迅速的從腰間掏出手槍，沿著斜坡快跑而下，解決了這個士兵，卻已經來不及挽救難民的生命。低頭檢視這個士兵，看著它全身青綠色的皮膚、滿口人類的血肉，心中不祥的預感更加濃厚。</p>
+						<p>　　你知道一切又回來了，和你當初在火星時的現象一樣：首先是正常的人類被擊倒，轉變成具有食人習性的怪物，接著是大量外太空的怪異生物從不知名的地方湧來，把祥和的世界化為煉獄。現在，它們已經把魔掌伸到向地球，而且整個地球都淪入了它們的控制，死亡人數超過了數百萬，剩下的少數人被轉化成食人為生的怪物。只有一批極少數的人類，仍然維持著本性，在短短的時間內收集到足夠的糧食、水源和空氣，準備搭乘巨大的太空船起飛，和這個已經化為灰燼的星球保持安全的距離。</p>
+						<p>　　不幸的是，太空船所在的太空港在異形的猛烈攻擊下，淪入了魔掌之中，並且啟動了某種強大的力量：一片廣大的火燄包圍了太空站上空，阻止了所有太空船的起降程序，在你嘗試著使用登陸艇連絡這些僅存的人員後，決定展開一次總攻擊，解救陷在太空港內僅存的人們，使太空船順利的離開地球。你心中十分明白，如果這次的行動失敗，那麼「人類」這個種族就成了歷史。</p>
+						<p>　　你和隊友們展開了最後的攻擊，但是敵人的火力強大，遠遠超出了原先的估計。你只看到四周英勇同伴的肢體在槍火中四散紛飛，並且一個個在無線電中沉寂不語。你脫下了通訊機，在一片黑暗中摸索著找尋出路，偶爾聽到遠方傳來同伴死前的號叫聲，在空中不斷的迴盪。</p>
+						<p>　　你聽到面前的通道傳來異樣的聲響，靠在冰冷的牆壁上，你可以感覺到一陣陣連續的震動如波浪般傳來。它們知道你在這裡。而且它們不懂得憐憫、不知道同情、也不會浪費時間；它們是你生命的最大威脅。現在，只剩下你了；你，和它們！？</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="story-content-title">
+			<img>DOOM2 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-01-22】<img>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x1-right" style="background-image:url('Images/Doom2/RSKY1.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【MAP06-07 關中劇情】</h3>
+				<p>　　你深入了這個被惡魔們盤據的太空站中，你看到了他們的陰謀 - 他們正嘗試著利用太空站引進他們的大軍。 在你前方是一座被惡魔們強化過的前哨站，如果你能闖過的話，你就能在太空站中找到那個關係到全人類命運、能夠關閉阻止人類逃亡的開關，人類的存亡就看你了，陸戰隊員！</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【MAP11-12 關中劇情】</h3>
+				<p>　　你成功了！現在包圍在太空船周邊的力場已經被消除了，現在僅存的地球人可以乘著太空船撤離到外太空，遠離他們曾是天堂的母星。 你坐下來休息片刻，期望獲得暫時的寧靜。但是，太空船上卻傳來了一條信息："我們已經定位了入侵的來源，現在麻煩英雄進入該區，以切斷怪獸的增援" 當你看到這條信息時，你心寒了，因為入侵來源不是別處，正是你的故鄉。你無力的站了起來，強忍著想起家人被成群的怪物撕裂的畫面帶給你的悲痛，繼續朝著既熟悉又陌生的城市前進。</p>
+			</div>
+			<div>
+				<div class="sky x1-left" style="background-image:url('Images/Doom2/RSKY2.png')"></div>
+			</div>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x1-right" style="background-image:url('Images/Doom2/RSKY3.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【MAP20-21 關中劇情】</h3>
+				<p>　　你現在身處在市中心，被敵人的大軍環繞著...。但你卻找不到惡魔們，但你的直覺告訴你你已經非常靠近了。所以你咬緊牙關，繼續向前。既然你都走到這了，那繼續走下去又何妨呢？</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【THE END 勝利劇情】</h3>
+				<p>　　當您把火箭彈轟向他的頭部時，這個您看過的惡魔在你面前倒下了，他的鮮血覆蓋了地獄，宣告地獄大軍的侵略失敗了，地獄也不會再出現。你擦拭著額前的汗水，朝著殘破的故鄉前進；重建地球是一條更漫長的路...</p>
+			</div>
+			<div>
+				<img src="Images/Doom2/BOSSBACK.png">
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="tnt" class="story">
+		<div class="story-table title">
+			<div><img src="Images/TNT/M_DOOM.png"></div>
+			<div><h2>Evilution－異星邪魔【邪化論－由 Mink 原文翻譯打字】</h2></div>
+		</div>
+		<div class="game-intro-container jarallax" data-img-src="Images/TNT/TITLEPIC.png">
+			<div class="game-intro-text">
+				<div>
+					<div>
+						<h3>【序】</h3>
+						<p>　　雖然 UAC 的最高管理階層都已經化為灰燼，連職員甚至清潔工也逃不過這場劫數，但公司卻存留著。受到政府嚴密的監視，UAC 仍然在高度的安全戒備下繼續他們的實驗。UAC的新基地座落於木星的衛星上，希望當錯誤發生時遙遠的距離能確保地球的安全，太空陸戰隊也在 UAC 實驗室旁設立了一座基地，為任何萬一做準備。</p>
+						<p>　　【入侵】當 UAC 開啟了他們第一道空間閘門不久後，地獄來的鐵軍開始了他們的第一波攻擊，大量的利爪、半機械生物揮動他們的四肢，以充滿屠殺慾的利眼搜尋著任何可以讓他們撕裂的生物。但是他們的搜尋卻徒勞無功，太空陸戰隊早已為此類的突發狀況做好準備，逐漸把這群惡魔趕回地獄去。惡魔們也開始聚集，希望以無窮盡的數量壓倒陸戰隊們的防禦，但單純靠數量是無法與陸戰隊匹敵的，靠著在閘門的重防線，陸戰隊們能以極少的損失屠殺數以百計的怪獸。就像事發時一樣突然，進攻停止了。當最後一個燃燒的骷髏發出被攻擊的尖叫聲，整個密室安靜了下來，只剩下血滴滴落的聲音，地獄的擴張失敗了。UAC 的實驗繼續下去了但是卻更明目張膽、安全控管也鬆懈了；事發後每一位陸戰隊隊員都獲得政府頒發的銀星勳章，UAC 也捐了一大筆錢給退伍軍人基金會。防禦線也增強了，陸戰隊們注意著閘門中來的任何攻擊的可能，尋找任何可能發生錯誤的區域。</p>
+						<p>　　【傾瀉而下的異形】但是道高一尺，魔高一丈，邪惡總是知道許多令人意想不到的把戲。攻擊事件發生數個月後，一年一次的補給船又要到來，很反常的，他在雷達上看起來比平常大上許多，而且航行的路徑也不正確。雖然詭異但並非無法解釋，所以馬虎的雷達員報告了船艦的接近，員工們就到登陸地點和船艦會合。但是它卻永遠不會登陸，取而代之的，它卻在 UAC 園區數公里的上空盤旋著；當員工們抬頭往上看，他們知道大事不妙了。這艘太空船絕對不可能是來自地球，它非常巨大、有數公里長，並且具有非常令人毛骨悚然的外表：它是用骨骼、鋼鐵、腐肉和死亡所構成的，它是有生命、也是機械更具有黑魔術，來自地獄最深處的太空船，穿越太空到來的路程是為了復仇而踏上的旅途。當如同足球場大小般的巨門開啟時，怪獸們便如潮水般湧出，到達地面並掩蓋了整個園區。因為陸戰隊們的防線是朝向著閘門，所以毫無用處，怪物們沿著下水道、通風管、大廳、每個實驗室佔據了整個園區、搜尋著、殺戮著、享用著他們的鮮肉。和以往一樣，倖存的人類被獸化，腦中的思路只剩下殺戮、殺戮、殺戮......</p>
+						<p>　　【戰鬥的宿命】只有一個人逃過獸化和死亡：你，陸戰隊的指揮官。你當時正在數英里外、漫步在這星球特殊的地理景觀上。突然間，你聽到你的背後傳來一陣熟悉的怪叫，這種叫聲偶而會出現在你的惡夢中，你的反應並沒有因為時光而頓化，你立刻掏出手槍，解決想要突襲你的IMP。當你飛奔回基地時，你瞭解發生了什麼事。邪惡的太空船仍盤繞著，你訓練來戰鬥、殺戮以及死亡的部下都犧牲了。並不像古武士道，你並沒有選擇和你的部下一同死去，你掏出了手槍，你決定為你的部下報仇，畢竟都是要死的，雖然死在地獄大軍的鐵騎下並不是很好的死法，但是你知道他們不會那麼輕易得逞。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="story-content-title">
+			<img>TNT 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-1-23】<img>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x4-right" style="background-image:url('Images/TNT/DODAY.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【MAP06-07 關中劇情】</h3>
+				<p>　　你殺到了事發的實驗室，看來 UAC 又再次的搞砸了。不知道幫 UAC 保險的保險公司看到這光景會有什麼看法。前方有一些殘留的軍事設施，雖然內部慘不忍睹，但您的運氣不錯，還有一些可以使用，只需要您找到方法啟動他們...</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【MAP11-12 關中劇情】</h3>
+				<p>　　你聽到不遠的前方傳來怪異的聲響，雖然你必要時可以衝出去吧他們全部殺乾淨，但你還是祈禱著惡魔們不是在召喚更多同伴。他們可能會找到您，試著把您殺死、用你的血來果腹；但是你知道這不會發生，你已經能夠想像數千支怪物被一個瘋狂殺手解決的樣子了。</p>
+			</div>
+			<div>
+				<div class="sky x4-left" style="background-image:url('Images/TNT/DONITE.png')"></div>
+			</div>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x4-right" style="background-image:url('Images/TNT/DOHELL.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【MAP20-21 關中劇情】</h3>
+				<p>　　你忽然感覺到眼前的景色是那麼天殺的熟悉，當然，那些惡魔也記得你。你看著前方，一股怒氣湧上了心頭，於是你將你的武器重新上膛，繼續往前；是該讓世人知道你名字的時候了。</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【THE END 勝利劇情】</h3>
+				<p>　　忽然間，四周安靜了下來，地獄的聲音往地平線的遠方消失而去了，那原本血紅的天空也恢復他應有的湛藍，怪物們的屍體也帶著地獄的臭味蒸發了。天阿！你真的做到了！但你真的勝利了嗎？四周忽然開始轟轟作響，一道藍光忽然在已經化為白骨的怪物引領者體內發出...</p>
+			</div>
+			<div>
+				<img src="Images/TNT/BOSSBACK.png">
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="plutonia" class="story">
+		<div class="story-table title">
+			<div><img src="Images/Plutonia/M_DOOM.png"></div>
+			<div><h2>The Plutonia Experiment－陰間的實驗【冥王計畫－由 Mink 原文翻譯打字】</h2></div>
+		</div>
+		<div class="game-intro-container jarallax" data-img-src="Images/Plutonia/TITLEPIC.png">
+			<div class="game-intro-text">
+				<div>
+					<div>
+						<p>　　地獄攻擊地球結束後，美國實施了許多的措施預防此類事件再度發生。前 UAC 在全新的管理方式下被再度組織起來（以前的股東和信託人都死了，這不成問題。），並運用大量新技術預防意外再度發生。雖然入侵被阻擋下來，殘餘在地球上的異形也被掃蕩小組消滅，但很明白的，地獄的勢力仍然強大，雖然機械蜘蛛魔、機械巨魔...等怪物都不再威脅著地球，但是誰知到有什麼東西在外界窺探著、監視著、準備著...</p>
+						<p>　　新 UAC 著手於量子加速器的研究上，如此一來便可以從遠方關閉空間閘門。但是因為舊有的科學家都死亡了，新的科學家在學習關閉閘門之前得先學習閘門的科技。這項技術被授與的很快，但有可能太快了...</p>
+						<p>　　【來自地獄的窺探】 不久，閘門外的生物注意到這個實驗，就在某一天，在整個實驗區中心的一個閘門被開啟了，大量的怪獸從閘門中湧出，但在陸戰隊的掩護下，科學家在一支機械巨魔試圖穿越閘門時順利的將它關閉，機械巨魔也被強大的力量切成兩半，對科學家們來說，眼前這幅景象的確是非常大的心理激勵，表示著這項科技的成熟，並將可以運用至全球，地球也不會有安全上的威脅。但，是真的嗎？事發隔天，有七個空間閘門突然被開啟了，雖然量子加速器隨即做出了反應，但在一小時後，卻只關閉了六個閘門，而此時，來自地獄的大軍也太過於壯大，雖然陸戰隊們近乎瘋狂的殺敵，但最後仍倒臥在敵人的利爪下.....</p>
+						<p>　　【職責】 現在，量子加速器在基地廢墟的深處，被惡魔們嚴密的看管著這座足以使通往地獄閘門關閉的機器。政府接獲報告後，不理會陸戰隊的紮駐地，慌亂的將所有隊員派往事發地點。你在接獲任務後，你迅速整裝，抓了一把手槍便搭上運兵車；當你到達時，你只看到許多火光，怪獸的嘶吼聲偶而會從廢墟中傳出，更糟的是，你知道這群惡魔想做會讓狀況更慘不忍睹的事。雖然在一、兩個小時後，大批的援軍甚至空中支援都會到來，但你也知道太晚了：戰機將會被漂浮的生物毫不留情的擊落、巨砲也將會被惡魔的火球無情的摧毀，進入基地的陸戰隊員更會被怪獸的利爪撕成碎片。在一、兩個小時後，內部的怪物將會完成他們的任務，並且聚集更多的大軍。再一次的，你又是世界唯一的依靠。這是你對全人類的職責，你必須獨自進入這一片狼籍中去阻止地獄的陰謀。</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="story-content-title">
+			<img>Plutonia 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-01-22】<img>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x1-right" style="background-image:url('Images/Plutonia/SKY1.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【MAP06-07 關中劇情】</h3>
+				<p>　　你得意洋洋的檢視著您的戰果 - 守護者的屍體無力的倒在地上，你把加速器從地獄的魔爪下搶了回來。你坐下來休息，看著四周..... 該死！應該至少會留下一個樣品才對的，但是四周卻空空如也..一定是天殺的惡魔們把它帶走了。</p>
+				<p>　　你現在必須奪回被搶走的樣品，否則之前的努力便全然白費了...別無他法，你只有繼續前進、繼續戰鬥、繼續殺戮.....Oh，當然，還要繼續活著。</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【MAP11-12 關中劇情】</h3>
+				<p>　　即使是由焰魔所構成的致命迷宮也無法阻擋你，但是在你眼前這個你尋覓已久的樣品卻已經被遺落在地上，您嘗試著重新啟動它，但是卻一點反應也沒有：惡魔們已經毀了它。 你知道接下來要做些什麼了 - 那些你曾經做過、而且現在仍熟悉的殺惡魔技巧該用上了！</p>
+			</div>
+			<div>
+				<div class="sky x4-left" style="background-image:url('Images/Plutonia/SKY2.png')"></div>
+			</div>
+		</div>
+		<div class="story-table bright">
+			<div>
+				<div class="sky x2-right" style="background-image:url('Images/Plutonia/SKY3.png')"></div>
+			</div>
+			<div class="context">
+				<h3>【MAP20-21 關中劇情】</h3>
+				<p>　　當您一路教訓怪物、踢著怪物的屁股時，您也來到了這群噁心生物的巢穴；您知道現在要開始清場了，特別是針對那把怪物們源源不絕帶來、對地球動歪腦筋的護門之侍者。 您知道他不是個好傢伙，但您更瞭解對這群惡魔們說，誰才是大壞蛋！您整理完裝備，露出邪惡的笑容，準備給這些從地獄來的小混蛋們嚐嚐你為他們量身打造的地獄的滋味！</p>
+			</div>
+		</div>
+		<div class="story-table">
+			<div class="context">
+				<h3>【THE END 勝利劇情】</h3>
+				<p>　　當護門侍者被你轟成碎片時，一股強大的力場形成了，把這一切凌亂吸回了地獄。您再一次的成功了；您再一次得將活生生的地獄送回，讓他變成茶餘飯後聊天的話題。等你老死後，記得叫你的孫兒在你的棺木內放一具火箭筒，以免你死後下地獄的話可能還要來個最後的大掃除...</p>
+			</div>
+			<div>
+				<img src="Images/Plutonia/BOSSBACK.png">
+			</div>
+		</div>
+	</section>
+
+	<footer>此頁面於 2018 年 06 月 08 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			// Initialize parallax images first so the next operation performs correctly.
+			$(".jarallax").jarallax({ speed: 0.2 });
+			$(".jarallax div")
+				.filter(function() {
+					var id = $(this).attr("id");
+					return typeof(id) === "string" ? id.startsWith("jarallax-container-") : false;
+				})
+				.each(function() {
+					$(this).addClass("bg-img");
+				});
+
+			// Brightening effect for background images.
+			$(".game-intro-container").each(function() {
+				var t = $(this);
+				t
+					.click(function() { StoryBackgroundClicked(t); })
+					.find("*").click(function() { StoryBackgroundClicked(t); });
+			})
+
+			// Initialize portal.
+			$(".portal-orb").click(function() { OrbPortal($(this)); } );
+			UpdateOrbs();
+		});
+
+		// Brightening effect on background images by clicks.
+		function StoryBackgroundClicked(jq) {
+			if (!jq.hasClass("game-intro-container")) {
+				jq = jq.parents(".game-intro-container");
+			}
+			jq.find(".bg-img")
+				.each(function() {
+					var t = $(this);
+					t.stop(true).fadeTo(200, 1.0, function() {
+						$(this).fadeTo(2000, 0.3);
+					})
+				});
+		}
+
+		function ScrollToID(name) {
+			$("html, body")
+				.stop(true)
+				.animate({ scrollTop: $("#" + name).offset().top }, 1000);
+		}
+
+		function OrbPortal(jq) {
+			ScrollToID(jq.attr("orb-target"));
+		}
+
+		function UpdateOrbs() {
+			var y = window.scrollY + window.innerHeight * 0.5;
+
+			$(".portal-orb").each(function() {
+				var orb = $(this);
+				var story = $("#" + orb.attr("orb-target"));
+				var top = story.offset().top;
+				var bottom = top + story.height();
+				if (y >= top && y <= bottom) {
+					orb.addClass("selected");
+				}
+				else {
+					orb.removeClass("selected");
+				}
+			});
+		}
+
+		$(document)
+			.scroll(function() { UpdateOrbs(); })
+			.resize(function() { UpdateOrbs(); });
+	</script>
+</body>
+</html>

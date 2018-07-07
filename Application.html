@@ -82,6 +82,7 @@
 		div.content {
 			position: relative;
 			display: table;
+			width: 100%;
 		}
 		div.content > div {
 			display: table-cell;
@@ -94,14 +95,13 @@
 			background: linear-gradient(to right, rgba(224,224,224,1), rgba(224,224,224,0));
 		}
 		div.content > .left { /* Keep it as wide as possible so the second child will be always on the right. */
-			width: 100%;
+			width: calc(100% - 24px); /* -24px from padding of "div.content > div". */
 		}
 		div.content > .right > hr {
 			display: none;
 		}
 		@media only screen and (max-width: 1024px) {
 			div.content > .left {
-				width: auto;
 				margin-right: 16px; /* For avoidig portal orbs. */
 			}
 			div.content > .left,

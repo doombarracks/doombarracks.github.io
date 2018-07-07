@@ -217,7 +217,7 @@
 		<div class="portal-orb-box"><div class="portal-orb" orb-target="plutonia"><div>Plutonia - 陰間的實驗</div></div></div>
 	</div>
 
-	<div class="page-title-container jarallax" data-img-src="Images/Doom/WIMAP0.png">
+	<div class="page-title-container jarallax" data-img-src="Images/Doom/WIMAP0.png" data-speed="0">
 		<div class="page-title">遊戲故事</div>
 		<div class="page-title-text">
 			<p>
@@ -235,7 +235,7 @@
 			<div><img src="Images/Doom/M_DOOM.png"></div>
 			<div><h2>毀滅開始【遊戲說明書－Darway 打字】</h2></div>
 		</div>
-		<div class="game-intro-container jarallax" data-img-src="Images/Doom/TITLEPIC.png">
+		<div class="game-intro-container jarallax" data-img-src="Images/Doom/TITLEPIC.png" data-speed="0.2">
 			<div class="game-intro-text">
 				<div>
 					<div>
@@ -306,7 +306,7 @@
 			<div><img src="Images/Doom2/M_DOOM.png"></div>
 			<div><h2>重返地球【遊戲說明書－Doomnobody 打字】</h2></div>
 		</div>
-		<div class="game-intro-container jarallax" data-img-src="Images/Doom2/TITLEPIC.png">
+		<div class="game-intro-container jarallax" data-img-src="Images/Doom2/TITLEPIC.png" data-speed="0.2">
 			<div class="game-intro-text">
 				<div>
 					<div>
@@ -369,7 +369,7 @@
 			<div><img src="Images/TNT/M_DOOM.png"></div>
 			<div><h2>Evilution－異星邪魔【邪化論－由 Mink 原文翻譯打字】</h2></div>
 		</div>
-		<div class="game-intro-container jarallax" data-img-src="Images/TNT/TITLEPIC.png">
+		<div class="game-intro-container jarallax" data-img-src="Images/TNT/TITLEPIC.png" data-speed="0.2">
 			<div class="game-intro-text">
 				<div>
 					<div>
@@ -430,7 +430,7 @@
 			<div><img src="Images/Plutonia/M_DOOM.png"></div>
 			<div><h2>The Plutonia Experiment－陰間的實驗【冥王計畫－由 Mink 原文翻譯打字】</h2></div>
 		</div>
-		<div class="game-intro-container jarallax" data-img-src="Images/Plutonia/TITLEPIC.png">
+		<div class="game-intro-container jarallax" data-img-src="Images/Plutonia/TITLEPIC.png" data-speed="0.2">
 			<div class="game-intro-text">
 				<div>
 					<div>
@@ -491,7 +491,7 @@
 	<script>
 		$(document).ready(function() {
 			// Initialize parallax images first so the next operation performs correctly.
-			$(".jarallax").jarallax({ speed: 0.2 });
+			$(".jarallax").jarallax();
 			$(".jarallax div")
 				.filter(function() {
 					var id = $(this).attr("id");

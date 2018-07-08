@@ -86,7 +86,7 @@ body {
 .page-title {
 	padding: 1em;
 	display: block;
-	font-size: 3em;
+	font-size: 2.25em;
 	font-family: sans-serif, DFKai-sb, 標楷體;
 	font-weight: bold;
 	line-height: 125%;
@@ -129,6 +129,7 @@ footer {
 	margin: 1em;
 	text-align: right;
 	font-style: italic;
+	font-size: 0.8em;
 }
 footer:after {
 	content: "毀滅戰士營所有。";

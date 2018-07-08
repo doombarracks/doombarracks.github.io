@@ -72,34 +72,77 @@
 
 		.story-table {
 			display: table;
+			position: relative;
 			margin: auto;
 			width: 100%;
 			max-width: 1024px;
-		}
-
-		.story-table.title {
-			width: auto;
-			max-width: 100% !important;
-		}
-
-		.story-table.bright {
-			background: linear-gradient(to right, #222 0%, #333 10%, #333 90%, #222 100%);
-		}
-		.story-table.brighter {
-			background: linear-gradient(to right, #222 0%, #444 10%, #444 90%, #222 100%);
 		}
 
 		.story-table > div {
 			display: table-cell;
 			text-align: center;
 			vertical-align: middle;
-			width: 0%;
+			width: auto;
 			padding: 1rem;
 		}
 
-		.story-table > div.context {
-			text-align: left;
+		.story-table.title {
+			width: auto;
+			max-width: 100%;
+		}
+
+		.story-container {
+			display: flex;
+			align-items: center;
+			position: relative;
+			margin: auto;
 			width: 100%;
+			max-width: 1024px;
+		}
+		.story-container.bright {
+			background: linear-gradient(to right, #222 0%, #333 10%, #333 90%, #222 100%);
+		}
+		.story-container > div {
+			text-align: center;
+			vertical-align: middle;
+			width: auto;
+			padding: 1rem;
+		}
+		.story-container.img-left {
+			flex-direction: row;
+		}
+		.story-container.img-right {
+			flex-direction: row-reverse;
+		}
+		.story-container > div:nth-child(1) { /* Image area. */
+			margin: 24px 32px;
+		}
+		.story-container > div:nth-child(2) { /* Text area. */
+			margin-right: 24px; /* Avoid portal orbs. */
+			text-align: left;
+			width: 100%; /* Text area should be as large as possible. */
+		}
+		.story-container img {
+			box-shadow: 0px 0px 8px red;
+			transition: transform 0.5s;
+		}
+
+		@media only screen and (max-width: 1024px) { /* 1024px is "max-length" of ".story-container". */
+			.story-container {
+				display: table;
+			}
+			.story-container > div {
+				display: block;
+			}
+			.story-container.img-left > div:nth-child(1) {
+				float: left;
+			}
+			.story-container.img-right > div:nth-child(1) {
+				float: right;
+			}
+			.story-container > div:nth-child(2) {
+				width: auto; /* Overrides 100% width to prevent overflowing. */
+			}
 		}
 
 		.doom-e3-end {
@@ -146,7 +189,8 @@
 		.doom-e3-end:hover,
 		.doom-vs-doomu:hover,
 		.sky:hover,
-		.story-table img:hover {
+		.story-table img:hover,
+		.story-container img:hover {
 			transform: scale(1.25);
 		}
 
@@ -252,47 +296,47 @@
 		<div class="story-content-title">
 			<img>DOOM 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-01-23】<img>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
-				<div class="sky x1-right" style="background-image:url('Images/Doom/SKY1.png')"></div>
+				<div class="sky x1-right left-img" style="background-image:url('Images/Doom/SKY1.png')"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【E1－勝利劇情】</h3>
 				<p>　　當你把壞蛋們全部從 Phobos 基地清空後，你應該勝利了。但是你的報酬呢？你回家的機票呢？在你思考這些的同時，Deimos 基地傳來了他們被攻擊的消息。你並沒有勝利，你只是剛登陸到地獄的海岸上而已，而你現在唯一的選擇就是硬著頭皮通過..... 如果想要繼續這段旅程，那就繼續玩 The Shores of Hell(DOOM E2) 和他的續集 Inferno(DOOM E3) 吧！</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【E2－勝利劇情】</h3>
-				<p>　　你成功了！領導入侵 Deimos 基地入侵計畫的機械巨魔已經被你擊倒。你站起來看著星空，該死！地獄已經來到 Deimos 附近了！你並沒有逃跑，你知道自己該做些什麼，你駕駛了一艘小型太空船登陸了地獄.....現在即將邁向 DOOM 的最後一個章節 - Inferno!!!</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<img src="Images/Doom/VICTORY2.png">
 			</div>
+			<div>
+				<h3>【E2－勝利劇情】</h3>
+				<p>　　你成功了！領導入侵 Deimos 基地入侵計畫的機械巨魔已經被你擊倒。你站起來看著星空，該死！地獄已經來到 Deimos 附近了！你並沒有逃跑，你知道自己該做些什麼，你駕駛了一艘小型太空船登陸了地獄.....現在即將邁向 DOOM 的最後一個章節 - Inferno!!!</p>
+			</div>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="doom-e3-end"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【E3－勝利劇情】</h3>
 				<p>　　那主導著整個進攻、令人憎恨的機械蜘蛛魔也在你面前化成灰燼，現在火星已經安全了。忽然在你面前打開了一道門，你走了進去，在眼前是你的家鄉 - 地球。你很想知道在這段你和地獄搏鬥時地球到底發生了些什麼事，回家的時候到了...</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【E4－勝利劇情】</h3>
-				<p>　　那隻機械蜘蛛魔一定在你把他幹掉前就先派出他的爪牙了，你忽然瞭解當英雄的痛苦 - 總是要面對如此邪惡的東西，現在，你準備踏上另一段旅程，另外，他們要為殺了你的寵物兔子付出代價。你已經能想像怪物們瘋狂的在城市中屠殺，但你也已經準備好了。下一站 - Hell on Earth!</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<img src="Images/Doom/ENDPIC.png">
 			</div>
+			<div>
+				<h3>【E4－勝利劇情】</h3>
+				<p>　　那隻機械蜘蛛魔一定在你把他幹掉前就先派出他的爪牙了，你忽然瞭解當英雄的痛苦 - 總是要面對如此邪惡的東西，現在，你準備踏上另一段旅程，另外，他們要為殺了你的寵物兔子付出代價。你已經能想像怪物們瘋狂的在城市中屠殺，但你也已經準備好了。下一站 - Hell on Earth!</p>
+			</div>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="doom-vs-doomu"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【附註】</h3>
 				<p>　　雖然這大家都知道，但還是在此說明一下，為何 E1 的結尾 id 的人會那樣說呢？原因是 DOOM 的 E1 部分是 Shareware，也就是說下載就可以玩，而 E2 和 E3 則是需要購買的.....那在 E2 的時候為何說 E3 是最後一章呢？那 E4 是什麼？因為起初的 DOOM 只有到 E3，而 E4 是數年後 id 將 DOOM 重製加上 E4，包裝成 The Ultimate DOOM，也就是說 E3 和 E4 差了數年，所以 E2 才會說 E3 是最後一章。</p>
 			</div>
@@ -324,40 +368,40 @@
 		<div class="story-content-title">
 			<img>DOOM2 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-01-22】<img>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="sky x1-right" style="background-image:url('Images/Doom2/RSKY1.png')"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【MAP06-07 關中劇情】</h3>
 				<p>　　你深入了這個被惡魔們盤據的太空站中，你看到了他們的陰謀 - 他們正嘗試著利用太空站引進他們的大軍。 在你前方是一座被惡魔們強化過的前哨站，如果你能闖過的話，你就能在太空站中找到那個關係到全人類命運、能夠關閉阻止人類逃亡的開關，人類的存亡就看你了，陸戰隊員！</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【MAP11-12 關中劇情】</h3>
-				<p>　　你成功了！現在包圍在太空船周邊的力場已經被消除了，現在僅存的地球人可以乘著太空船撤離到外太空，遠離他們曾是天堂的母星。 你坐下來休息片刻，期望獲得暫時的寧靜。但是，太空船上卻傳來了一條信息："我們已經定位了入侵的來源，現在麻煩英雄進入該區，以切斷怪獸的增援" 當你看到這條信息時，你心寒了，因為入侵來源不是別處，正是你的故鄉。你無力的站了起來，強忍著想起家人被成群的怪物撕裂的畫面帶給你的悲痛，繼續朝著既熟悉又陌生的城市前進。</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<div class="sky x1-left" style="background-image:url('Images/Doom2/RSKY2.png')"></div>
 			</div>
-		</div>
-		<div class="story-table bright">
 			<div>
-				<div class="sky x1-right" style="background-image:url('Images/Doom2/RSKY3.png')"></div>
+				<h3>【MAP11-12 關中劇情】</h3>
+				<p>　　你成功了！現在包圍在太空船周邊的力場已經被消除了，現在僅存的地球人可以乘著太空船撤離到外太空，遠離他們曾是天堂的母星。 你坐下來休息片刻，期望獲得暫時的寧靜。但是，太空船上卻傳來了一條信息："我們已經定位了入侵的來源，現在麻煩英雄進入該區，以切斷怪獸的增援" 當你看到這條信息時，你心寒了，因為入侵來源不是別處，正是你的故鄉。你無力的站了起來，強忍著想起家人被成群的怪物撕裂的畫面帶給你的悲痛，繼續朝著既熟悉又陌生的城市前進。</p>
 			</div>
-			<div class="context">
+		</div>
+		<div class="story-container img-left bright">		
+			<div>
+					<div class="sky x1-right" style="background-image:url('Images/Doom2/RSKY3.png')"></div>
+			</div>
+			<div>
 				<h3>【MAP20-21 關中劇情】</h3>
 				<p>　　你現在身處在市中心，被敵人的大軍環繞著...。但你卻找不到惡魔們，但你的直覺告訴你你已經非常靠近了。所以你咬緊牙關，繼續向前。既然你都走到這了，那繼續走下去又何妨呢？</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【THE END 勝利劇情】</h3>
-				<p>　　當您把火箭彈轟向他的頭部時，這個您看過的惡魔在你面前倒下了，他的鮮血覆蓋了地獄，宣告地獄大軍的侵略失敗了，地獄也不會再出現。你擦拭著額前的汗水，朝著殘破的故鄉前進；重建地球是一條更漫長的路...</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<img src="Images/Doom2/BOSSBACK.png">
+			</div>
+			<div>
+				<h3>【THE END 勝利劇情】</h3>
+				<p>　　當您把火箭彈轟向他的頭部時，這個您看過的惡魔在你面前倒下了，他的鮮血覆蓋了地獄，宣告地獄大軍的侵略失敗了，地獄也不會再出現。你擦拭著額前的汗水，朝著殘破的故鄉前進；重建地球是一條更漫長的路...</p>
 			</div>
 		</div>
 	</section>
@@ -385,40 +429,40 @@
 		<div class="story-content-title">
 			<img>TNT 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-1-23】<img>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="sky x4-right" style="background-image:url('Images/TNT/DODAY.png')"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【MAP06-07 關中劇情】</h3>
 				<p>　　你殺到了事發的實驗室，看來 UAC 又再次的搞砸了。不知道幫 UAC 保險的保險公司看到這光景會有什麼看法。前方有一些殘留的軍事設施，雖然內部慘不忍睹，但您的運氣不錯，還有一些可以使用，只需要您找到方法啟動他們...</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【MAP11-12 關中劇情】</h3>
-				<p>　　你聽到不遠的前方傳來怪異的聲響，雖然你必要時可以衝出去吧他們全部殺乾淨，但你還是祈禱著惡魔們不是在召喚更多同伴。他們可能會找到您，試著把您殺死、用你的血來果腹；但是你知道這不會發生，你已經能夠想像數千支怪物被一個瘋狂殺手解決的樣子了。</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<div class="sky x4-left" style="background-image:url('Images/TNT/DONITE.png')"></div>
 			</div>
+			<div>
+				<h3>【MAP11-12 關中劇情】</h3>
+				<p>　　你聽到不遠的前方傳來怪異的聲響，雖然你必要時可以衝出去吧他們全部殺乾淨，但你還是祈禱著惡魔們不是在召喚更多同伴。他們可能會找到您，試著把您殺死、用你的血來果腹；但是你知道這不會發生，你已經能夠想像數千支怪物被一個瘋狂殺手解決的樣子了。</p>
+			</div>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="sky x4-right" style="background-image:url('Images/TNT/DOHELL.png')"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【MAP20-21 關中劇情】</h3>
 				<p>　　你忽然感覺到眼前的景色是那麼天殺的熟悉，當然，那些惡魔也記得你。你看著前方，一股怒氣湧上了心頭，於是你將你的武器重新上膛，繼續往前；是該讓世人知道你名字的時候了。</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【THE END 勝利劇情】</h3>
-				<p>　　忽然間，四周安靜了下來，地獄的聲音往地平線的遠方消失而去了，那原本血紅的天空也恢復他應有的湛藍，怪物們的屍體也帶著地獄的臭味蒸發了。天阿！你真的做到了！但你真的勝利了嗎？四周忽然開始轟轟作響，一道藍光忽然在已經化為白骨的怪物引領者體內發出...</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<img src="Images/TNT/BOSSBACK.png">
+			</div>
+			<div>
+				<h3>【THE END 勝利劇情】</h3>
+				<p>　　忽然間，四周安靜了下來，地獄的聲音往地平線的遠方消失而去了，那原本血紅的天空也恢復他應有的湛藍，怪物們的屍體也帶著地獄的臭味蒸發了。天阿！你真的做到了！但你真的勝利了嗎？四周忽然開始轟轟作響，一道藍光忽然在已經化為白骨的怪物引領者體內發出...</p>
 			</div>
 		</div>
 	</section>
@@ -445,41 +489,41 @@
 		<div class="story-content-title">
 			<img>Plutonia 各階段的劇情簡介【由 Mink 原文翻譯打字 2005-01-22】<img>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="sky x1-right" style="background-image:url('Images/Plutonia/SKY1.png')"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【MAP06-07 關中劇情】</h3>
 				<p>　　你得意洋洋的檢視著您的戰果 - 守護者的屍體無力的倒在地上，你把加速器從地獄的魔爪下搶了回來。你坐下來休息，看著四周..... 該死！應該至少會留下一個樣品才對的，但是四周卻空空如也..一定是天殺的惡魔們把它帶走了。</p>
 				<p>　　你現在必須奪回被搶走的樣品，否則之前的努力便全然白費了...別無他法，你只有繼續前進、繼續戰鬥、繼續殺戮.....Oh，當然，還要繼續活著。</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【MAP11-12 關中劇情】</h3>
-				<p>　　即使是由焰魔所構成的致命迷宮也無法阻擋你，但是在你眼前這個你尋覓已久的樣品卻已經被遺落在地上，您嘗試著重新啟動它，但是卻一點反應也沒有：惡魔們已經毀了它。 你知道接下來要做些什麼了 - 那些你曾經做過、而且現在仍熟悉的殺惡魔技巧該用上了！</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<div class="sky x4-left" style="background-image:url('Images/Plutonia/SKY2.png')"></div>
 			</div>
+			<div>
+				<h3>【MAP11-12 關中劇情】</h3>
+				<p>　　即使是由焰魔所構成的致命迷宮也無法阻擋你，但是在你眼前這個你尋覓已久的樣品卻已經被遺落在地上，您嘗試著重新啟動它，但是卻一點反應也沒有：惡魔們已經毀了它。 你知道接下來要做些什麼了 - 那些你曾經做過、而且現在仍熟悉的殺惡魔技巧該用上了！</p>
+			</div>
 		</div>
-		<div class="story-table bright">
+		<div class="story-container img-left bright">		
 			<div>
 				<div class="sky x2-right" style="background-image:url('Images/Plutonia/SKY3.png')"></div>
 			</div>
-			<div class="context">
+			<div>
 				<h3>【MAP20-21 關中劇情】</h3>
 				<p>　　當您一路教訓怪物、踢著怪物的屁股時，您也來到了這群噁心生物的巢穴；您知道現在要開始清場了，特別是針對那把怪物們源源不絕帶來、對地球動歪腦筋的護門之侍者。 您知道他不是個好傢伙，但您更瞭解對這群惡魔們說，誰才是大壞蛋！您整理完裝備，露出邪惡的笑容，準備給這些從地獄來的小混蛋們嚐嚐你為他們量身打造的地獄的滋味！</p>
 			</div>
 		</div>
-		<div class="story-table">
-			<div class="context">
-				<h3>【THE END 勝利劇情】</h3>
-				<p>　　當護門侍者被你轟成碎片時，一股強大的力場形成了，把這一切凌亂吸回了地獄。您再一次的成功了；您再一次得將活生生的地獄送回，讓他變成茶餘飯後聊天的話題。等你老死後，記得叫你的孫兒在你的棺木內放一具火箭筒，以免你死後下地獄的話可能還要來個最後的大掃除...</p>
-			</div>
+		<div class="story-container img-right">		
 			<div>
 				<img src="Images/Plutonia/BOSSBACK.png">
+			</div>
+			<div>
+				<h3>【THE END 勝利劇情】</h3>
+				<p>　　當護門侍者被你轟成碎片時，一股強大的力場形成了，把這一切凌亂吸回了地獄。您再一次的成功了；您再一次得將活生生的地獄送回，讓他變成茶餘飯後聊天的話題。等你老死後，記得叫你的孫兒在你的棺木內放一具火箭筒，以免你死後下地獄的話可能還要來個最後的大掃除...</p>
 			</div>
 		</div>
 	</section>

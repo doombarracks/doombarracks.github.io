@@ -178,6 +178,18 @@
 		.img-display > img:not(:first-child) { /* Kind of hack to make images no too close. */
 			margin-top: 12px;
 		}
+		.img-display > span {
+			padding-top: 0; /* So it stays close to the target on the top. */
+			text-shadow: 0 0 1em black, 0 0 0.75em black, 0 0 0.5em black, 0 0 0.25em black, 0 0 0.2em black, 0 0 0.1em black;
+			box-shadow: none;
+		}
+
+		.inner-separator {
+			border: 0;
+			margin: 16px 0;
+			padding: 0;
+			border-top: 2px dashed #aaa;
+		}
 
 		@media only screen and (max-width: 1024px) {
 			div.table { margin-left: 1.75em; }
@@ -203,6 +215,7 @@
 		<div class="portal-orb-box"><div class="portal-orb" orb-target="legacy"><div>Doom Legacy</div></div></div>
 		<div class="portal-orb-box"><div class="portal-orb" orb-target="slade"><div>Slade</div></div></div>
 		<div class="portal-orb-box"><div class="portal-orb" orb-target="gzdb"><div>GZDoom Builder - bugfix</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="other"><div>其它</div></div></div>
 	</div>
 	
 	<div class="page-title-container jarallax cover" data-img-src="Images/Application/Title_Back.png">
@@ -250,7 +263,8 @@
 					</div>
 				</div>
 			</p>
-			<p>以下就開始介紹各個模擬器及應用程式吧！</p>
+			<p>若對於所有毀滅戰士相關的模擬器有興趣的話，可參考<a href="https://doomwiki.org/wiki/Source_port" target="_blank">此列表</a>。工具部分，可參考<a href="https://doomwiki.org/wiki/Editing_utility" target="_blank">此列表</a>。</p>
+			<p>以下是站長比較熟悉的各個模擬器及應用程式，就讓我們開始介紹吧！</p>
 		</div>
 		<div class="top-gradient"></div>
 		<div class="bottom-gradient"></div>
@@ -506,7 +520,7 @@
 					<p>
 						Doom Legacy 在推出的時候是個很前衛的模擬器，具有以下特色：
 						<ul class="detail">
-							<li>支援了大於 320x200 的解析度顯示，這在當時只有 <a href="https://doomwiki.org/wiki/Doom95">Doom95</a> 支援更高解析度的時代是很吸引人的特色</li>
+							<li>支援了大於 320&times;200 的解析度顯示，這在當時只有 <a href="https://doomwiki.org/wiki/Doom95">Doom95</a> 支援更高解析度的時代是很吸引人的特色</li>
 							<li>動態光源。讓遊戲畫面看起來更有明暗感，但有些人偏好原始(無動態光源)的樣子</li>
 							<li>濃霧效果。想要製造懸疑、驚悚氣氛就不能錯過這個功能</li>
 							<li>3D 地板。大幅提升了地圖的複雜性，Phobia 就是一個使用大量 3D 地板創造驚人氣氛的作品。營內作品 3ddm01 運用 3D 地板使單純的 MAP07 產生了上下兩層的多樣性，增加死鬥的趣味</li>
@@ -597,6 +611,133 @@
 					<div class="img-display">
 						<iframe src="https://www.youtube.com/embed/HFyENEL4BO4?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 						<a href="https://www.youtube.com/watch?v=HFyENEL4BO4">GZDoom Builder - Time Lapse | UAC Base-Thingy</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div class="separator"></div>
+
+	<section id="other" class="jarallax" data-img-src="Images/Application/Others_Background.jpg">
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+		<div class="body">
+			<h1><img src="Images/Animation/Doom_FloatingSkull_R1.gif"> 其它 <img src="Images/Animation/Doom_FloatingSkull_R1.gif"></h1>
+			<hr>
+			<p>除了以上所列出來的資料，以下是站長曾經使用過的應用程式：</p>
+
+			<div class="inner-separator"></div>
+
+			<div class="content">
+				<div class="left">
+					<h2><img src="Images/Animation/Doom_HeartColumn_R1.gif"> DeHackEd</h2>
+					<p>一款直接修改 doom2.exe 的軟體，可以修改各個物件的數值(如怪物生命值、火球飛行速度、死亡時播放那一種音效)及狀態(顯示哪一張圖片、圖片顯示的時間長度、進行何種動作)，因此可將一些不常用的物件如裝飾物等等改變成怪物，增加遊戲的多樣性。也可以將武器速度改到極速，瞬殺每一隻怪物。改 doom2.exe 當時是地圖設計以外的另一項樂趣。</p>
+					<p>DeHackEd 可將修改過的進度儲存成 .deh 檔，模擬器大部分都支援 .deh，只要將 .deh 檔案讀進去之後就可以享受修改過後的結果了。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="https://www.doomworld.com/idgames/utils/exe_edit/dhe31" target="_blank">下載</a></li>
+						<li><a href="https://doomwiki.org/wiki/DeHackEd" target="_blank">介紹 (維基)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/DeHackEd.png">
+						<span>程式介面 (物件編輯)</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="inner-separator"></div>
+			
+			<div class="content">
+				<div class="left">
+					<h2><img src="Images/Animation/Doom_HeartColumn_R1.gif"> DeePsea / DeeP97</h2>
+					<p>這是站長第一款接觸的地圖編輯軟體，功能非常強大，DeeP97 為其前身。</p>
+					<p>DeePsea 主要是地圖編輯軟體，功能數量和使用上都比當時用過的其它軟體更方便(如 WadAuthor)。而且也自帶檔案(lump)管理、材質貼圖的規劃與管理，就如同今天的 Slade。</p>
+					<p>但 DeePsea 為商業軟體，試用版有地圖大小的限制，超過限制就無法儲存。所以站長曾有過一段 DeePsea 設計部分地圖然後用 WadAuthor 接起來的辛苦歲月，最後在無可奈何的情況下<span>掏出口袋</span>將地圖設計軟體改為 WadAuthor。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://www.sbsoftware.com/" target="_blank">網站</a></li>
+						<li><a href="https://doomwiki.org/wiki/DeePsea" target="_blank">介紹 (維基)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/DeePsea.png">
+						<span>程式介面 (天花板、地板編輯)</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="inner-separator"></div>
+			
+			<div class="content">
+				<div class="left">
+					<h2><img src="Images/Animation/Doom_HeartColumn_R1.gif"> WadAuthor</h2>
+					<p>站長使用的第二款地圖編輯軟體，因為在接觸這軟體之前已習慣了 DeePsea 的設計方式，一開始做起地圖來顯得格格不入，方便性遠不如 DeePsea，也因此無法達到使用 DeePsea 的開發速度。</p>
+					<p>WadAuthor 也是商業軟體，但當時在已忘記來源的情況下，軟體早已是註冊版本，所以沒有遇到任何被要求掏口袋的限制。而在 2017 年，作者將軟體<a href="https://www.doomworld.com/forum/topic/93968-wadauthor-is-freeware/" target="_blank">免費化</a>了。</p>
+					<p>WadAuthor 開發速度雖沒有 DeePsea 快，但它是當時營裡大家熟悉的地圖編輯工具。大部分的討論都是基於 WadAuthor 界面，甚至還幫軟體進行了中文化。</p>
+					<p>因此，雖然不清楚實際情況，WadAuthor 應該為營區戰士的地圖作品付出了很大部分的貢獻。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="https://www.doomworld.com/idgames/utils/level_edit/wauthor" target="_blank">下載</a></li>
+						<li><a href="https://doomwiki.org/wiki/WadAuthor" target="_blank">介紹 (維基)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/WadAuthor.png">
+						<span>程式介面</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="inner-separator"></div>
+			
+			<div class="content">
+				<div class="left">
+					<h2><img src="Images/Animation/Doom_HeartColumn_R1.gif"> XWE (eXtendable Wad Editor)</h2>
+					<p>WAD 檔案(lump)管理工具，功能如同今天的 Slade。XWE 使用上比 DeePsea 來的快速、方便，所以後來站長都習慣用 XWE 進行檔案管理。</p>
+					<p>但 XWE 程式不穩定，時常會在存檔的時候發生問題導致炸檔。所以存檔前要習慣先備份，一次修改也不敢太多，避免一炸就把所有修改進度都炸光光了...</p>
+					<hr>
+					<ul class="links">
+						<li><a href="https://www.doomworld.com/xwe/" target="_blank">網站</a></li>
+						<li><a href="https://www.doomworld.com/forum/topic/98107-where-do-i-download-xwe/" target="_blank">下載點 (論壇文章)</a></li>
+						<li><a href="https://doomwiki.org/wiki/EXtendable_WAD_Editor" target="_blank">介紹 (維基)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/XWE.png">
+						<span>程式介面 (Demo 檔讀取)</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="inner-separator"></div>
+			
+			<div class="content">
+				<div class="left">
+					<h2><img src="Images/Animation/Doom_HeartColumn_R1.gif"> ZenNode</h2>
+					<p>一款計算地圖內部結構的軟體。一個地圖完成後，會有一個節點建造軟體預先計算遊戲中需要的資料並儲存在地圖裡面。</p>
+					<p>在 Doom Legacy 的 OpenGL 渲染模式下，Plutonia 的地圖常會出現視覺上的破洞，使用 ZenNode 重新建造後，這些視覺破洞就會消失。</p>
+					<p>也因此在開發 Doom Legacy 專用地圖時，站長都會使用這個軟體進行節點建造。</p>
+					<hr>
+					<ul class="links">
+						<li><a href="http://www.mrousseau.org/programs/ZenNode/" target="_blank">網站</a></li>
+						<li><a href="https://doomwiki.org/wiki/ZenNode" target="_blank">介紹 (維基)</a></li>
+					</ul>
+				</div>
+				<div class="right">
+					<hr>
+					<div class="img-display">
+						<img src="Images/Application/E1M1_SS.png">
+						<a href="https://doomwiki.org/wiki/Doom_rendering_engine#Node_building" target="_blank">Doom E1M1 經二元空間分割(BSP)後得到的子區塊</a>	
 					</div>
 				</div>
 			</div>

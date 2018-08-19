@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+	<title>戰士名冊</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans+SC');
+		
+		div.table {
+			display: table;
+			border-collapse: collapse;
+			width: 100%;
+			max-width: 1920px;
+		}
+		div.table > div {
+			display: table-row;
+		}
+		div.table > div > div {
+			display: table-cell;
+			vertical-align: middle;
+			padding: 8px;
+		}
+
+		div.table > div > div.player {
+			text-align: center;
+			font-size: 1.3em;
+		}
+		div.table > div > div.intro {
+			text-align: left;
+		}
+
+		div.table > div:nth-child(even) {
+			background-color: #333;
+		}
+		
+		div.intro ul {
+			display: table;
+		}
+		div.intro ul > li {
+			list-style: none;
+			display: table-row;
+		}
+		div.intro ul > li::before {
+			display: table-cell;
+			text-align: right;
+			color: #777;
+			white-space: nowrap;
+		}
+		div.intro ul > li.mail::before { content: "電子郵件："; }
+		div.intro ul > li.weapon::before { content: "常用武器："; }
+		div.intro ul > li.mode::before { content: "喜愛模式："; }
+		div.intro ul > li.map::before { content: "常玩地圖："; }
+		div.intro ul > li.experience::before { content: "作戰心得："; }
+		div.intro ul > li.intro::before { content: "個人介紹："; }
+		div.intro ul > li.works::before { content: "個人作品："; }
+		div.intro ul > li.sites::before { content: "個人網站："; }
+		div.intro ul > li.note::before { content: "備註事項："; }
+
+		div.intro ul > li.mail,
+		div.intro ul > li.weapon,
+		div.intro ul > li.mode,
+		div.intro ul > li.map,
+		div.intro ul > li.experience,
+		div.intro ul > li.works,
+		div.intro ul > li.sites,
+		div.intro ul > li.note {
+			color: #ccc;
+		}
+		
+		div.intro ul > li.intro {
+			color: yellow;
+		}
+		div.intro ul > li.works a,
+		div.intro ul > li.sites a {
+			color: cyan;
+		}
+		div.intro ul > li.sites a.link-dead {
+			text-decoration: line-through;
+			color: darkcyan;
+		}
+		div.player > .name {
+			font-family: 'Alegreya Sans SC', sans-serif;
+			font-size: 1.3em;
+			padding: 0.5em;
+		}
+
+		trophy {
+			display: block;
+			margin: 0;
+			padding: 0;
+			color: #bbb;
+			font-size: 0.75em;
+			line-height: 1.4em;
+		}
+		trophy::before {
+			font-family: "DooM";
+		}
+		trophy.gold { color: gold; }
+		trophy.gold::before { content: "1 "; }
+		trophy.gold::after { content: " 冠軍"; }
+		trophy.silver { color: silver; }
+		trophy.silver::before { content: "2 "; }
+		trophy.silver::after { content: " 亞軍"; }
+		trophy.bronze { color: #CD7F32; }
+		trophy.bronze::before { content: "3 "; }
+		trophy.bronze::after { content: " 季軍"; }
+		trophy.fourth { color: #CD7F32; }
+		trophy.fourth::before { content: "4 "; }
+		trophy.fourth::after { content: " 殿軍"; }
+	</style>
+</head>
+<body>
+	
+	<div class="page-title-container jarallax cover" data-img-src="Images/Application/Title_Back.png">
+		<div class="page-title">戰士名冊</div>
+		<div class="page-title-text">
+			<p>本頁內容節選自原<a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-DoomerList.html">毀滅戰士營編制人員名冊</a>。</p>
+		</div>
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+	</div>
+
+	<section id="doomers"></section>
+
+	<footer>此頁面於 2018 年 08 月 18 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			BuildDoomerList();
+		});
+
+		function BuildDoomerList() {
+			let codes = [];
+
+			codes.push("<div class='table'>");
+			let table = GetPlayerTrophies();
+			for (let d in DBDoomerList) {
+				let doomer = DBDoomerList[d];
+
+				codes.push("<div>")
+				codes.push("<div class='player'>");
+				codes.push("<div class='name'>" + doomer.Name + "</div>");
+				if (doomer.Name in table) {
+					let trophies = table[doomer.Name];
+					for (let i in trophies){
+						let t = trophies[i];
+						let c;
+						switch (t.Rank) {
+							case "0": c = "gold"; break;
+							case "1": c = "silver"; break;
+							case "2": c = "bronze"; break;
+							default: c = "fourth"; break;
+						}
+						codes.push("<trophy class='" + c + "'>DBSDMT " + t.Year + "</trophy>");
+					}
+				}
+				codes.push("</div>");
+				codes.push("<div class='intro'>");
+				codes.push("<ul>");
+				if ("Mail" in doomer) {
+					codes.push("<li class='mail'>" + doomer.Mail + "</li>");
+				}
+				if ("PreferredWeapons" in doomer) {
+					codes.push("<li class='weapon'>" + doomer.PreferredWeapons + "</li>");
+				}
+				if ("PreferredGameModes" in doomer) {
+					codes.push("<li class='mode'>" + doomer.PreferredGameModes + "</li>");
+				}
+				if ("PreferredMaps" in doomer) {
+					codes.push("<li class='map'>" + doomer.PreferredMaps + "</li>");
+				}
+				if ("Motto" in doomer) {
+					codes.push("<li class='experience'>" + doomer.Motto + "</li>");
+				}
+				if ("Introduction" in doomer) {
+					codes.push("<li class='intro'>" + doomer.Introduction + "</li>");
+				}
+				if ("Works" in doomer) {
+					let works = doomer.Works;
+					let code = "<li class='works'>";
+					let comma = false;
+					for (let i in works) {
+						let w = works[i];
+						code += (comma ? ", " : "") +
+							(typeof(w.Link) === "string"
+								? ("<a href='" + w.Link + "' target='_blank' title='前往個人作品'>" + w.Name + "</a>")
+								: ("<a>" + w.Name + "</a>"));
+						comma = true;
+					}
+					code += "</li>";
+
+					codes.push(code);
+				}
+				if ("Websites" in doomer) {
+					let sites = doomer.Websites;
+					let code = "<li class='sites'>";
+					for (let i in sites) {
+						let s = sites[i];
+						code += !s.LinkDead
+							? ("<div><a href='" + s.Link + "' target='_blank' title='前往個人網站'>" + s.Title + "</a></div>")
+							: ("<div><a href='" + s.Link + "' target='_blank' class='link-dead' title='連結已失效'>" + s.Title + "</a></div>");
+					}
+					code += "</li>";
+
+					codes.push(code);
+				}
+				if ("Note" in doomer) {
+					codes.push("<li class='note'>" + doomer.Note + "</li>");
+				}
+				codes.push("</ul>");
+				codes.push("</div>");
+				codes.push("</div>");
+			}
+			codes.push("</div>");
+
+			$("#doomers").html(codes.join(""));
+		}
+
+		function GetPlayerTrophies() {
+			let table = {};
+			for (let y in DBSDMTRank) {
+				let list = DBSDMTRank[y];
+				for (let r in list) {
+					let n = list[r];
+
+					if (!(n in table)) {
+						table[n] = [];
+					}
+
+					table[n].push({ Year: y, Rank: r });
+				}
+			}
+			return table;
+		}
+
+		var DBSDMTRank = {
+			2004: [ "Unicode", "Mario", "Rock1246", "Rei", "Dino" ],
+			2005: [ "Unicode" ],
+			2006: [ "Jason", "No95", "Timothy", "Mario" ],
+			2007: [ "Asdfgh", "Raw", "Timothy", "Unicode" ],
+			2008: [ "QQW94", "AJNeoK", "Crazy", "TeanZlink" ],
+			2009: [ "QQW94", "Open", "Crazy", "AJNeoK" ],
+		}
+
+		/* Names not included:
+Angus
+Arthas
+Ash
+Dakki
+Dr.Kill
+Gordon
+Jack
+James Bond
+JinWooKo
+Link
+Shon
+Vegetto
+Yoyo
+		*/
+
+		var DBDoomerList = [
+			{
+				Name: "Darway",
+				Commission: "上校",
+				Position: "營長",
+				Mail: "darway168@gmail.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "All",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet VDSL 光纖 下載10Mb/上傳2Mb",
+				Motto: "DOOM 界眾生, 相生相剋, 始於勝負, 止於勝負, 週而復始, 輪轉不休, 所剩為何, 盡皆不語, 頻頻回首, 只存 DOOM 心 !",
+				Introduction: "毀滅戰士營營長，帶領戰士們參與各項活動。為本營核心人物。",
+				Websites: [ {
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/index.html",
+					Title: "毀滅戰士營 DOOM Barracks",
+				} ],
+			}, {
+				Name: "Caesar",
+				Commission: "中校",
+				Position: "副營長",
+				Mail: "boppin.caesar@msa.hinet.net",
+				PreferredWeapons: "似乎沒有..",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "DOOM加AV,HERETIC-E1M6",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "來合作闖關吧!!",
+				Websites: [ {
+					Link: "http://w2.loxa.com.tw/ly80657/",
+					Title: "DB-第二基地"
+				} ],
+			}, {
+				Name: "Unicode",
+				Commission: "中校",
+				Position: "營輔導長",
+				Mail: "unicode_@hotmail.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "All",
+				PreferredMaps: "DOOM2-Map08, 3DDM01.WAD, DOOM-E2M4,M6",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "Go Go!",
+			}, {
+				Name: "Mario",
+				Commission: "中校",
+				Position: "營特戰官",
+				Mail: "menu224@msn.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "DOOM重要的不是個人神話而是你參於的心!",
+				Works: [ {
+					Name: "TD334",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/TD334.7z",
+				}, {
+					Name: "YouOnOne",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/YouOnOne.7z",
+				} ],
+			}, {
+				Name: "UAC",
+				Commission: "中校",
+				Position: "營顧問官",
+				Mail: "freakuac@hotmail.com",
+				PreferredWeapons: "3,4,5",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "UAC 裡的怪人，對地獄空間特別瞭解，不時在基地中的各個角落出沒，口頭禪是「讓我們的毀滅戰士魂永遠長存吧！」",
+			}, {
+				Name: "Tnlkm",
+				Introduction: "架設了台灣 classic Doom 網站之元老級玩家，資料豐富且美工精緻。",
+				Websites: [ {
+					Link: "",
+					Title: "Tnlkm Doom's Page",
+					LinkDead: true,
+				} ]
+			}, {
+				Name: "Weow",
+				Commission: "中校",
+				Position: "營科技官",
+				Mail: "weow@msn.com",
+				PreferredWeapons: "巫師骷髏手榴彈",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "CD2_1-10.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "無盡的毀滅是為了重生!",
+				Works: [ {
+					Name: "3DDM01",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/3ddm01.7z",
+				}, {
+					Name: "CD2_1-11",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/CD2_1-11.7z",
+				} ],
+				Websites: [ {
+					Link: "http://weow.myweb.hinet.net/",
+					Title: "WEOW 的 DOOM 之家",
+					LinkDead: true,
+				}, {
+					Link: "http://www.ult-doomlegacy.url.tw/",
+					Title: "Ultimate Doom Legacy",
+					LinkDead: true,
+				} ],
+			}, {
+				Name: "Howie",
+				Commission: "中校",
+				Position: "營工程官",
+				Mail: "carlcyber@yahoo.com.tw",
+				PreferredWeapons: "能體驗到瞬殺或虐殺的武器",
+				PreferredGameModes: "SP, COOP, Invasion",
+				PreferredMaps: "好玩即可",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載10Mb/上傳2Mb",
+				Motto: "iddqd + idkfa + idclip + ...(飛)",
+				Introduction: "喜好地圖設計。本網站站長。",
+				Works: [ {
+					Name: "CubeArena",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/CubeArena.7z",
+				}, {
+					Name: "DOOM Arena 2",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/DOOMarena2.7z",
+				}, {
+					Name: "CD2_1-11",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/CD2_1-11.7z",
+				}, {
+					Name: "D2M7DM",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/D2M7DM.7z",
+				}, {
+					Name: "HellCave",
+					//Link: "",
+				}, {
+					Name: "Blocks of Doom II",
+					Link: "https://www.moddb.com/mods/blocks-of-doom-ii",
+				} ],
+				Websites: [ {
+					Link: "http://www.ult-doomlegacy.url.tw/",
+					Title: "Ultimate Doom Legacy",
+					LinkDead: true,
+				}, {
+					Link: "https://doombarracks.github.io",
+					Title: "Doom Barracks - 毀滅戰士營",
+				} ],
+			}, {
+				Name: "QQW94",
+				Commission: "少校",
+				Position: "營作戰官",
+				Mail: "qqw94@hotmail.com",
+				PreferredWeapons: "BFG9K",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet VDSL 光纖 下載10Mb/上傳2Mb",
+				Motto: "發現到一隻怪不可怕 重點是在多隻啊!",
+			}, {
+				Name: "Timothy",
+				Commission: "上尉",
+				Position: "連長",
+				Mail: "yoyo10084@hotmail.com",
+				PreferredWeapons: "3,6,7",
+				PreferredGameModes: "Coop, CTF",
+				PreferredMaps: "DOOM2",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "i-cable,下載2Mb/上傳256Kb",
+				Motto: "Doom...算是我精神支柱之一吧....Doom Forever!",
+				Websites: [ {
+					Link: "http://hk.geocities.com/timothydoomplanet",
+					Title: "Timothy's Doom Planet",
+					LinkDead: true,
+				} ],
+			}, {
+				Name: "AJNeoK",
+				Commission: "中尉",
+				Position: "副連長",
+				Mail: "ajneok@gmail.com",
+				PreferredWeapons: "3,4,5,6",
+				PreferredGameModes: "PK",
+				PreferredMaps: "簡單的QQ\"",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "ADSL 下載8Mb/上傳640Kb",
+				Motto: "多練習，必成功",
+			}, {
+				Name: "No95",
+				Commission: "中尉",
+				Position: "排長",
+				Mail: "doomerNo95@hotmail.com",
+				PreferredWeapons: "BFG9K",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "最近才找到Legacy，好久好久沒有打了，很懷念Ifrag的時代。現在還有嗎?",
+			}, {
+				Name: "Mink",
+				Commission: "少尉",
+				Position: "排長",
+				Mail: "mink_tsie@hotmail.com",
+				PreferredWeapons: "無偏好",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM2 Map01~07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "ADSL 下載8Mb/上傳640Kb",
+				Motto: "id心機重阿..擺怪物都在很意想不到的地方..",
+			}, {
+				Name: "Raw",
+				Commission: "少尉",
+				Position: "排長",
+				Mail: "raw@sob.com.tw",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載8Mb/上傳640Kb",
+				Motto: "很久沒玩@@~請多指教.",
+			}, {
+				Name: "Tails",
+				Commission: "士官長",
+				Position: "副排長",
+				Mail: "tails201@hotmail.com",
+				PreferredWeapons: "3,5,7",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "DOOM2, TNT, AV.wad, Dib20b.wad",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "DOOM2真是款經典的遊戲,有時拿來消氣也不錯XD",
+				Works: [ {
+					Name: "Home",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/Home.7z",
+				}, {
+					Name: "DBZone",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/DBZone.7z",
+				} ],
+			}, {
+				Name: "DoomEnergy",
+				Commission: "士官長",
+				Position: "副排長",
+				Mail: "frankyeh602@hotmail.com",
+				PreferredWeapons: "1,3,4",
+				PreferredGameModes: "PK, SP",
+				PreferredMaps: "DOOM2 Map07, 3DDM01.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "東森ADSL 下載1Mb/上傳64Kb",
+				Motto: "很容易因緊張造成亂殺一通，手還會輕微抖，還有當我挑戰比我強很多的人時別懷疑，因為我是來被電的XD，還有我最愛玩DOOM之極速快感。",
+				Works: [ {
+					Name: "ChainSawArena",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/chainsawarea.7z",
+				}, {
+					Name: "DE-Battle_Field01 Ver:A",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/DE-Battle_Field01-A.7z",
+				} ],
+				Websites: [ {
+					Link: "http://fyspmail.idv.st/",
+					Title: "南方堂果屋",
+				}, {
+					Link: "http://atonisfreak.byethost12.com/doompages/",
+					Title: "Doom Never Dies",
+				} ],
+			}, {
+				Name: "Jackgo0932",
+				Commission: "士官長",
+				Position: "副排長",
+				Mail: "jackgo0932@pchome.com.tw",
+				PreferredWeapons: "無",
+				PreferredGameModes: "All",
+				PreferredMaps: "DOOM2外掛地圖AV.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載512Kb/上傳128Kb",
+				Motto: "凶鬼啊，吞噬心智，污化思想，引領瘋狂；恐懼之王，水面院之剋星。以我等之血，請再度君臨。",
+			}, {
+				Name: "Orcs",
+				Commission: "上士",
+				Position: "班長",
+				Mail: "orcs2003@msn.com",
+				PreferredWeapons: "3,5",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "新手對地圖不太熟",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "香港Netvigator 1Mb",
+				Motto: "看到一群怪的時候就是踏中傳送點的時侯....",
+			}, {
+				Name: "904631",
+				Commission: "上士",
+				Position: "班長",
+				Mail: "martin0914@hgcbroadband.com",
+				PreferredWeapons: "單管3號和4號(好像比較易用而且不會自殺= =)",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "TNT Map 5,7,11-20,27,31",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "香港VDSL 下載10M/上傳10M",
+				Motto: "向前衝,才能得到勝利= =+",
+			}, {
+				Name: "Rock1246",
+				Commission: "上士",
+				Position: "班長",
+				Mail: "rock1246@msn.com",
+				PreferredWeapons: "無阿XDXDXD",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM-E1",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "看吧XD左手鍊炮,右手BFG,想跟我打嗎XD?(逃)",
+			}, {
+				Name: "Crazy",
+				Commission: "上士",
+				Position: "班長",
+				Mail: "jt14732@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK,COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "無盡毀滅只為了生存",
+			}, {
+				Name: "HBO<br>(Superman)",
+				Commission: "中士",
+				Position: "班長",
+				Mail: "cinemax510@hotmail.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "All",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "COOP 的時候愛衝第一, FFA 的時候痛宰洋鬼子為TW爭光, 贏老外不代表強, 有很多的強手等著我們對付!",
+			}, {
+				Name: "Palk",
+				Commission: "中士",
+				Position: "班長",
+				Mail: "palk1974@hotmail.com",
+				PreferredWeapons: "3,4,5,6,7",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載1Mb/上傳128Kb",
+				Motto: "DOOM 真是個操壞手腕的好遊戲..XD..CCC",
+			}, {
+				Name: "SHON",
+				Commission: "中士",
+				Position: "班長",
+				Mail: "sam924@msn.com",
+				PreferredWeapons: "散彈 & 雙管",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "ㄝ...幾百年沒玩doom，忘了耶",
+				PreferredControls: "Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "用IDKFA後，我還是只選散彈~嘿嘿",
+			}, {
+				Name: "OPEN",
+				Commission: "中士",
+				Position: "班長",
+				Mail: "Open_ii@hotmail.com",
+				PreferredWeapons: "3,4,5,6,7",
+				PreferredGameModes: "PK,COOP,CTF",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "來吧! 多說無益! 打了就知道!! Go!!",
+			}, {
+				Name: "TeanZlink",
+				Commission: "中士",
+				Position: "班長",
+				Mail: "teanzlink@hotmail.com",
+				PreferredWeapons: "雙管散彈槍",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "ADSL ? / ?",
+				Motto: "殺阿~~",
+				Works: [ {
+					Name: "Z2",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/z2.7z",
+				} ],
+			}, {
+				Name: "Syx68011",
+				Commission: "中士",
+				Position: "班長",
+				Mail: "syx680114@yahoo.com.tw",
+				PreferredWeapons: "4,5,6",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "DOOM1.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載?Mb/上傳???Kb",
+				Motto: "火箭砲對地開發才是王道！",
+			}, {
+				Name: "Secreet",
+				Commission: "下士",
+				Position: "班長",
+				Mail: "jeffliu0412@hotmail.com",
+				PreferredWeapons: "3,7",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "AV(全), Dib20b(全)",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載不太記得/上傳不太記得",
+				Motto: "所謂DOOM就是把看的到、摸的到的東西全部清乾淨～",
+			}, {
+				Name: "Masayan",
+				Commission: "下士",
+				Position: "班長",
+				Mail: "masaya_d00m@hotmail.com",
+				PreferredWeapons: "3,5",
+				PreferredGameModes: "All",
+				PreferredMaps: "TNT Map01, DOOM1 E3, Scythe.wad",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Japan Net",
+				Motto: "Avoided & runs...XD",
+				Introduction: "日本玩家。",
+				Works: [ {
+					Name: "Ares",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/Ares.7z",
+				} ],
+			}, {
+				Name: "Chromatic.HP",
+				Commission: "下士",
+				Position: "班長",
+				Mail: "chromaticplayer@yahoo.com.tw",
+				PreferredWeapons: "3,4,6",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "都沒什麼經驗",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Seed Net ADSL 下載3Mb/上傳64Kb",
+				Motto: "沒事就打槍吧",
+			}, {
+				Name: "Asdfgh",
+				Note: "<span style='color:magenta'>2008年因數度累犯破壞團體紀律引起團體紛亂因此踢出出營!</span>",
+				Commission: "下士",
+				Position: "明德班",
+				Mail: "ark0618@hotmail.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "All",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "社區區域網路-遠東寬頻 下載8Mb/上傳640Kb",
+				Motto: "Doom真是經典的好遊戲阿!!!!!",
+			}, {
+				Name: "Ckegg",
+				Commission: "上兵",
+				Position: "伍長",
+				Mail: "ckegg@pchome.com.tw",
+				PreferredWeapons: "3.單/雙管散彈槍",
+				PreferredGameModes: "DM,COOP",
+				PreferredMaps: "Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Cable modem 下載16Mb/上傳2Mb",
+				Motto: "目前我是新手!",
+			}, {
+				Name: "Shift",
+				Commission: "上兵",
+				Position: "伍長",
+				Mail: "k_i_m_o_b_o_y@yahoo.com.tw",
+				PreferredWeapons: "皆可",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "大夥想玩什麼,小弟就跟著玩",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "HiNet T3 下載5Mb/上傳1Mb",
+				Motto: "Attack is the best form of defense",
+			}, {
+				Name: "CatPrince",
+				Commission: "上兵",
+				Position: "伍長",
+				Mail: "prince@iqcat.com.tw",
+				PreferredWeapons: "3,5,7",
+				PreferredGameModes: "PK",
+				PreferredMaps: "Aje-combo.wad",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Giga ADSL 下載128Kb/上傳64Kb",
+				Motto: "殺就對了....",
+			}, {
+				Name: "Saiste",
+				Commission: "上兵",
+				Position: "伍長",
+				Mail: "saistee@hotmail.com",
+				PreferredWeapons: "不要七號槍",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "怎麼第一個打的都是我?",
+			}, {
+				Name: "WILL",
+				Commission: "上兵",
+				Position: "伍長",
+				Mail: "will6208@hotmail.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "PK, COOP, SP",
+				PreferredMaps: "無",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載512Kb/上傳64Kb",
+				Motto: "打怪或pk時，近一點攻擊力會比較強",
+			}, {
+				Name: "Nick.Oster<br>(Mike)",
+				Commission: "上兵",
+				Position: "伍長",
+				Mail: "woupin14145@hotmail.com",
+				PreferredWeapons: "3,7",
+				PreferredGameModes: "SP",
+				PreferredMaps: "VILE、營內的地圖",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載8Mb/上傳2Mb",
+				Motto: "永不毀滅，再度消滅。",
+			}, {
+				Name: "Logo",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "logo7533967@msn.com",
+				PreferredWeapons: "1,3",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "什麼地圖都玩",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載1Mb/上傳64Kb",
+				Motto: "衝阿~",
+			}, {
+				Name: "Ringo",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "ringoppabc@hotmail.com",
+				PreferredWeapons: "雙管散彈槍",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM2 Map32",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "香港Netvigator 3Mb",
+				Motto: "殺殺殺殺殺殺..",
+			}, {
+				Name: "WillyKuo123",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "hi5480@hotmail.com",
+				PreferredWeapons: "3,7",
+				PreferredGameModes: "Coop",
+				PreferredMaps: "好玩就好啦",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "最好玩的 就是看到怪物互相殘殺",
+			}, {
+				Name: "Y.S.C.",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "hkj865nk@hotmail.com",
+				PreferredWeapons: "3,5,7",
+				PreferredGameModes: "CTF,COOP,SP",
+				PreferredMaps: "DOOM1.WAD, 3DDM01.WAD, PLUTONIA.WAD, CD2_1-11.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "北健 下載8Mb/上傳:??b",
+				Motto: "DOOM 這個遊戲過再久，我相信還是有人再玩的，是百玩不膩的！",
+				Works: [ {
+					Name: "YSCDM07",
+					//Link: "",
+				}, {
+					Name: "HellE1",
+					//Link: "",
+				}, {
+					Name: "HELLaccess2",
+					//Link: "",
+				} ],
+			}, {
+				Name: "Rei",
+			}, {
+				Name: "Miles",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "loi66612@hotmail.com",
+				PreferredWeapons: "3,4",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載1Mb/上傳256Kb",
+				Motto: "作戰，不比誰殺的多、誰比較強，因為我們是一個團隊。",
+			}, {
+				Name: "HOWARD",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "howard60104@yahoo.com.tw",
+				PreferredWeapons: "3,6",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "我新手不太認識地圖名字(玩過DOOM3)",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "在這地獄中...只有技術才能活下去= =",
+			}, {
+				Name: "Freeman",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "kei01112@msn.com",
+				PreferredWeapons: "3,6",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "DOOM2-Map32, TNT Map32",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "(海外公司) ADSL 下載512Kb/上傳64Kb",
+				Motto: "我自認在戰慄時空中，用MP5加榴彈炮幾乎是無敵的配搭;我也希望在Doom中能夠用得一手好的電漿炮。這是我的理想!",
+			}, {
+				Name: "Nuonellyoun",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "nuonellyoun@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "只要可合作都OK!",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "剛玩沒多久@@~請多指教",
+			}, {
+				Name: "Zeroandy25",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "zeroandy25@hotmail.com",
+				PreferredWeapons: "...",
+				PreferredGameModes: "皆可",
+				PreferredMaps: "All",
+				PreferredControls: "Keyboard",
+				Connection: "Hinet ADSL 下載256Kb/上傳64Kb",
+				Motto: "團隊作戰才是王道啊! 獨樂樂不如眾樂樂",
+			}, {
+				Name: "Squall666Lucifer",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "squall_lucifer@hotmail.com",
+				PreferredWeapons: "3,6",
+				PreferredGameModes: "All",
+				PreferredMaps: "好地圖就玩",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載1Mb/上傳256Kb",
+				Motto: "血肉橫飛...I Lovin it!",
+			}, {
+				Name: "Extremely Fantasy",
+				Commission: "上尉",
+				Position: "營後勤官",
+				Mail: "yuyu19876@hotmail.com",
+				PreferredWeapons: "3,5,7",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "好玩就好",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載8Mb/上傳640Kb",
+				Motto: "Death is a part of life!!!",
+			}, {
+				Name: "Jason",
+				Commission: "中尉",
+				Position: "排長",
+				Mail: "a511208@hotmail.com",
+				PreferredWeapons: "3,5,6,7",
+				PreferredGameModes: "PK",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Cable Modem",
+				Motto: "KILL...",
+			}, {
+				Name: "Dino",
+				Commission: "少尉",
+				Position: "排長",
+				Mail: "dino780928@hotmail.com",
+				PreferredWeapons: "3,4,5,6,7",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "不斷的戰鬥,是為了生存",
+			}, {
+				Name: "Ausa Wu",
+				Commission: "少尉",
+				Position: "排長",
+				Mail: "ausawu1966@hotmail.com",
+				PreferredWeapons: "3,5,6,7",
+				PreferredGameModes: "All",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "東森 Cable Modem",
+				Motto: "年紀大了三號甩不準了!..@@",
+			}, {
+				Name: "Hunter",
+				Commission: "少尉",
+				Position: "預備官",
+				Mail: "a2ojiaugl@hotmail.com",
+				PreferredWeapons: "3,5,6,7",
+				PreferredGameModes: "All",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 512Kb/128Kb",
+				Motto: "多打多進步",
+			}, {
+				Name: "Guy",
+				Commission: "下士",
+				Position: "班長",
+				Mail: "hideonomoalex@hotmail.com",
+				PreferredWeapons: "5,6",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "TNT, Plutonia Map31, 32 + Fast Monster",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "So-Net ADSL 下載2Mb/上傳512Kb",
+				Motto: "不會TK的不是我是代玩!!~\"~",
+			}, {
+				Name: "AJ",
+				Commission: "下士",
+				Position: "班長",
+				Mail: "qwe5108@yahoo.com.tw",
+				PreferredWeapons: "都會用",
+				PreferredGameModes: "All",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載512Kb/上傳128Kb",
+				Motto: "希望老哥老姊不要同時用網路!",
+			}, {
+				Name: "PkmX",
+				Commission: "下士",
+				Position: "班長",
+				Mail: "pkmx.tw@gmail.com",
+				PreferredWeapons: "3,4",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "Doom1,Doom2,Doom3,Final Doom(不是PK都好)",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載12Mb/上傳1Mb",
+				Motto: "如果你總是攻擊的很順利，那一定是個圈套。",
+				Works: [ {
+					Name: "DarkMars V1.04",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/DarkMars.7z",
+				} ],
+			}, {
+				Name: "BB",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "e52187644@msn.com",
+				PreferredWeapons: "雙管散彈槍",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM E1M1",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
+				Motto: "死完再衝..",
+			}, {
+				Name: "Doomnobody",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "star13go@yahoo.com.tw",
+				PreferredWeapons: "有子彈的就用..",
+				PreferredGameModes: "COOP 我喜歡靠同伴過關..XD",
+				PreferredMaps: "DOOM2-Map01~07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Cable Modem 下載768Kb/上傳128Kb",
+				Motto: "不要把準心對著我..",
+			}, {
+				Name: "ASS HUNTER",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "juv50306@yahoo.com.tw",
+				PreferredWeapons: "電鋸",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM2 Map07",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "不太清楚",
+				Motto: "目前沒打過...XD",
+			}, {
+				Name: "Cappuccino",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "friendforever_91@yahoo.com.tw",
+				PreferredWeapons: "1,3,4,5,6,7",
+				PreferredGameModes: "COOP,偶爾會玩PK",
+				PreferredMaps: "DOOM2 Map09, 外掛地圖AV, CD2_1-10",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "東森寬頻Cable Modem 其他一概不知= =",
+				Motto: "隨到隨玩",
+			}, {
+				Name: "Chun",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "kwok0916@hotmail.com",
+				PreferredWeapons: "3,4",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM2 所有內定Map",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "香港Netviagtor Cable Modem 下載3Mb/上傳64Kb",
+				Motto: "毀滅=死,所以我經常被殺",
+			}, {
+				Name: "[DJ]Mr.Trooper",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "tezuka_osamu85@hotmail.com",
+				PreferredWeapons: "3,4,5,6",
+				PreferredGameModes: "SP, COOP",
+				PreferredMaps: "Plutonia Map31",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Korea ADSL Primium.",
+				Motto: "Kill~",
+			}, {
+				Name: "E007X",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "a073515756@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "都喜歡玩",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載1Mb/上傳512Kb",
+				Motto: "打帶跑=_=d",
+			}, {
+				Name: "CCU",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "kingu772000@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "2dmaps.wad",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳64Kb",
+				Motto: "寒雨他老爸的老爸的女兒和她老公所生的兒子! 寒雨的表弟啦!",
+			}, {
+				Name: "Kenny",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "llooo5552002@hotmail.com",
+				PreferredWeapons: "3,5,6,7",
+				PreferredGameModes: "SP, COOP",
+				PreferredMaps: "DOOM2 Map23,31,18,  DOOM  E1M5, E2M2, E3M5",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "HK LAN 下載2M/上傳384K",
+				Motto: "殺!我們是英勇的戰士,騎士.為人類的生存,願天主保佑.阿們!",
+			}, {
+				Name: "Terminator",
+				Commission: "上兵",
+				Position: "士兵",
+				Mail: "magicsilversky@hotmail.com",
+				PreferredWeapons: "3,7",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2 Map07, 3ddm01",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "好懷念喔...這ㄇ久ㄉ遊戲..沒想到還有人在玩ㄟ~~希望技巧沒有退步...= =",
+			}, {
+				Name: "ASKA",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "asoonatw@hotmail.com",
+				PreferredWeapons: "3,7",
+				PreferredGameModes: "SP",
+				PreferredMaps: "皆可",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "ADSL 下載2Mb/上傳128Kb",
+				Motto: "勝負都沒關係,重點是..幹掉對方",
+			}, {
+				Name: "Artist_Hong",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "artist_hong@hotmail.com",
+				PreferredWeapons: "3,6",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "全都不太會",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "香港Netvigator 1.5Mb",
+				Motto: "勇往直前~",
+			}, {
+				Name: "GreenTank",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "mgt104@hotmail.com",
+				PreferredWeapons: "沒有",
+				PreferredGameModes: "沒有",
+				PreferredMaps: "沒有",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "經由 PkmX 介紹 才知道這款遊戲",
+			}, {
+				Name: "Sprite",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "z23158@yahoo.com.tw",
+				PreferredWeapons: "3,4,6",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "DOOM2-Map07, 3DDM01.WAD",
+				PreferredControls: "Keyboard",
+				Connection: "Hinet ADSL 下載256Kb/上傳64Kb",
+				Motto: "殺戮~換來和平~",
+			}, {
+				Name: "Raymond",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "raymond_ycp@hotmal.com",
+				PreferredWeapons: "4,5,6,7",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "皆可",
+				PreferredControls: "Keyboard",
+				Connection: "香港Cable Modem:下載5Mb/上傳768Kb",
+				Motto: "我只想合力闖關時可以增進友誼,在對戰時不會消逝友誼!",
+			}, {
+				Name: "Moving_Target",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "mstarget_tw@hotmail.com",
+				PreferredWeapons: "4,5,6,7",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "Campaign Stages",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Seednet ADSL 下載2Mb/上傳512Kb",
+				Motto: "多打多看多想，技巧就會進步",
+			}, {
+				Name: "Webonomics",
+				Commission: "一兵",
+				Position: "士兵",
+				Mail: "webonomics@hotmail.com",
+				PreferredWeapons: "3,4,5",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "All",
+				PreferredControls: "Keyboard",
+				Connection: "和信 ADSL 下載768Kb/上傳128Kb",
+				Motto: "GOGOGOGOGO!!!",
+			}, {
+				Name: "Zerg King",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "challenger_1501@hotmail.com",
+				PreferredWeapons: "目前未受實彈射擊訓練=.=\"",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "還未知",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "玩射擊遊戲那麼久 終於要踏上 DOOM 的領域了感謝Mink大大的引導希望經過一番特訓之後能在毀滅營得到好成績",
+			}, {
+				Name: "Dodo",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "angel51322@msn.com",
+				PreferredWeapons: "3,6",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2",
+				PreferredControls: "Keyboard",
+				Connection: "ADSL ? / ?",
+				Motto: "不大常玩..希望以後可和各位多多交戰,增進戰鬥經驗~^^",
+			}, {
+				Name: "Unatco",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "pg955203@hotmail.com",
+				PreferredWeapons: "看哪把子彈快滿出來",
+				PreferredGameModes: "COOP, PK會輸@@",
+				PreferredMaps: "不要會頭昏的的地圖",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "SHAW CABLE 10Mbps (俺家在加拿大)",
+				Motto: "戰鬥...單純是為了享受殺戮的快感..",
+			}, {
+				Name: "Dalyadam",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "ucs88732@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK",
+				PreferredMaps: "DOOM2 Map01-08, 3DDM01",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "學術網路(我都在學校玩~\"~)",
+				Motto: "＠＠？MINK徒弟II",
+			}, {
+				Name: "WCT",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "wctinearth@hotmail.com",
+				PreferredWeapons: "3,4,5,6",
+				PreferredGameModes: "SP",
+				PreferredMaps: "DOOM2-Map01~05, Plutonia-Map32",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載512Kb/上傳128Kb",
+				Motto: "其實我是大嫩咖 XD,因為去年初才裝ADSL,所以沒有連線經驗,戰法是中規中矩的步步為營,過了開頭幾關就要打密技了>< 打plu32是發洩用在還只有Doom95的時候,我有試過打開所有門存檔,退出,選\"怪物復活\"打的好爽阿 XD",
+				Works: [ {
+					Name: "Wct01",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/wct01.7z",
+				} ],
+			}, {
+				Name: "Nair",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "tcen8168@giga.net.tw",
+				PreferredWeapons: "3,6",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "能殺得很爽的都常玩",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "SeedNet ADSL 下載2Mb/上傳512Kb",
+				Motto: "把電話綁在頭上和朋友邊打邊聊天 , 感覺很棒XD",
+			}, {
+				Name: "Paul",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "egg1321@hotmail.com",
+				PreferredWeapons: "1,3",
+				PreferredGameModes: "PK, COOP, SP",
+				PreferredMaps: "DOOM2  Map01~04",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "SeedNet ADSL 下載2Mb/上傳128Kb",
+				Motto: "我還很爛,上次跟DoomEnergy玩 (某種因素認識) 結果變成幾乎處處妨礙他..XD..總之我技術非常非常非常的..爛XD...不知道誰可以來給我一個特訓唷-_-\"",
+			}, {
+				Name: "Ken",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "Ken_DOOM@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "?",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "SeedNet ADSL 下載2Mb/上傳256Kb",
+				Motto: "同學介紹的，還不太熟",
+			}, {
+				Name: "DAKKI",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "chiung026@hotmail.com",
+				PreferredWeapons: "3,5",
+				PreferredGameModes: "SP",
+				PreferredMaps: "DOOM2.WAD",
+				PreferredControls: "Keyboard",
+				Connection: "Hinet ADSL 下載1Mb/上傳1Mb",
+				Motto: "都是玩單人闖關的,還蠻刺激的~目前找各地圖外掛試玩中~",
+			}, {
+				Name: "MIGING170",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "miging170@hotmail.com",
+				PreferredWeapons: "3,5,6",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "DOOM2.WAD",
+				PreferredControls: "Keyboard",
+				Connection: "ADSL 下載1Mb/上傳1Mb",
+				Motto: "DOOM 系列都很好玩~來合作闖關吧~XD",
+			}, {
+				Name: "YOYO",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "yoyo_123321_123321@hotmail.com",
+				PreferredWeapons: "3,5",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "都可以玩",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "HK LAN 下載2Mb/上傳384Kb",
+				Motto: "我不太勁的，請多多保護我～",
+			}, {
+				Name: "A.DA",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "a751109@hotmail.com",
+				PreferredWeapons: "All",
+				PreferredGameModes: "All",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "我是新手請多多指教!!!",
+			}, {
+				Name: "Ghost",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "xsupertony@yahoo.com.tw",
+				PreferredWeapons: "3",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM2.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載640Kb/上傳256Kb",
+				Motto: "........",
+			}, {
+				Name: "fishmen",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "fishmenxp@hotmail.com",
+				PreferredWeapons: "3,4",
+				PreferredGameModes: "COOP, SP",
+				PreferredMaps: "DOOM2 Map07, 3ddm01.wad",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "ADSL 下載8Mb/上傳640Kb",
+				Motto: "為了100%而100%,再多時間也值得!",
+			}, {
+				Name: "WINDELF",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "andywindelf@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "DOOM2-Map07,3DDM01.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載512Kb/上傳512Kb",
+				Motto: "我是最近才接觸到DOOM,不過我對DOOM可是有很大ㄉ熱忱喔~我剛上高一",
+			}, {
+				Name: "Amorej",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "moon.wing@msa.hinet.net",
+				PreferredWeapons: "3",
+				PreferredGameModes: "PK, COOP, SP",
+				PreferredMaps: "All of DOOM series map",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
+				Motto: "~~!",
+			}, {
+				Name: "ORZ GORDON STO",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "happle29897@example.com",
+				PreferredWeapons: "2,3",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "DOOM2.WAD",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL, 上傳速度還有下載速度我不知道怎看耶..XD",
+				Motto: "我雖膽小，但我喜歡玩DOOM、我要挑戰恐懼所以我才會玩DOOM啊啊!！",
+			}, {
+				Name: "ASH",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "ash_conan@hotmail.com",
+				PreferredWeapons: "3",
+				PreferredGameModes: "COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "香港寬頻 ADSL 下載2Mb/上傳1Mb",
+				Motto: "我跑得快..死更快XD 永遠的肉盾lol",
+			}, {
+				Name: "Wasami4118",
+				Commission: "二兵",
+				Position: "士兵",
+				Mail: "wasami4118@mail2000.com.tw",
+				PreferredWeapons: "All",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "都OK!",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "外宿區網，不清楚XD",
+				Motto: "衝就對了~There is no other way!",
+			}, {
+				Name: "Charlene",
+				Commission: "學兵",
+				Position: "學生",
+				Mail: "yaokeyi589@yahoo.com.cn",
+				PreferredWeapons: "3,4",
+				PreferredGameModes: "PK, COOP",
+				PreferredMaps: "All",
+				PreferredControls: "Mouse & Keyboard",
+				Connection: "Hinet ADSL 下載2Mb/上傳384Kb",
+				Motto: "Doom is great name. Although I never touch this game. But I must take the guns to kill everyone. To save the world!",
+			},
+		];
+	</script>
+</body>
+</html>

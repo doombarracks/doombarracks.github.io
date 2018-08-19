@@ -594,6 +594,14 @@
 		ul.links {
 			list-style-image: url("Images/DoomCommon/SHELA0.png");
 		}
+
+		#dbg {
+			position: fixed;
+			left: 0;
+			top: 0;
+			font-size: 24px;
+			z-index: 1048576;
+		}
 	</style>
 </head>
 <body>
@@ -721,15 +729,15 @@
 			})
 
 			// Build tables.
-			BuildMapTable($("#wads1"), CoopWads.concat(DMWads));
-			BuildMapTable($("#wads2"), DBWads);
-			BuildMusicTable();
-
-			InitializeMusicItemBackground();
+			MapTable.Build($("#wads1"), CoopWads.concat(DMWads));
+			MapTable.Build($("#wads2"), DBWads);
+			MusicTable.Build();
+			MusicTable.InitializeItemBackground();
 
 			// Initialize jarallax.
-			$(".jarallax").jarallax({ speed: 0 });
-			$(".jarallax div")
+			$(".jarallax")
+				.jarallax({ speed: 0 })
+				.find("div")
 				.filter(function() {
 					var id = $(this).attr("id");
 					return typeof(id) === "string" ? id.startsWith("jarallax-container-") : false;
@@ -747,53 +755,74 @@
 			}
 
 			// Start projectile shooter game loop.
-			ProtectileShooterLoop();
+			Game.GameLoop();
 		});
 
-		function GetPreloader() {
-			var pl = $("preloader");
-			if (pl.length === 0) {
-				$("body").prepend("<preloader></preloader>");
-				pl = $("preloader")
+		var Preloader = new function() {
+			function GetPreloader() {
+				let $pl = $("preloader");
+				if ($pl.length === 0) {
+					$pl = $("<preloader></preloader>");
+					$("body").prepend($pl);
+				}
+				return $pl;
 			}
-			return pl;
-		}
 
-		function PreloadClass(tag, className) {
-			var pl = GetPreloader();
-			var selector = tag + "." + className;
-			if (pl.find(selector).length === 0) {
-				pl.append("<" + tag + " class=" + className + "></" + tag + ">");
+			function PreloadClass(tag, className) {
+				let $pl = GetPreloader();
+				let $t = $pl.find(tag).find("." + className);
+				if ($t.length === 0) {
+					$pl.append("<" + tag + " class=" + className + "></" + tag + ">");
+				}
 			}
-		}
 
-		var ProjectileSummonInterval = !Debug ? (10 + Math.random() * 10) : 5;
-		var ProjectileShooterTimeoutID = 0;
+			this.PreloadClass = PreloadClass;
+		};
 
-		function ProtectileShooterLoop(spawn) {
-			if (ProjectileShooterTimeoutID !== 0) {
-				clearTimeout(ProjectileShooterTimeoutID);
+		var Game = new function() {
+			function Clamp(min, value, max) {
+				return value < min ? min : (value > max ? max : value);
 			}
-			ProjectileShooterTimeoutID = setTimeout(function() { ProtectileShooterLoop(true); }, ProjectileSummonInterval * 1000);
-			
-			if (spawn) {
-				SpawnProjectile();
+
+			var _spawnInterval = new function() {
+				var _value = 10 + Math.random() * 10;
+
+				this.Set = function(value) {
+					_value = Clamp(
+						Math.max(0.1, 0.25 - (Math.sqrt(_hitOrMiss.HitKeepCount()) * 0.01)),
+						value,
+						30);
+					}
+				this.Get = function() { return _value; }
 			}
-		}
 
-		var ProjectileInterceptCharge = 1;
-		var ProjectileIndex = 0;
-		var ProjectileBaseSpeedTime = 5;
-		var ProjectileInterceptCount = 0;
-		var ProjectileKeepInterceptingCount = 0;
-		var ProjectileHitWallCount = 0;
-		var ProjectileKeepHitingWallCount = 0;
-		var BlanketCharge = 0;
-		var BlanketChargeRecoveryTimerID = 0;
-		var GameScore = 0;
+			var _gameLoopTimeoutID = 0;
+			var _initialized = false;
 
-		function SpawnProjectile() {
-			var ProjectileList = [
+			function GameLoop(spawn) {
+				if (!_initialized) {
+					// Attach a delegated event handler.
+					$("#player").on("click mouseover", "projectile", function(e) {
+						e.preventDefault();
+						ProjectileIntercept(e);
+					});
+
+					_initialized = true;
+				}
+
+				// Starts a new time out for spawning next projectile.
+				clearTimeout(_gameLoopTimeoutID);
+				_gameLoopTimeoutID = setTimeout(function() {
+					GameLoop(true);
+				}, _spawnInterval.Get() * 1000);
+
+				if (spawn) {
+					SpawnProjectile();
+				}
+			};
+			this.GameLoop = GameLoop;
+
+			var _ProjectileList = [
 				"SAni_Doom_ArachnotronPlasma_Fly_R1",
 				"SAni_Doom_BaronBall_Fly_R3",
 				"SAni_Doom_CacodemonBall_Fly_R1",
@@ -805,219 +834,260 @@
 				"SAni_Doom_LostSoul_Fly_R3",
 				"SAni_Doom_RevenantTracer_Fly_R3",
 			];
-
-			var id = "p" + ProjectileIndex++; // Makes a unique ID.
-			var baseName = ProjectileList[Math.floor(ProjectileList.length * Math.random())]; // Randomly choose one class name.
-			var rotation = baseName.slice(-1); // Gets rotation from class name.
-			var right2left = Math.random() < 0.5; // Determine whether to spawn from the left border(false) or right border(true).
-			var name = rotation === "1"
-				? baseName // Universal rotation, so we don't need to find the opposite rotation.
-				: (rotation === "3" && right2left ? baseName : baseName.slice(0, -1) + "7"); // "7" is the opposite rotation of "3".
-			var hitName = baseName.substr(0, baseName.indexOf("_Fly_")) + "_Hit_R1"; // Gets class name when projectile hits.
-
-			// Preload sprite sheet for hit animation.
-			PreloadClass("div", hitName);
-
-			// Gets game player.
-			var player = $("#player");
-
-			// Initially creates projectile so it's size can be determined.
-			player.append('<projectile id="' + id + '"><div><div class="' + name + '"></div></div></projectile>');
-
-			// Gets jquery objects of projectile container and projectile itself.
-			var domCont = $("#" + id);
-			var domProj = domCont.find("div > div");
-
-			// Gets player size and projectile container size so we can determine where to spawn.
-			var sw = player.width(), sh = player.height(); // s: screen
-			var cw = domCont.width(), ch = domCont.height(); // c: contiainer
-			var pw = domProj.width(), ph = domProj.height(); // p: projectile
-
-			domProj.attr("fly-class", name) // Set information to retrieve later.
-				.attr("hit-class", hitName) // Set information to retrieve later.
-				.css("left", ((cw - pw) / 2) + "px") // Center align to container.
-				.css("top", ((ch - ph) / 2) + "px"); // Center align to container.
-
-			// Speed of projectile to fly.
-			var speed = (sw - cw) / (ProjectileBaseSpeedTime * (1 + Math.random() * 1.5));
-
-			domCont.css("left", (right2left ? sw - cw : 0) + "px") // Spawns at left or right border.
-				.css("top", ((sh - ch) * Math.random()).toFixed(0) + "px") // Spawns at rendom height within player.
-				.css("transform", "scale(" + (1 + Math.random() * 0.75).toFixed(2) + ")") // Makes it a little different in size.
-				.mouseover(ProjectileIntercept)
-				.click(ProjectileIntercept)
-				.animate({
-					left: (right2left ? 0 : sw - cw) + "px",
-				}, {
-					duration: (sw - cw) / speed * 1000,
-					easing: "linear",
-					done: ProjectileReachWall,
-				});
-		}
-
-		function Update_BlanketCharge(increment) {
-			BlanketCharge += increment;
-			BlanketCharge = Math.min(0.85, Math.max(0, BlanketCharge));
-			$("#blanket")
-				.css("opacity", BlanketCharge)
-				.css("pointer-events", BlanketCharge > 0 ? "auto" : "none");
-		}
-
-		function ProjectileReachWall(e) {
-			ProjectileHitWallCount++;
-			ProjectileKeepHitingWallCount++;
-			ProjectileKeepInterceptingCount = 0;
-
-			// Lengthen time to spawn the next projectile.
-			ProjectileInterceptCharge = Math.max(ProjectileInterceptCharge - Math.sqrt(ProjectileKeepHitingWallCount) * 0.2, 1); // So we will not decrease too much i the player is playing well already.
-			ProjectileSummonInterval = Math.min(ProjectileSummonInterval + 3 / ProjectileInterceptCharge, 30); // Spawns at longer interval.
-			ProjectileBaseSpeedTime = Math.min(ProjectileBaseSpeedTime + Math.sqrt(ProjectileKeepHitingWallCount) * 0.2 / ProjectileInterceptCharge, 5); // Flys slower.
-
-			// Decrease opacity if player don't wanna play anymore.
-			if (ProjectileKeepHitingWallCount > 1 && BlanketChargeRecoveryTimerID === 0) {
-				BlanketChargeRecoveryTimerID = setInterval(function() {
-					Update_BlanketCharge(-0.01);
-					if (BlanketCharge <= 0) { // We already reached out goal.
-						clearInterval(BlanketChargeRecoveryTimerID);
-						BlanketChargeRecoveryTimerID = 0;
-					}
-				}, 100);
-			}
-
-			// Determine.
-			Update_BlanketCharge(Math.pow(ProjectileKeepHitingWallCount, 0.75) * -0.02);
-
-			var pc = $(this); // Projectile container.
-			DamagePlayer(pc);
-			ProjectileExplode(pc);
-		}
-
-		function ProjectileIntercept(e) {
-			ProjectileInterceptCount++;
-			ProjectileKeepInterceptingCount++;
-			ProjectileKeepHitingWallCount = 0;
-
-			// Update score according to current status.
-			GameScore += 10 / ProjectileBaseSpeedTime * Math.sqrt(ProjectileKeepInterceptingCount);
-			$("#score").html(GameScore.toFixed(0));
-
-			// shorten time to spawn the next projectile.
-			ProjectileInterceptCharge = Math.min(ProjectileInterceptCharge + 0.1, 4);
-			ProjectileSummonInterval = Math.max(
-				ProjectileSummonInterval / 1.2,
-				Math.max(0.1, 0.25 - (Math.sqrt(ProjectileKeepHitingWallCount) * 0.01))); // Spawns at shorter interval.
-			ProjectileBaseSpeedTime = Math.max(ProjectileBaseSpeedTime - 0.01, 1); // Flys faster.
-
-			if (ProjectileKeepInterceptingCount > 10) {
-				Update_BlanketCharge(Math.sqrt(ProjectileKeepInterceptingCount - 10) * 0.01);
-			}
-
-			// Stop decreasing blanket charge.
-			clearInterval(BlanketChargeRecoveryTimerID);
-			BlanketChargeRecoveryTimerID = 0;
-
-			var pc = $(this); // Projectile container.
-			ProjectileExplode(pc);
-		}
-
-		function DamagePlayer(pc) { // Projectile container.
-			var f = $("#face");
-			var o = function() { return parseFloat(f.css("opacity")); };
-
-			f.stop(true)
-				.fadeTo(100, 0.25 + o(), function() { // Initial additive redness when damaged.
-					f.fadeTo(o() * 2000, o(), function() { // Keep redness for a while.
-						f.fadeTo(o() * 5000, 0); // Fading.
-					});
-				})
-		}
-
-		function ProjectileExplode(pc) { // Projectile container.
-			pc.stop() // Stop moving.
-				.css("pointer-events", "none"); // So we can click on any other projectiles under.
-
-			var p = pc.find("div > div"); // Projectile.
-			p.removeClass(p.attr("fly-class")) // Removes flying animation.
-				.addClass(p.attr("hit-class")) // Start playing hit animation.
-				.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
-				function(e) {
-					pc.remove(); // Removes projectile container when animation is complete.
-				}
-			);
-		}
-
-		function BuildSourcePorts(ports) {
-			// No port is defined.
-			if (typeof(ports) !== "string") ports = "";
-
-			var tokens = ports.split(",");
-
-			// Build html text.
-			var html = "";
-			if (tokens.indexOf("all") < 0) {
-				if (tokens.indexOf("gzdoom") > -1) html += '<img src="Images/GameResource/GZDoom.png" title="限定 GZDoom 模擬器">';
-				if (tokens.indexOf("zdoom") > -1) html += '<img src="Images/GameResource/ZDoom.png" title="限定 ZDoom 模擬器">';
-				if (tokens.indexOf("zandronum") > -1) html += '<img src="Images/GameResource/Zandronum.png" title="限定 Zandronum 模擬器">';
-				if (tokens.indexOf("skulltag") > -1) html += '<img src="Images/GameResource/Skulltag.png" title="限定 Skulltag 模擬器">';
-				if (tokens.indexOf("zdaemon") > -1) html += '<img src="Images/GameResource/ZDaemon.png" title="限定 ZDaemon 模擬器">';
-				if (tokens.indexOf("legacy") > -1) html += '<img src="Images/GameResource/Legacy.png" title="限定 Doom Legacy 模擬器">';
-			}
-			if (html === "") html = '<img src="Images/GameResource/STFGOD0.png" title="無模擬器限制"></sp>';
-
-			return html;
-		}
-
-		function BuildGame(game) {
-			switch (game) {
-				case "doom": return '<img src="Images/Doom/M_DOOM.png" title="以 DOOM 為 IWAD">';
-				case "doom2": default: return '<img src="Images/Doom2/M_DOOM.png" title="以 DOOM2 為 IWAD">';
-				case "tnt": return '<img src="Images/TNT/M_DOOM.png" title="以 TNT 為 IWAD">';
-				case "plutonia": return '<img src="Images/Plutonia/M_DOOM.png" title="以 Plutonia 為 IWAD">';
-			}
-			return "";
-		}
-
-		function BuildGameType(type) {
-			switch (type) {
-				case "coop": default: return '<img src="Images/GameResource/TROOG1.png" title="合作模式">';
-				case "dm": return '<img src="Images/GameResource/PLAYE1.png" title="死鬥模式">';
-				case "ctf": return '<img src="Images/GameResource/SFLSA0.png" title="搶旗模式">';
-			}
-			return "";
-		}
-
-		function BuildLink(link, isDeadLink) {
-			if (isDeadLink) {
-				return '<a class="dead-link" title="連結已失效"></a>';
-			}
 			
-			// Check if this link should be redirected.
-			if (link.startsWith("Music") || link.startsWith("MyBackup")) {
-				link = "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/" + link;
-			}
-			return '<a href="' + link + '" title="下載" target="_blank"></a>';
-		}
+			var _projIndex = 0;
 
-		function BuildMapTable(div, data) {
-			var html = "";
-			for (var i in data) {
-				var d = data[i];
-				html +=
-					'<div>' +
-						'<div>' +
-							'<p>' + d.Title + '</p>' +
-							'<div>' + BuildSourcePorts(d.Ports) + '</div>' +
-						'</div>' +
-						'<div>' + BuildGame(d.Game) + '</div>' +
-						'<div>' + BuildGameType(d.Type) + '</div>' +
-						'<div>' +
-							BuildLink(d.Link, d.LinkDead) +
-						'</div>' +
-						'<div>' + d.Description + '</div>' +
-					'</div>';
+			var _interceptCharge = new function() {
+				var _value = 1;
+				this.Set = function(value) { _value = Clamp(1, value, 4); }
+				this.Get = function() { return _value; }
 			}
-			div.html(html);
-		}
+			var _hitOrMiss = new function() {
+				var _hitTotalCount = 0;
+				var _hitKeepCount = 0;
+				var _missTotalCount = 0;
+				var _missKeepCount = 0;
+
+				this.HitOrMiss = function(hit) {
+					if (hit) {
+						_hitTotalCount++;
+						_hitKeepCount++;
+						_missKeepCount = 0;
+					}
+					else {
+						_missTotalCount++;
+						_missKeepCount++;
+						_hitKeepCount = 0;
+					}
+				}
+
+				this.HitTotalCount = function() { return _hitTotalCount; }
+				this.HitKeepCount = function() { return _hitKeepCount; }
+				this.MissTotalCount = function() { return _missTotalCount; }
+				this.MissKeepCount = function() { return _missKeepCount; }
+			}
+			var _baseSpeedTime = new function() {
+				var _value = 5;
+				this.Set = function(value) { _value = Clamp(1, value, 5); }
+				this.Get = function() { return _value; }
+			}
+			var _blanketCharge = new function() {
+				var _value = 0;
+				this.Set = function(value) {
+					_value = Clamp(0, value, 0.85);
+					$("#blanket")
+						.css("opacity", _value)
+						.css("pointer-events", _value > 0 ? "auto" : "none");
+				}
+				this.Get = function() { return _value; }
+			}
+			var _blanketChargeRecoveryTimeoutID = 0;
+
+			var _gameScore = 0;
+
+			function SpawnProjectile() {
+				let id = "p" + _projIndex++; // Makes a unique ID.
+				let baseName = _ProjectileList[Math.floor(_ProjectileList.length * Math.random())]; // Randomly choose one class name.
+				let rotation = baseName.slice(-1); // Gets rotation from class name.
+				let right2left = Math.random() < 0.5; // Determine whether to spawn from the left border(false) or right border(true).
+				let name = rotation === "1"
+					? baseName // Universal rotation, so we don't need to find the opposite rotation.
+					: (rotation === "3" && right2left ? baseName : baseName.slice(0, -1) + "7"); // "7" is the opposite rotation of "3".
+				let hitName = baseName.substr(0, baseName.indexOf("_Fly_")) + "_Hit_R1"; // Gets class name when projectile hits.
+
+				// Preload sprite sheet for hit animation.
+				Preloader.PreloadClass("div", hitName);
+
+				// Gets game player.
+				let $player = $("#player");
+
+				// Initially creates projectile so it's size can be determined.
+				$player.append('<projectile id="' + id + '"><div><div class="' + name + '"></div></div></projectile>');
+
+				// Gets jquery objects of projectile container and projectile itself.
+				let $domCont = $("#" + id);
+				let $domProj = $domCont.find("div > div");
+
+				// Gets player size and projectile container size so we can determine where to spawn.
+				let sw = $player.width(), sh = $player.height(); // s: screen
+				let cw = $domCont.width(), ch = $domCont.height(); // c: contiainer
+				let pw = $domProj.width(), ph = $domProj.height(); // p: projectile
+
+				$domProj.attr("fly-class", name) // Set information to retrieve later.
+					.attr("hit-class", hitName) // Set information to retrieve later.
+					.css("left", ((cw - pw) / 2) + "px") // Center align to container.
+					.css("top", ((ch - ph) / 2) + "px"); // Center align to container.
+
+				// Speed of projectile to fly.
+				let speed = (sw - cw) / (_baseSpeedTime.Get() * (1 + Math.random() * 1.5));
+
+				$domCont.css("left", (right2left ? sw - cw : 0) + "px") // Spawns at left or right border.
+					.css("top", ((sh - ch) * Math.random()).toFixed(0) + "px") // Spawns at rendom height within player.
+					.css("transform", "scale(" + (1 + Math.random() * 0.75).toFixed(2) + ")") // Makes it a little different in size.
+					.animate({
+						left: (right2left ? 0 : sw - cw) + "px",
+					}, {
+						duration: (sw - cw) / speed * 1000,
+						easing: "linear",
+						done: ProjectileReachWall,
+					});
+			};
+		
+			function ProjectileReachWall(e) {
+				_hitOrMiss.HitOrMiss(false);
+				
+				// Lengthen time to spawn the next projectile.
+				_interceptCharge.Set(_interceptCharge.Get() - Math.sqrt(_hitOrMiss.MissKeepCount()) * 0.2);
+				_spawnInterval.Set(_spawnInterval.Get() + 3 / _interceptCharge.Get());
+				_baseSpeedTime.Set(_baseSpeedTime.Get() + Math.sqrt(_hitOrMiss.MissKeepCount()) * 0.2 / _interceptCharge.Get());
+
+				// Decrease opacity if player don't wanna play anymore.
+				if (_blanketChargeRecoveryTimeoutID === 0) {
+					_blanketChargeRecoveryTimeoutID = setInterval(function() {
+						_blanketCharge.Set(_blanketCharge.Get() - 0.01);
+						if (_blanketCharge.Get() <= 0) { // We already reached out goal.
+							clearInterval(_blanketChargeRecoveryTimeoutID);
+							_blanketChargeRecoveryTimeoutID = 0;
+						}
+					}, 100);
+				}
+
+				// Determine.
+				_blanketCharge.Set(_blanketCharge.Get() - Math.pow(_hitOrMiss.MissKeepCount(), 0.75) * 0.02);
+
+				var $pc = $(this); // Projectile container.
+				DamagePlayer($pc);
+				ProjectileExplode($pc);
+			}
+
+			function ProjectileIntercept(e) {
+				_hitOrMiss.HitOrMiss(true);
+
+				// Update score according to current status.
+				_gameScore += 10 / _baseSpeedTime.Get() * Math.sqrt(_hitOrMiss.HitKeepCount());
+				$("#score").html(_gameScore.toFixed(0));
+
+				// shorten time to spawn the next projectile.
+				_interceptCharge.Set(_interceptCharge.Get() + 0.1);
+				_spawnInterval.Set(_spawnInterval.Get() / 1.2); // Spawns at shorter interval.
+				_baseSpeedTime.Set(_baseSpeedTime.Get() - 0.01); // Flys faster.
+
+				if (_hitOrMiss.HitKeepCount() > 10) {
+					_blanketCharge.Set(_blanketCharge.Get() + Math.sqrt(_hitOrMiss.HitKeepCount() - 10) * 0.01);
+				}
+
+				// Stop decreasing blanket charge.
+				clearInterval(_blanketChargeRecoveryTimeoutID);
+				_blanketChargeRecoveryTimeoutID = 0;
+
+				//var pc = $(this); // Projectile container.
+				var $pc = $(e.target);
+				ProjectileExplode($pc);
+			}
+
+			function DamagePlayer($pc) { // Projectile container.
+				var f = $("#face");
+				var o = function() { return parseFloat(f.css("opacity")); };
+
+				f.stop(true)
+					.fadeTo(100, 0.25 + o(), function() { // Initial additive redness when damaged.
+						f.fadeTo(o() * 2000, o(), function() { // Keep redness for a while.
+							f.fadeTo(o() * 5000, 0); // Fading.
+						});
+					});
+			}
+
+			function ProjectileExplode($pc) { // Projectile container.
+				$pc.stop() // Stop moving.
+					.css("pointer-events", "none"); // So we can click on any other projectiles under.
+
+				var $p = $pc.find("div > div"); // Projectile.
+				$p.removeClass($p.attr("fly-class")) // Removes flying animation.
+					.addClass($p.attr("hit-class")) // Start playing hit animation.
+					.one('webkitAnimationEnd oanimationend msAnimationEnd animationend',
+					function(e) {
+						$pc.remove(); // Removes projectile container when animation is complete.
+					}
+				);
+			}
+		};
+
+		var MapTable = new function() {
+			function BuildSourcePorts(ports) {
+				// No port is defined.
+				if (typeof(ports) !== "string") ports = "";
+
+				let tokens = ports.split(",");
+
+				// Build html text.
+				let html = "";
+				if (tokens.indexOf("all") < 0) {
+					if (tokens.indexOf("gzdoom") > -1) html += '<img src="Images/GameResource/GZDoom.png" title="限定 GZDoom 模擬器">';
+					if (tokens.indexOf("zdoom") > -1) html += '<img src="Images/GameResource/ZDoom.png" title="限定 ZDoom 模擬器">';
+					if (tokens.indexOf("zandronum") > -1) html += '<img src="Images/GameResource/Zandronum.png" title="限定 Zandronum 模擬器">';
+					if (tokens.indexOf("skulltag") > -1) html += '<img src="Images/GameResource/Skulltag.png" title="限定 Skulltag 模擬器">';
+					if (tokens.indexOf("zdaemon") > -1) html += '<img src="Images/GameResource/ZDaemon.png" title="限定 ZDaemon 模擬器">';
+					if (tokens.indexOf("legacy") > -1) html += '<img src="Images/GameResource/Legacy.png" title="限定 Doom Legacy 模擬器">';
+				}
+				if (html === "") html = '<img src="Images/GameResource/STFGOD0.png" title="無模擬器限制"></sp>';
+
+				return html;
+			}
+
+			function BuildGame(game) {
+				switch (game) {
+					case "doom": return '<img src="Images/Doom/M_DOOM.png" title="以 DOOM 為 IWAD">';
+					case "doom2": default: return '<img src="Images/Doom2/M_DOOM.png" title="以 DOOM2 為 IWAD">';
+					case "tnt": return '<img src="Images/TNT/M_DOOM.png" title="以 TNT 為 IWAD">';
+					case "plutonia": return '<img src="Images/Plutonia/M_DOOM.png" title="以 Plutonia 為 IWAD">';
+				}
+				return "";
+			}
+
+			function BuildGameType(type) {
+				switch (type) {
+					case "coop": default: return '<img src="Images/GameResource/TROOG1.png" title="合作模式">';
+					case "dm": return '<img src="Images/GameResource/PLAYE1.png" title="死鬥模式">';
+					case "ctf": return '<img src="Images/GameResource/SFLSA0.png" title="搶旗模式">';
+				}
+				return "";
+			}
+
+			function BuildLink(link, isDeadLink) {
+				if (isDeadLink) {
+					return '<a class="dead-link" title="連結已失效"></a>';
+				}
+				
+				// Check if this link should be redirected.
+				if (link.startsWith("Music") || link.startsWith("MyBackup")) {
+					link = "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/" + link;
+				}
+				return '<a href="' + link + '" title="下載" target="_blank"></a>';
+			}
+
+			function BuildMapTable(div, data) {
+				let codes = [];
+				for (let i in data) {
+					let d = data[i];
+					codes.push(
+						'<div>' +
+							'<div>' +
+								'<p>' + d.Title + '</p>' +
+								'<div>' + BuildSourcePorts(d.Ports) + '</div>' +
+							'</div>' +
+							'<div>' + BuildGame(d.Game) + '</div>' +
+							'<div>' + BuildGameType(d.Type) + '</div>' +
+							'<div>' +
+								BuildLink(d.Link, d.LinkDead) +
+							'</div>' +
+							'<div>' + d.Description + '</div>' +
+						'</div>');
+				}
+				div.html(codes.join(""));
+			}
+
+			this.Build = BuildMapTable;
+		};
 
 		var CoopWads = [
 			{
@@ -1232,14 +1302,13 @@
 				Description: "很寫實的地圖(妖怪，貼圖，魍魎，聲音，音樂)! 讓人感到驚奇! 一切彷彿置身於被怪物入侵的學校，<map>MAP01-MAP06</map> 關。",
 			},
 		];
-		for (var i in CoopWads) { CoopWads[i].Type = "coop"; } // Not really necessary since this is the default type, but leave it here anyway.
+		for (let i in CoopWads) { CoopWads[i].Type = "coop"; } // Not really necessary since this is the default type, but leave it here anyway.
 
 		var DMWads = [
 			{
 				Title: "Rail War 2",
 				Ports: "gzdoom,zdoom,zdaemon",
-				Link: "http://users2.titanichost.com/darway168/Db/Railwarz2.rar",
-				LinkDead: true,
+				Link: "MyBackup/DMMaps/railwarz2.7z",
 				Description: "有著各式各樣不同種類 Rail Gun 的對戰地圖，強力推薦！<map>MAP01-MAP09</map> 關。",
 			}, {
 				Title: "Aje-Cmbo",
@@ -1317,7 +1386,7 @@
 				Description: "專門設計用來 PK 的地圖，關卡地形多變，強力推薦！<map>MAP01-MAP18</map> 關。",
 			}
 		];
-		for (var i in DMWads) { if (typeof DMWads[i].Type !== "string") DMWads[i].Type = "dm"; }
+		for (let i in DMWads) { if (typeof DMWads[i].Type !== "string") DMWads[i].Type = "dm"; }
 
 		var DBWads = [
 		{
@@ -1404,57 +1473,57 @@
 				Description: "由 D.E. 所創作，僅提供狂戰箱與電鋸的 PK 地圖，<map>MAP01</map> 關。",
 			}
 		];
-	
-		function BuildMusicTable() {
-			var html = "";
-			for (var i in MusicList) {
-				var m = MusicList[i];
-				var title = m.Title,
+
+		var MusicTable = new function() {
+			function BuildMusicTable() {
+			let codes = [];
+			for (let i in MusicList) {
+				let m = MusicList[i];
+				let title = m.Title,
 					link = m.Link;
 				
-				html += '<div><div></div><a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/Music/' + link + '" title="下載音樂">' + title + '</a></div>';
+				codes.push('<div><div></div><a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/Music/' + link + '" title="下載音樂">' + title + '</a></div>');
 			}
-			$("#music").html(html);
+			$("#music").html(codes.join(""));
 		}
 
-		var MusicItemBackgroundTable = [
-			"CEIL3_3.png",
-			"COMP03_2.png",
-			"FLAT1_1.png",
-			"FLAT5_2.png",
-			"FLOOR0_1.png",
-			"FLOOR0_3.png",
-			"FLOOR4_8.png",
-			"FLOOR6_2.png",
-			"FLOOR7_2.png",
-			"FWATER3.png",
-			"LAVA1.png",
-			"MFLR8_1.png",
-			"MFLR8_4.png",
-			"NUKAGE3.png",
-			"RROCK01.png",
-			"RROCK02.png",
-			"RROCK12.png",
-			"RROCK17.png",
-			"RROCK19.png",
-			"SFLR6_1.png",
-			"SFLR6_4.png",
-			"SLIME04.png",
-			"SLIME13.png",
-		];
-		var MusicItemBackgroundRadomizeList;
+			var _itemBackgroundTable = [
+				"CEIL3_3.png",
+				"COMP03_2.png",
+				"FLAT1_1.png",
+				"FLAT5_2.png",
+				"FLOOR0_1.png",
+				"FLOOR0_3.png",
+				"FLOOR4_8.png",
+				"FLOOR6_2.png",
+				"FLOOR7_2.png",
+				"FWATER3.png",
+				"LAVA1.png",
+				"MFLR8_1.png",
+				"MFLR8_4.png",
+				"NUKAGE3.png",
+				"RROCK01.png",
+				"RROCK02.png",
+				"RROCK12.png",
+				"RROCK17.png",
+				"RROCK19.png",
+				"SFLR6_1.png",
+				"SFLR6_4.png",
+				"SLIME04.png",
+				"SLIME13.png",
+			];
 
-		function InitializeMusicItemBackground() {
-			$("#music > div").each(function() {
-				if (!MusicItemBackgroundRadomizeList || MusicItemBackgroundRadomizeList.length === 0)
-				{
-					MusicItemBackgroundRadomizeList = MusicItemBackgroundTable.slice(0);
-				}
+			function InitializeMusicItemBackground() {
+				let list = _itemBackgroundTable.slice(0);
+				$("#music").children("div").each(function() {
+					let i = Math.floor(Math.random() * list.length);
+					$(this).css("background-image", "url('Images/GameResource/MusicBacks/" + list[i] + "')");
+					list.splice(i, 1);
+				});
+			}
 
-				var i = Math.floor(Math.random() * MusicItemBackgroundRadomizeList.length);
-				$(this).css("background-image", "url('Images/GameResource/MusicBacks/" + MusicItemBackgroundRadomizeList[i] + "')");
-				MusicItemBackgroundRadomizeList.splice(i, 1);
-			});
+			this.Build = BuildMusicTable;
+			this.InitializeItemBackground = InitializeMusicItemBackground;
 		}
 
 		var MusicList = [

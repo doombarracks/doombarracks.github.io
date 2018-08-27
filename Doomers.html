@@ -144,9 +144,18 @@
 
 				codes.push("<div>")
 				codes.push("<div class='player'>");
-				codes.push("<div class='name'>" + doomer.Name + "</div>");
-				if (doomer.Name in table) {
-					let trophies = table[doomer.Name];
+
+				let names = Array.isArray(doomer.Name) ? doomer.Name : [doomer.Name];
+				let code = "<div class='name'>";
+				for (let i in names) {
+					code += i == "0" ? names[i] : ("<br>(" + names[i] + ")");
+				}
+				code += "</div>";
+				codes.push(code);
+				for (let i in names) {
+					let n = names[i];
+					if (!(n in table)) continue;
+					let trophies = table[n];
 					for (let i in trophies){
 						let t = trophies[i];
 						let c;
@@ -244,7 +253,7 @@
 			2006: [ "Jason", "No95", "Timothy", "Mario" ],
 			2007: [ "Asdfgh", "Raw", "Timothy", "Unicode" ],
 			2008: [ "QQW94", "AJNeoK", "Crazy", "TeanZlink" ],
-			2009: [ "QQW94", "Open", "Crazy", "AJNeoK" ],
+			2009: [ "QQW94", "OPEN", "Crazy", "AJNeoK" ],
 		}
 
 		/* Names not included:
@@ -257,7 +266,6 @@ Gordon
 Jack
 James Bond
 JinWooKo
-Link
 Shon
 Vegetto
 Yoyo
@@ -515,6 +523,9 @@ Yoyo
 				}, {
 					Name: "DE-Battle_Field01 Ver:A",
 					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/DE-Battle_Field01-A.7z",
+				}, {
+					Name: "Zdekill16",
+					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/zdekill16b.7z",
 				} ],
 				Websites: [ {
 					Link: "http://fyspmail.idv.st/",
@@ -579,7 +590,7 @@ Yoyo
 				Connection: "Hinet ADSL 下載2Mb/上傳256Kb",
 				Motto: "無盡毀滅只為了生存",
 			}, {
-				Name: "HBO<br>(Superman)",
+				Name: [ "HBO", "Superman" ],
 				Commission: "中士",
 				Position: "班長",
 				Mail: "cinemax510@hotmail.com",
@@ -623,7 +634,7 @@ Yoyo
 				Connection: "Hinet ADSL 下載2Mb/上傳512Kb",
 				Motto: "來吧! 多說無益! 打了就知道!! Go!!",
 			}, {
-				Name: "TeanZlink",
+				Name: [ "TeanZlink", "Link" ],
 				Commission: "中士",
 				Position: "班長",
 				Mail: "teanzlink@hotmail.com",
@@ -688,7 +699,7 @@ Yoyo
 				Motto: "沒事就打槍吧",
 			}, {
 				Name: "Asdfgh",
-				Note: "<span style='color:magenta'>2008年因數度累犯破壞團體紀律引起團體紛亂因此踢出出營!</span>",
+				Note: "<span style='color:magenta'>2008年因數度累犯破壞團體紀律引起團體紛亂因此強制退出營!</span>",
 				Commission: "下士",
 				Position: "明德班",
 				Mail: "ark0618@hotmail.com",
@@ -754,7 +765,7 @@ Yoyo
 				Connection: "Hinet ADSL 下載512Kb/上傳64Kb",
 				Motto: "打怪或pk時，近一點攻擊力會比較強",
 			}, {
-				Name: "Nick.Oster<br>(Mike)",
+				Name: [ "Nick.Oster", "Mike" ],
 				Commission: "上兵",
 				Position: "伍長",
 				Mail: "woupin14145@hotmail.com",
@@ -818,8 +829,6 @@ Yoyo
 					Name: "HELLaccess2",
 					//Link: "",
 				} ],
-			}, {
-				Name: "Rei",
 			}, {
 				Name: "Miles",
 				Commission: "一兵",
@@ -887,7 +896,7 @@ Yoyo
 				Connection: "Hinet ADSL 下載1Mb/上傳256Kb",
 				Motto: "血肉橫飛...I Lovin it!",
 			}, {
-				Name: "Extremely Fantasy",
+				Name: [ "Extremely Fantasy", "Rei" ],
 				Commission: "上尉",
 				Position: "營後勤官",
 				Mail: "yuyu19876@hotmail.com",

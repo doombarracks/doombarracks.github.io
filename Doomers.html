@@ -117,7 +117,7 @@
 	<div class="page-title-container jarallax cover" data-img-src="Images/Application/Title_Back.png">
 		<div class="page-title">戰士名冊</div>
 		<div class="page-title-text">
-			<p>本頁內容節選自原<a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-DoomerList.html">毀滅戰士營編制人員名冊</a>。</p>
+			<p>本頁內容源自<a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-DoomerList.html">毀滅戰士營編制人員名冊</a>。</p>
 		</div>
 		<div class="top-gradient"></div>
 		<div class="bottom-gradient"></div>
@@ -210,9 +210,13 @@
 					let code = "<li class='sites'>";
 					for (let i in sites) {
 						let s = sites[i];
-						code += !s.LinkDead
-							? ("<div><a href='" + s.Link + "' target='_blank' title='前往個人網站'>" + s.Title + "</a></div>")
-							: ("<div><a href='" + s.Link + "' target='_blank' class='link-dead' title='連結已失效'>" + s.Title + "</a></div>");
+						let link = !s.LinkDead
+							? ("<a href='" + s.Link + "' target='_blank' title='前往個人網站'>" + s.Title + "</a>")
+							: ("<a href='" + s.Link + "' target='_blank' class='link-dead' title='連結已失效'>" + s.Title + "</a>");
+						let wayback = s.WaybackMachine
+							? ("(<a href='" + s.WaybackMachine + "' target='_blank' title='時光機回溯'>時光機</a>)")
+							: "";
+						code += "<div>" + link + (link && wayback ? " " : "") + wayback + "</div>";
 					}
 					code += "</li>";
 
@@ -347,9 +351,10 @@ Yoyo
 				Name: "Tnlkm",
 				Introduction: "架設了台灣 classic Doom 網站之元老級玩家，資料豐富且美工精緻。",
 				Websites: [ {
-					Link: "",
+					Link: "http://tnlkm.idv.tw",
 					Title: "Tnlkm Doom's Page",
 					LinkDead: true,
+					WaybackMachine: "https://web.archive.org/web/20030807200720/http://www.tnlkm.idv.tw/",
 				} ]
 			}, {
 				Name: "Weow",
@@ -369,14 +374,16 @@ Yoyo
 					Name: "CD2_1-11",
 					Link: "https://doombarracks.github.io/Darway/darway.myweb.hinet.net/MyBackup/DBMaps/CD2_1-11.7z",
 				} ],
-				Websites: [ {
-					Link: "http://weow.myweb.hinet.net/",
-					Title: "WEOW 的 DOOM 之家",
-					LinkDead: true,
-				}, {
+				Websites: [  {
 					Link: "http://www.ult-doomlegacy.url.tw/",
 					Title: "Ultimate Doom Legacy",
 					LinkDead: true,
+					WaybackMachine: "https://web.archive.org/web/20090909195626/http://www.ult-doomlegacy.url.tw/",
+				}, {
+					Link: "http://weow.myweb.hinet.net/",
+					Title: "WEOW 的 DOOM 之家",
+					LinkDead: true,
+					WaybackMachine: "https://web.archive.org/web/20070923082347/http://weow.myweb.hinet.net/",
 				} ],
 			}, {
 				Name: "Howie",
@@ -410,12 +417,13 @@ Yoyo
 					Link: "https://www.moddb.com/mods/blocks-of-doom-ii",
 				} ],
 				Websites: [ {
+					Link: "https://doombarracks.github.io",
+					Title: "Doom Barracks - 毀滅戰士營",
+				}, {
 					Link: "http://www.ult-doomlegacy.url.tw/",
 					Title: "Ultimate Doom Legacy",
 					LinkDead: true,
-				}, {
-					Link: "https://doombarracks.github.io",
-					Title: "Doom Barracks - 毀滅戰士營",
+					WaybackMachine: "https://web.archive.org/web/20090909195626/http://www.ult-doomlegacy.url.tw/",
 				} ],
 			}, {
 				Name: "QQW94",
@@ -443,6 +451,7 @@ Yoyo
 					Link: "http://hk.geocities.com/timothydoomplanet",
 					Title: "Timothy's Doom Planet",
 					LinkDead: true,
+					WaybackMachine: "https://web.archive.org/web/20091027005856/http://hk.geocities.com/timothydoomplanet/",
 				} ],
 			}, {
 				Name: "AJNeoK",

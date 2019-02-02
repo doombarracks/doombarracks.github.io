@@ -77,6 +77,11 @@ body {
 	}
 }
 
+a,
+a:hover {
+	color: skyblue;
+}
+
 .page-title-container {
 	margin: 0;
 	padding: 0 0 32px 0;

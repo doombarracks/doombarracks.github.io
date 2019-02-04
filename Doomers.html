@@ -8,83 +8,119 @@
 	<link rel="stylesheet" href="Styles/DBStyles.css">
 	<style>
 		@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans+SC');
-		
-		div.table {
-			display: table;
+
+		.separator {
+			display: block;
+			margin: 18px 0;
+			padding: 0;
+			height: 24px;
+			background-image: url('Images/Doomers/SUPPORT2_hr.png');
+			background-position: center;
+		}
+
+		table {
 			border-collapse: collapse;
 			width: 100%;
 			max-width: 1920px;
 		}
-		div.table > div {
-			display: table-row;
-		}
-		div.table > div > div {
-			display: table-cell;
+		td {
 			vertical-align: middle;
 			padding: 8px;
 		}
-
-		div.table > div > div.player {
+		td.player {
 			text-align: center;
 			font-size: 1.3em;
 		}
-		div.table > div > div.intro {
+		td.intro {
 			text-align: left;
 		}
 
-		div.table > div:nth-child(even) {
-			background-color: #333;
+		.hr {
+			width: 100%;
+			height: 24px;
+			padding: 0 8px;
 		}
-		
-		div.intro ul {
+		.hr > div {
+			display: inline-block;
+			height: 24px;
+		}
+		.hr > div:nth-child(1) {
+			float: left;
+			width: 16px;
+		}
+		.hr > div:nth-child(2) {
+			width: calc(100% - 32px);
+			background-repeat: repeat-x;
+			background-position: center;
+		}
+		.hr > div:nth-child(3) {
+			float: right;
+			width: 16px;
+		}
+
+		.hr.blue > div:nth-child(1),
+		.hr.blue > div:nth-child(3) { background-image: url("Images/Doomers/W108_2.png"); }
+		.hr.blue > div:nth-child(2) { background-image: url("Images/Doomers/W46_37_2.png") }
+
+		.hr.red > div:nth-child(1),
+		.hr.red > div:nth-child(3) { background-image: url("Images/Doomers/W108_3.png"); }
+		.hr.red > div:nth-child(2) { background-image: url("Images/Doomers/W46_38_2.png") }
+
+		.hr.yellow > div:nth-child(1),
+		.hr.yellow > div:nth-child(3) { background-image: url("Images/Doomers/W108_4.png"); }
+		.hr.yellow > div:nth-child(2) { background-image: url("Images/Doomers/W46_39_2.png") }
+
+		td.intro ul {
 			display: table;
 		}
-		div.intro ul > li {
+		td.intro ul > li {
 			list-style: none;
 			display: table-row;
+			text-shadow: black 0.1em 0.1em 0.2em;
 		}
-		div.intro ul > li::before {
+		td.intro ul > li::before {
 			display: table-cell;
 			text-align: right;
-			color: #777;
+			color: #999;
 			white-space: nowrap;
 		}
-		div.intro ul > li.mail::before { content: "電子郵件："; }
-		div.intro ul > li.weapon::before { content: "常用武器："; }
-		div.intro ul > li.mode::before { content: "喜愛模式："; }
-		div.intro ul > li.map::before { content: "常玩地圖："; }
-		div.intro ul > li.experience::before { content: "作戰心得："; }
-		div.intro ul > li.intro::before { content: "個人介紹："; }
-		div.intro ul > li.works::before { content: "個人作品："; }
-		div.intro ul > li.sites::before { content: "個人網站："; }
-		div.intro ul > li.note::before { content: "備註事項："; }
+		td.intro ul > li.mail::before { content: "電子郵件："; }
+		td.intro ul > li.weapon::before { content: "常用武器："; }
+		td.intro ul > li.mode::before { content: "喜愛模式："; }
+		td.intro ul > li.map::before { content: "常玩地圖："; }
+		td.intro ul > li.experience::before { content: "作戰心得："; }
+		td.intro ul > li.intro::before { content: "個人介紹："; }
+		td.intro ul > li.works::before { content: "個人作品："; }
+		td.intro ul > li.sites::before { content: "個人網站："; }
+		td.intro ul > li.note::before { content: "備註事項："; }
 
-		div.intro ul > li.mail,
-		div.intro ul > li.weapon,
-		div.intro ul > li.mode,
-		div.intro ul > li.map,
-		div.intro ul > li.experience,
-		div.intro ul > li.works,
-		div.intro ul > li.sites,
-		div.intro ul > li.note {
+		td.intro ul > li.mail,
+		td.intro ul > li.weapon,
+		td.intro ul > li.mode,
+		td.intro ul > li.map,
+		td.intro ul > li.experience,
+		td.intro ul > li.works,
+		td.intro ul > li.sites,
+		td.intro ul > li.note {
 			color: #ccc;
 		}
 		
-		div.intro ul > li.intro {
+		td.intro ul > li.intro {
 			color: yellow;
 		}
-		div.intro ul > li.works a,
-		div.intro ul > li.sites a {
+		td.intro ul > li.works a,
+		td.intro ul > li.sites a {
 			color: cyan;
 		}
-		div.intro ul > li.sites a.link-dead {
+		td.intro ul > li.sites a.link-dead {
 			text-decoration: line-through;
 			color: darkcyan;
 		}
-		div.player > .name {
+		td.player > .name {
 			font-family: 'Alegreya Sans SC', sans-serif;
 			font-size: 1.3em;
 			padding: 0.5em;
+			text-shadow: 4px 3px 0px #550, 9px 8px 0px rgba(0, 0, 0, 0.15);
 		}
 
 		trophy {
@@ -114,16 +150,24 @@
 </head>
 <body>
 	
-	<div class="page-title-container jarallax cover" data-img-src="Images/Application/Title_Back.png">
+	<div class="page-title-container jarallax cover" data-img-src="Images/Doomers/Title_Back.jpg">
 		<div class="page-title">戰士名冊</div>
 		<div class="page-title-text">
-			<p>本頁內容源自<a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-DoomerList.html">毀滅戰士營編制人員名冊</a>。</p>
+			<p>本頁內容源自<a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-DoomerList.html" target="_blank">毀滅戰士營編制人員名冊</a>，共有 <span id="doomer_count"></span> 名戰士資料。</p>
+			<p>除了整理來源資料外，這裡添加了其他相關資料如網站、作品及介紹，盡量記錄每個人更詳細的資訊。</p>
+			<p>若有資料補充，請不吝提供給站長讓本頁能更加完備。謝謝。</p>
 		</div>
 		<div class="top-gradient"></div>
 		<div class="bottom-gradient"></div>
 	</div>
 
-	<section id="doomers"></section>
+	<div class="separator"></div>
+
+	<div class="jarallax darker" data-img-src="Images/Doomers/BFG.jpg">
+		<div class="top-gradient"></div>
+		<div id="doomers"></div>
+		<div class="bottom-gradient"></div>
+	</div>
 
 	<footer>此頁面於 2018 年 08 月 18 日建立。</footer>
 
@@ -132,25 +176,58 @@
 	<script>
 		$(document).ready(function() {
 			BuildDoomerList();
+
+			$("#doomer_count").html(DBDoomerList.length);
+
+			// Creates parallax effect.
+			$(".jarallax").each(function() {
+				var t = $(this);
+				t.jarallax({
+					speed: 0,
+					imgSize: t.hasClass("cover") ? "cover" : "contain"
+				});
+			});
+
+			// Sets opacity.
+			$(".jarallax div")
+				.filter(function() {
+					var id = $(this).attr("id");
+					return typeof(id) === "string" ? id.startsWith("jarallax-container-") : false;
+				})
+				.each(function() {
+					$(this).addClass("bg-img");
+				});
+
 		});
 
 		function BuildDoomerList() {
 			let codes = [];
 
-			codes.push("<div class='table'>");
+			let hrColorList = [ "blue", "red", "yellow" ];
+			let hrColor = Math.floor(Math.random() * 2); // Yellow is too bright.
+			let hr = false;
+
+			codes.push("<table>");
 			let table = GetPlayerTrophies();
 			for (let d in DBDoomerList) {
 				let doomer = DBDoomerList[d];
 
-				codes.push("<div>")
-				codes.push("<div class='player'>");
+				if (hr) {
+					codes.push("<tr><td class='hr " + hrColorList[hrColor] + "' colspan='3'><div></div><div></div><div></div></td></tr>");
+				}
+				hr = true;
 
 				let names = Array.isArray(doomer.Name) ? doomer.Name : [doomer.Name];
+
+				codes.push("<tr id='doomer_" + names[0] + "'>")
+				codes.push("<td class='player'>");
+
 				let code = "<div class='name'>";
 				for (let i in names) {
 					code += i == "0" ? names[i] : ("<br>(" + names[i] + ")");
 				}
 				code += "</div>";
+
 				codes.push(code);
 				for (let i in names) {
 					let n = names[i];
@@ -168,8 +245,8 @@
 						codes.push("<trophy class='" + c + "'>DBSDMT " + t.Year + "</trophy>");
 					}
 				}
-				codes.push("</div>");
-				codes.push("<div class='intro'>");
+				codes.push("</td>");
+				codes.push("<td class='intro'>");
 				codes.push("<ul>");
 				if ("Mail" in doomer) {
 					codes.push("<li class='mail'>" + doomer.Mail + "</li>");
@@ -226,10 +303,10 @@
 					codes.push("<li class='note'>" + doomer.Note + "</li>");
 				}
 				codes.push("</ul>");
-				codes.push("</div>");
-				codes.push("</div>");
+				codes.push("</td>");
+				codes.push("</tr>");
 			}
-			codes.push("</div>");
+			codes.push("</table>");
 
 			$("#doomers").html(codes.join(""));
 		}

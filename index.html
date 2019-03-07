@@ -4,58 +4,10 @@
 <head>
 	<title>Doom Barracks - 毀滅戰士營</title>
 	<meta charset="utf-8"/>
+	
+<link rel="stylesheet" href="Styles/DBStyles.css">
 	<style>
-		@font-face {
-			font-family: 'DooM';
-			src: url('Fonts/DooM.eot');
-			src: url('Fonts/DooM.woff2') format('woff2'),
-					url('Fonts/DooM.woff') format('woff'),
-					url('Fonts/DooM.ttf') format('truetype'),
-					url('Fonts/DooM.svg#DooM') format('svg'),
-					url('Fonts/DooM.eot?#iefix') format('embedded-opentype');
-			font-weight: normal;
-			font-style: normal;
-		}
-
-		@font-face {
-			font-family: 'AmazDooMLeft';
-			src: url('Fonts/AmazDooMLeft.eot');
-			src: url('Fonts/AmazDooMLeft.woff2') format('woff2'),
-					url('Fonts/AmazDooMLeft.woff') format('woff'),
-					url('Fonts/AmazDooMLeft.ttf') format('truetype'),
-					url('Fonts/AmazDooMLeft.svg#AmazDooMLeft') format('svg'),
-					url('Fonts/AmazDooMLeft.eot?#iefix') format('embedded-opentype');
-			font-weight: normal;
-			font-style: normal;
-		}
-
-		@font-face {
-			font-family: 'AmazDooMRight';
-			src: url('Fonts/AmazDooMRight.eot');
-			src: url('Fonts/AmazDooMRight.woff2') format('woff2'),
-					url('Fonts/AmazDooMRight.woff') format('woff'),
-					url('Fonts/AmazDooMRight.ttf') format('truetype'),
-					url('Fonts/AmazDooMRight.svg#AmazDooMRight') format('svg'),
-					url('Fonts/AmazDooMRight.eot?#iefix') format('embedded-opentype');
-			font-weight: normal;
-			font-style: normal;
-		}
-
-		body {
-			position: relative;
-			margin: 0;
-			padding: 0;
-			background-color: #222;
-			color: #eee;
-			line-height: 200%;
-			min-width: 640px;
-			max-width: 1920px;
-			font-family: sans-serif;
-		}
-
 		.full-screen {
-			pointer-events: none;
-			user-select: none;
 			position: fixed;
 			width: 100vw;
 			height: 100vh;
@@ -64,26 +16,50 @@
 			overflow: hidden;
 		}
 
+		#sky {
+			position: absolute;
+			background-size: cover;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			opacity: 0;
+			filter: blur(2px);
+			z-index: -3;
+		}
+
 		#logo {
 			position: absolute;
 			top: 50%;
-			width: 100%;
+    		width: 100%;
 			font-size: 20vw;
 			text-align: center;
-			transform: translateY(-50%);
-			z-index: 0;
-		}
-
-		#logo > * {
 			line-height: 100%;
+			transform: translateY(-45%);
+			transition: filter 3s, opacity 0.5s;
+			animation: kf-logo-pulse 20s infinite;
+			z-index: -2;
 		}
 
-		#alpha {
-			font-size: 3vw;
-			font-family: 'DooM', Tahoma, Geneva, Verdana, sans-serif;
-			text-align: center;
-			line-height: 0%;
+		#logo.blur {
+			filter: blur(20px);
 		}
+
+		@keyframes kf-logo-pulse {
+			0% { transform: translateY(-45%)  scale(1); }
+			50% { transform: translateY(-45%) scale(1.05); }
+			100% { transform: translateY(-45%) scale(1); }
+		}
+
+/*
+		.doom-font-back {
+			background-image: url('Images/DoomCommon/DoomFontBack.png');
+			background-clip: text;
+			background-size: contain;
+			-webkit-background-clip: text;
+			color: transparent;
+		}
+*/
 
 		.amazdoom-font .left { font-family: 'AmazDooMLeft', Tahoma, Geneva, Verdana, sans-serif; }
 		.amazdoom-font .left-outline { font-family: 'AmazDooMLeftOutline', Tahoma, Geneva, Verdana, sans-serif; }
@@ -95,47 +71,401 @@
 			height: 110vh;
 		}
 
-		.demo-container {
+		.main-body {
 			position: relative;
-			display: table;
-			margin: 15vw auto;
-			padding: 4vw;
-			border: 0.3vw solid white;
-			border-radius: 1vw;
-			box-shadow: 0 0 3vw 1.5vw black;
-			background-color: rgba(0, 0, 0, 0.85);
-			z-index: 1;
+			margin: 2em;
+			overflow-x: hidden;
 		}
-		.demo {
-			color: #ddd;
-			text-decoration: none;
-			display: inline-block;
-			padding: 4vw 4vw;
-			font-size: 3vw;
-			font-family: sans-serif, DFKai-sb, 標楷體;
-			border: none;
-			border-radius: 1.5vw;
-			transition: color 1s, background-color 1s;
+		
+		.img-line {
+			position: relative;
+			height: 200px;
 		}
-		.demo:hover {
+		.img-line > img {
+			position: absolute;
+			margin: 80px 0;
+			height: 200px;
+			width: auto;
+			transition: all 0.5s;
+			z-index: 0;
+		}
+		.img-line > img.left {
+			left: 0;
+			top: 0;
+			margin-left: 100px;
+			transform: perspective(200px) rotateY(30deg);
+		}
+		.img-line > img.right {
+			right: 0;
+			top: 0;
+			margin-right: 100px;
+			transform: perspective(200px) rotateY(-30deg);
+		}
+		.img-line > img:hover,
+		.img-line > img.show {
+			transform: perspective(200px) rotateY(0deg) scale(1.5);
+		}
+		.img-line > img.left:hover,
+		.img-line > img.left.show {
+			margin-left: 200px;
+		}
+		.img-line > img.right:hover,
+		.img-line > img.right.show {
+			margin-right: 200px;
+		}
+
+		/*
+		 * Credit: https://codepen.io/dodozhang21/pen/siKtp
+		 */
+		#down-hint {
+			position: fixed;
+			bottom: 16px;
+			opacity: 0;
+			left: 50%;
+			margin-left: -20px;
+			width: 40px;
+			height: 40px;
+			background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxwYXRoIGZpbGw9IiNGRkZGRkYiIGQ9Ik0yOTMuNzUxLDQ1NS44NjhjLTIwLjE4MSwyMC4xNzktNTMuMTY1LDE5LjkxMy03My42NzMtMC41OTVsMCwwYy0yMC41MDgtMjAuNTA4LTIwLjc3My01My40OTMtMC41OTQtNzMuNjcyICBsMTg5Ljk5OS0xOTBjMjAuMTc4LTIwLjE3OCw1My4xNjQtMTkuOTEzLDczLjY3MiwwLjU5NWwwLDBjMjAuNTA4LDIwLjUwOSwyMC43NzIsNTMuNDkyLDAuNTk1LDczLjY3MUwyOTMuNzUxLDQ1NS44Njh6Ii8+DQo8cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjIwLjI0OSw0NTUuODY4YzIwLjE4LDIwLjE3OSw1My4xNjQsMTkuOTEzLDczLjY3Mi0wLjU5NWwwLDBjMjAuNTA5LTIwLjUwOCwyMC43NzQtNTMuNDkzLDAuNTk2LTczLjY3MiAgbC0xOTAtMTkwYy0yMC4xNzgtMjAuMTc4LTUzLjE2NC0xOS45MTMtNzMuNjcxLDAuNTk1bDAsMGMtMjAuNTA4LDIwLjUwOS0yMC43NzIsNTMuNDkyLTAuNTk1LDczLjY3MUwyMjAuMjQ5LDQ1NS44Njh6Ii8+DQo8L3N2Zz4=);
+			background-size: contain;
+			animation: bounce 2s infinite;
+		}
+		@keyframes bounce {
+			0%, 20%, 50%, 80%, 100% { transform: translateY(0);}
+			40% { transform: translateY(-30px); }
+			60% { transform: translateY(-15px); }
+		}
+
+		#dbmv {
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: 2em;
+			margin-bottom: 2em;
+		}
+
+		.invisible {
+			opacity: 0 !important;
+		}
+
+		#menu-button {
+			position: fixed;
+			background-image: url("Images/index/GATE4.png");
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: contain;
+			cursor: pointer;
+			right: 2vw;
+			bottom: 2vw;
+			width: 4vw;
+			height: 4vw;
+			min-width: 32px;
+			min-height: 32px;
+			opacity: 0.5;
+			transition: all 0.5s;
+			z-index: 10;
+		}
+
+		#menu-button:hover {
+			opacity: 1;
+			width: 6vw;
+			height: 6vw;
+		}
+
+		#menu-container {
+			display: none;
+		}
+
+		#menu {
+			position: absolute;
+			width: auto;
+			height: auto;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		#menu-back {
+			position: absolute;
+			background-color: #020;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			opacity: 0.8;
+			z-index: -1;
+		}
+
+		#menu-logo {
+			pointer-events: none;
+			font-size: 20vw;
+			text-align: center;
+			line-height: 80%;
+		}
+
+		#menu-table {
+			margin: auto;
+		}
+
+		#menu-table td {
+			padding: 0.5vw;
+			height: 3vw;
+		}
+
+		#menu-table td:nth-child(1) {
+			width: 3vw;
+		}
+
+		#menu-table tr:hover td:nth-child(1) {
+			background-image: url("Images/Animation/M_SKULL.gif");
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: contain;
+		}
+
+		#menu-table tr:hover a {
 			color: #fff;
-			background-color: #444;
+		}
+
+		#menu-table td:nth-child(2) {
+			padding-left: 2vw;
+		}
+
+		#menu-table a {
+			color: #bbb;
+			font-family: sans-serif, DFKai-sb, 標楷體;
+			font-size: 3vw;
+			text-decoration: none;
+			line-height: 120%;
+			text-shadow: 0 0 0.5em black, 0 0 0.25em black, 0 0 0.2em black, 0 0 0.1em black;
 		}
 	</style>
 </head>
 <body>
-	<div class="full-screen">
-		<div id="logo" class="amazdoom-font">
-			<div><span class="left">Do</span><span class="right">oM</span></div>
-			<div style="line-height:80%"><span class="left">Barr</span><span class="right">ackS</span></div>
-			<div id="alpha">Alpha</div>
+	<section class="full-screen" style="pointer-events: none">
+		<div id="sky"></div>
+		<div id="logo" class="amazdoom-font blur">
+			<div class="doom-font-back"><span class="left">Do</span><span class="right">oM</span></div>
+			<div class="doom-font-back"><span class="left">Barr</span><span class="right">ackS</span></div>
 		</div>
-	</div>
+		<div id="fog"></div>
+	</section>
+
+	<div id="down-hint"></div>
+
 	<div class="title-spacer"></div>
-	<div class="demo-container">
-		<a class="demo" href="Story.html">遊戲故事</a>
-		<a class="demo" href="Application.html">模擬器</a>
-		<a class="demo" href="GameResource.html">遊戲資源</a>
-	</div>
+
+	<section class="main-body">
+		<iframe id="dbmv" width="560" height="315" src="https://www.youtube.com/embed/9uimD0kQWGE" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+		<p>
+			毀滅戰士營是一個集合了台灣、香港，熱衷於毀滅戰士 (Doom) 的社團。於 2004 年創立，創立者為營長 Darway，號稱「綠光魔王」。
+			<!--玩家資料-->
+		</p>
+		<p>
+			戰士們透過網路互相認識、集結，最後形成團體。遊戲是使用 <a href="Application.html" title="前往模擬器介紹">模擬器</a> 交流。從 Doom Legacy 開始，陪伴大家度過一段連線、辦活動、<a href="GameResource.html" title="前往地圖作品列表">做地圖</a> 的熱血歲月，當時的 3ddm01、CD2_1-11、DB Zone 等地圖都是毀滅戰士營開山元老級玩家不會淡忘的記憶。
+		</p>
+		<p>
+			創營前，網路上已出現百家爭鳴的局面，有興趣的玩家們靠著熱情，在資料與速度都遠不及現在的寬頻網路甚至是撥接網路時代留下了作品。有人建立網站，有人撰寫文章，有人戰績輝煌，也有人製作模組。
+			<!--時光機-->
+		</p>
+		<p>
+			營長每年都會舉辦 <a href="DBSDMT.html" title="前往 DBSDMT 頁面">DM 大賽</a>，鼓勵大家參與活動。一般時間則會開伺服器供戰士們連線，一些熱心的戰士們也會自願貢獻資源開伺服器。畢竟連到國外的伺服器大部分延遲都很明顯，降低了遊戲樂趣。
+		</p>
+		<p>
+			而大家的聯絡方式從早期的 <a href="https://web.archive.org/web/20080416204639/http://member.moninet.com.tw/gb2/afgb.php?A=music-darway168" title="時光機 - 前往留言板" target="_blank">留言板</a>，到後來的 MSN 加上 <a href="https://web.archive.org/web/20120103064748/http://www.hostmybb.com/phpbb/?mforum=darway" title="時光機 - 前往專屬論壇" target="_blank">專屬論壇</a> ，再到現在的 <a href="https://www.facebook.com/groups/139808872809841" title="前往 FB 專頁" target="_blank">FB 專頁</a>。本營目前依然有新血加入，不過現在大部分的話題已轉移到最新的 <a href="https://zh.wikipedia.org/wiki/%E6%AF%81%E7%81%AD%E6%88%98%E5%A3%AB_(2016%E5%B9%B4%E6%B8%B8%E6%88%8F)" target="_blank">DOOM</a> 而非當初大家 <a href="https://zh.wikipedia.org/wiki/%E6%AF%80%E6%BB%85%E6%88%B0%E5%A3%AB_(1993%E5%B9%B4%E9%81%8A%E6%88%B2)" target="_blank">所玩的版本</a>，團體活動也趨近於零。
+			加上沉寂將近十年後，營長關閉了 <a href="https://web.archive.org/web/20180405141206/darway.myweb.hinet.net/" title="時光機 - 前往毀滅戰士營網站" target="_blank">網站</a>，驅動了站長想記錄這個階段而創立此網站。
+			而營長的網站在原網址雖已消失，但已複製至 <a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/" title="毀滅戰士營 DOOM Barracks" target="_blank">新空間</a> 延續。希望能讓更多人看到這段歷史。
+		</p>
+<!--
+https://forum.zdoom.org/viewtopic.php?t=60879
+-->
+	</section>
+
+	<div id="menu-button" class="invisible"></div>
+
+	<section id="menu-container" class="full-screen">
+		<div id="menu-back"></div>
+		<div id="menu">
+			<div id="menu-logo" class="amazdoom-font">
+				<div class="doom-font-back"><span class="left">D</span><span class="right">B</span></div>
+			</div>
+			<table id="menu-table">
+				<tr><td></td><td><a>時光機</a></td></tr>
+				<tr><td></td><td><a href="Doomers.html">戰士名冊</a></td></tr>
+				<tr><td></td><td><a>DBSDMT</a></td></tr>
+				<tr><td></td><td><a href="Story.html">遊戲故事</a></td></tr>
+				<tr><td></td><td><a href="Application.html">模擬器與地圖設計</a></td></tr>
+				<tr><td></td><td><a href="GameResource.html">遊戲資源</a></td></tr>
+			</table>
+		</div>
+	</section>
+
+	<footer>此頁面於 2018 年 10 月 25 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			$("#logo").removeClass("blur");
+
+
+
+			Scroll();
+			Sky.Update();
+			Menu.Initialize();
+		});
+
+		var Sky = new function() {
+			var SkyTable = [
+				'Images/Doom/SKY1.png',
+				'Images/Doom/SKY2.png',
+				'Images/Doom/SKY3.png',
+				'Images/Doom/SKY4.png',
+				'Images/Doom2/RSKY1.png',
+				'Images/Doom2/RSKY2.png',
+				'Images/Doom2/RSKY3.png'
+			];
+			var SkyPreloadImages = [];
+			var SkyIndex = -1;
+
+			this.Update = function() {
+				// Get next index without repeat.
+				var i;
+				do {
+					i = Math.floor(Math.random() * SkyTable.length);
+				}
+				while (i == SkyIndex);
+				SkyIndex = i;
+
+				var update = function(path) {
+					var s = $("#sky");
+					s.fadeTo(2000, 0, function() {
+						s.css("background-image", "url('" + path + "')").fadeTo(2000, 0.25);
+						setTimeout(Sky.Update, Math.round(7500 + Math.random() * 5000));
+					});
+				}
+
+				// Load image.
+				var src = SkyTable[i];
+				if (SkyPreloadImages[i] === undefined) {
+					var img = new Image();
+					img.onload = function() {
+						update(src);
+					}
+					img.src = src;
+					SkyPreloadImages[i] = img;
+				}
+				else {
+					update(src);
+				}
+			}
+		};
+
+		var Logo = new function() {
+			this.Update = function() {
+				var logo = $("#logo");
+				var logoHeight = logo.height();
+				var amount = (logoHeight - window.scrollY) / logoHeight;
+				var opacity = 0.15 + (amount < 0 ? 0 : amount) * 0.85;
+				var blur = (1 - amount) * 0.0;
+				logo.css("opacity", opacity).css("filter", "blur(" + blur.toFixed(2) + "px)");
+			}
+		}
+
+		var HintArrow = new function() {
+			var setTimeoutID = 0;
+
+			this.Update = function() {
+				var st = $("body, html").scrollTop();
+
+				if (st !== 0) {
+					if (setTimeoutID !== 0) {
+						clearTimeout(setTimeoutID);
+						setTimeoutID = 0;
+					}
+					$("#down-hint").stop().fadeTo(1000, 0);
+					return;
+				}
+
+				if (setTimeoutID === 0) {
+					setTimeoutID = setTimeout(() => {
+						setTimeoutID = 0;
+						$("#down-hint").stop().fadeTo(1000, 0.5);
+					}, 10000);
+				}
+			}
+		}
+
+		var Menu = new function() {
+			this.Initialize = function() {
+				$("#menu-button").click(function() {
+					let t = $("#menu-container");
+					switch (t.css("display")) {
+						case "none": t.css("display", "block"); break;
+						default: t.css("display", "none"); break;
+					}
+				});
+
+				$("#menu-table a").each(function() {
+					let t = $(this);
+					if (!t.attr("href")) {
+						t.css("color", "#666");
+					}
+				});
+			}
+
+			this.Update = function() {
+				if (window.scrollY > 0) {
+					$("#menu-button").removeClass("invisible");
+				}
+			}
+		}
+
+		var WindowPictures = new function() {
+			this.Update = function() {
+				var wh = window.innerHeight;
+				var h0 = window.scrollY,
+					h1 = h0 + wh;
+				var hMin = h0 + wh * 0.1,
+					hMax = h1 - wh * 0.1;
+				
+				var rect = $("#dbg-rect");
+				rect.css("top", hMin.toFixed(2) + "px")
+					.css("height", (hMax - hMin).toFixed(2) + "px");
+
+				$(".img-line img").each(function() {
+					var t = $(this);
+					var o = t.offset();
+					var tMin = o.top,
+						tMax = tMin + t.height();
+					if ((tMin <= hMin && tMax >= hMax)
+						|| (tMin >= hMin && tMin <= hMax)
+						|| (tMax >= hMin && tMax <= hMax)) {
+						t.addClass("show");
+					}
+					else {
+						t.removeClass("show");
+					}
+				});
+			}
+		}
+
+		function Scroll() {
+			Logo.Update();
+			HintArrow.Update();
+			Menu.Update();
+			WindowPictures.Update();
+		}
+
+		function Resize() {
+			Logo.Update();
+			HintArrow.Update();
+			Menu.Update();
+			WindowPictures.Update();
+		}
+
+		$(document)
+			.scroll(function() { Scroll(); })
+			.resize(function() { Resize(); });
+	</script>
 </body>
 </html>

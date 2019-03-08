@@ -404,7 +404,7 @@ https://forum.zdoom.org/viewtopic.php?t=60879
 				$("#menu-button").each(function() {
 					let t = $(this);
 
-					t.css("background-image", "url('" + ButtonTable[1 + Math.floor(Math.random() * 4)] + "')");
+					t.css("background-image", "url('" + ButtonTable[Math.floor(Math.random() * 4)] + "')");
 
 					t.click(function() {
 						let c = $("#menu-container");

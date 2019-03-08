@@ -149,7 +149,6 @@
 
 		#menu-button {
 			position: fixed;
-			background-image: url("Images/index/GATE4.png");
 			background-position: center;
 			background-repeat: no-repeat;
 			background-size: contain;
@@ -307,8 +306,6 @@ https://forum.zdoom.org/viewtopic.php?t=60879
 		$(document).ready(function() {
 			$("#logo").removeClass("blur");
 
-
-
 			Scroll();
 			Sky.Update();
 			Menu.Initialize();
@@ -396,13 +393,26 @@ https://forum.zdoom.org/viewtopic.php?t=60879
 		}
 
 		var Menu = new function() {
+			var ButtonTable = [
+				"Images/index/GATE1.png",
+				"Images/index/GATE2.png",
+				"Images/index/GATE3.png",
+				"Images/index/GATE4.png",
+			];
+
 			this.Initialize = function() {
-				$("#menu-button").click(function() {
-					let t = $("#menu-container");
-					switch (t.css("display")) {
-						case "none": t.css("display", "block"); break;
-						default: t.css("display", "none"); break;
-					}
+				$("#menu-button").each(function() {
+					let t = $(this);
+
+					t.css("background-image", "url('" + ButtonTable[1 + Math.floor(Math.random() * 4)] + "')");
+
+					t.click(function() {
+						let c = $("#menu-container");
+						switch (c.css("display")) {
+							case "none": c.css("display", "block"); break;
+							default: c.css("display", "none"); break;
+						}
+					});
 				});
 
 				$("#menu-table a").each(function() {

@@ -5,7 +5,8 @@
 	<title>遊戲故事</title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css">
 	<link rel="stylesheet" href="Styles/DBStyles.css">
 	<style>
 		.separator {
@@ -528,10 +529,20 @@
 		</div>
 	</section>
 
-	<footer>此頁面於 2018 年 06 月 08 日建立。</footer>
+	<change-log>
+		<div class="main">
+			<ul>
+				<li>2018/06/08：頁面建立</li>
+				<li>2020/02/02：新增改版日誌功能</li>
+			</ul>
+		</div>
+	</change-log>
 
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<footer>此頁面於 2018 年 06 月 08 日建立，2020 年 02 月 02 日更新。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.12.0/jarallax.min.js"></script>
+	<script src="Scripts/DBScripts.js"></script>
 	<script>
 		$(document).ready(function() {
 			// Initialize parallax images first so the next operation performs correctly.
@@ -556,6 +567,9 @@
 			// Initialize portal.
 			$(".portal-orb").click(function() { OrbPortal($(this)); } );
 			UpdateOrbs();
+
+			// Initializes changelog.
+			DBScripts.InitializeChangelog();
 		});
 
 		// Brightening effect on background images by clicks.

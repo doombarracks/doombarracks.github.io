@@ -5,6 +5,7 @@
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css">
 	<link rel="stylesheet" href="Styles/DBStyles.css">
 	<style>
 		@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans+SC');
@@ -169,10 +170,20 @@
 		<div class="bottom-gradient"></div>
 	</div>
 
-	<footer>此頁面於 2018 年 08 月 18 日建立。</footer>
+	<change-log>
+		<div class="main">
+			<ul>
+				<li>2018/08/18：頁面建立</li>
+				<li>2020/02/02：新增改版日誌功能</li>
+			</ul>
+		</div>
+	</change-log>
 
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<footer>此頁面於 2018 年 08 月 18 日建立，2020 年 02 月 02 日更新。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.12.0/jarallax.min.js"></script>
+	<script src="Scripts/DBScripts.js"></script>
 	<script>
 		$(document).ready(function() {
 			BuildDoomerList();
@@ -198,6 +209,8 @@
 					$(this).addClass("bg-img");
 				});
 
+			// Initializes changelog.
+			DBScripts.InitializeChangelog();
 		});
 
 		function BuildDoomerList() {

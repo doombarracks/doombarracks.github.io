@@ -5,7 +5,8 @@
 	<title>模擬器與地圖設計</title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css">
 	<link rel="stylesheet" href="Styles/DBStyles.css">
 	<style>
 		@import url('https://fonts.googleapis.com/css?family=Alegreya+Sans+SC');
@@ -484,7 +485,7 @@
 					<ul class="links">
 						<li><a href="http://atonisfreak.byethost12.com/doompages/zdooms.htm" target="_blank">介紹 (Doom Never Dies)</a></li>
 						<li><a href="https://zdoom.org/" target="_blank">ZDoom 網站</a></li>
-						<li><a href="https://forums.zdaemon.org/" target="_blank">ZDoom 論壇</a></li>
+						<li><a href="https://forum.zdoom.org/" target="_blank">ZDoom 論壇</a></li>
 						<li><a href="https://devbuilds.drdteam.org/" target="_blank">各模擬器最新版下載區</a> (<a href="https://devbuilds.drdteam.org/gzdoom/" target="_blank">GZDoom</a>)</li>
 						<li><a href="https://doomwiki.org/wiki/GZDoom" target="_blank">GZDoom 介紹 (維基)</a></li>
 						<li><a href="https://doomwiki.org/wiki/ZDoom" target="_blank">ZDoom 介紹 (維基)</a></li>
@@ -592,7 +593,7 @@
 			<div class="content">
 				<div class="left">
 					<p>若要設計地圖，Ultimate Doom Builder(UDB) 應該是不二人選。</p>
-					<p>UDB 有著一段複雜的歷史。UDB 來自於 GZDoom Builder - bugfix(GZDB - bugfix)，GZDB - bugfix 來自於 GZDoom Builder(GZDB)，而 GZDB 為 Doom Builder 2(DB2) 的後繼專案，而 DB2 即是過去著名的地圖編輯軟體 Doom Builder(DB) 作者的下一個作品，可惜的是當時 DB 會因為作業系統語言為中文的關係而無法正常執行。</p>
+					<p>UDB 有著一段複雜的歷史。UDB 來自於 <a href="https://forum.zdoom.org/viewtopic.php?f=232&t=54957" target="_blank">GZDoom Builder - bugfix</a>(GZDB - bugfix)，GZDB - bugfix 來自於 <a href="https://forum.zdoom.org/viewtopic.php?f=3&t=32392" target="_blank">GZDoom Builder</a>(GZDB)，而 GZDB 為 <a href="http://www.doombuilder.com/" target="_blank">Doom Builder 2</a>(DB2) 的後繼專案，而 DB2 即是過去著名的地圖編輯軟體 Doom Builder(DB) 作者的下一個作品，可惜的是當時 DB 會因為作業系統語言為中文的關係而無法正常執行。</p>
 					<p>DB2 除了沿襲前作的功能，更增加了 3D 模式，使設計者能在如遊戲般的 3D 畫面中即時修改地圖，這對於像是選擇及對齊貼圖等操作能大幅提升效率。</p>
 					<p>後來有人將 DB2 增加了 GZDoom 相關的各項功能，如動態光源、3D 模型、支援更多圖片格式等等，也修正並改進了 DB2。正好在那時，DB2 宣布停止更新。</p>
 					<p>直到 2017，GZDB 在作者消失的情況下停止更新。不過還是有人繼續進行各種更新及修正，也就是現在的 GZDB - bugfix 版本。</p>
@@ -601,9 +602,6 @@
 					<ul class="links">
 						<li><a href="https://forum.zdoom.org/viewtopic.php?t=66745" target="_blank">Ultimate Doom Builder 於 ZDoom 論壇頁面</a></li>
 						<li><a href="https://devbuilds.drdteam.org/ultimatedoombuilder/" target="_blank">Ultimate Doom Builder 軟體下載</a></li>
-						<li><a href="https://forum.zdoom.org/viewtopic.php?t=54957" target="_blank">(停止更新) GZDB - bugfix 於 ZDoom 論壇頁面</a></li>
-						<li><a href="https://devbuilds.drdteam.org/gzdbbf/" target="_blank">(停止更新) GZDB - bugfix 軟體下載</a></li>
-						<li><a href="https://forum.zdoom.org/viewtopic.php?t=32392" target="_blank">(停止更新) GZDB 於 ZDoom 論壇頁面</a></li>
 					</ul>
 				</div>
 				<div class="right">
@@ -636,7 +634,7 @@
 			<div class="content">
 				<div class="left">
 					<h2><img src="Images/Animation/Doom_HeartColumn_R1.gif"> DeHackEd</h2>
-					<p>一款直接修改 doom2.exe 的軟體，可以修改各個物件的數值(如怪物生命值、火球飛行速度、死亡時播放那一種音效)及狀態(顯示哪一張圖片、圖片顯示的時間長度、進行何種動作)，因此可將一些不常用的物件如裝飾物等等改變成怪物，增加遊戲的多樣性。也可以將武器速度改到極速，瞬殺每一隻怪物。改 doom2.exe 當時是地圖設計以外的另一項樂趣。</p>
+					<p>一款直接修改 doom2.exe 的軟體，可以修改各個物件的數值(如怪物生命值、火球飛行速度、死亡時播放那一種音效)及狀態(顯示哪一張圖片、圖片顯示的時間長度、進行何種動作)，因此可將一些不常用的物件如裝飾物等等改變成怪物，增加遊戲的多樣性。也可以將武器速度改到極速 (程式的範例檔 SUPRWEP8.DEH)，瞬殺每一隻怪物。改 doom2.exe 當時是地圖設計以外的另一項樂趣。</p>
 					<p>DeHackEd 可將修改過的進度儲存成 .deh 檔，模擬器大部分都支援 .deh，只要將 .deh 檔案讀進去之後就可以享受修改過後的結果了。</p>
 					<hr>
 					<ul class="links">
@@ -748,10 +746,22 @@
 		</div>
 	</section>
 
-	<footer>此頁面於 2018 年 06 月 25 日建立。</footer>
+	<change-log>
+		<div class="main">
+			<ul>
+				<li>2018/06/25：頁面建立</li>
+				<li>2020/01/19：更新 GZDoom Builder - bugfix 資料為 Ultimate Doom Builder</li>
+				<li>2020/02/01：新增改版日誌功能</li>
+				<li>2020/02/02：修正 ZDoom 論壇連結錯誤</li>
+			</ul>
+		</div>
+	</change-log>
 
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.9.0/jarallax.min.js"></script>
+	<footer>此頁面於 2018 年 06 月 25 日建立，2020 年 02 月 02 日更新。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.12.0/jarallax.min.js"></script>
+	<script src="Scripts/DBScripts.js"></script>
 	<script>
 		$(document).ready(function() {
 			// Creates parallax effect.
@@ -776,6 +786,9 @@
 			// Initialize portal.
 			$(".portal-orb").click(function() { OrbPortal($(this)); } );
 			UpdateOrbs();
+
+			// Initializes changelog.
+			DBScripts.InitializeChangelog();
 		});
 
 		function ScrollToID(name) {

@@ -3,8 +3,6 @@
 var DBScripts = new function() {
 	// Builds changelog to a proper form to display.
 	function InitializeChangelog() {
-        return;
-        
 		// There's no changelog in this page.
 		if ($("change-log").length == 0) return;
 

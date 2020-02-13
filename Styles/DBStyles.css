@@ -188,7 +188,7 @@ change-log > .main > .title {
 	padding: 0.5em;
 	color: #ddd;
 	font-size: 2em;
-	font-family: sans-serif, DFKai-sb, 標楷體;
+	font-family: 'DFKai-sb', 'Microsoft JhengHei', sans-serif;
 	font-weight: bold;
 	text-align: center;
 }

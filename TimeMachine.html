@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+	<title>時光機</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css">
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		.jarallax {
+			min-height: 75vh;
+		}
+
+		.story-box {
+			padding: 2.5em;
+			margin: 0;
+			text-align: left;
+		}
+
+		.center {
+			text-align: center;
+		}
+
+		.left {
+			text-align: left;
+		}
+
+		.story-box img {
+			margin: 0.3em;
+		}
+
+		.content {
+			position: relative;
+			margin: 0 auto;
+			text-align: center;
+			background-color: #000;
+		}
+
+		.content .box {
+			padding: 80px 0;
+		}
+
+		.content .title {
+			font-family: 'DooM', 'Microsoft JhengHei', Verdana, Geneva, Tahoma, sans-serif;
+			font-size: 2em;
+			padding: 0.5em;
+		}
+
+		.content .lesson {
+			font-family: 'Microsoft JhengHei', Verdana, Geneva, Tahoma, sans-serif;
+			font-size: 2em;
+			padding: 25vh 1em;
+		}
+
+		.content .separator {
+			margin: 1em;
+			height: 2px;
+			background: linear-gradient(to left, #aaa0, #aaaf, #aaa0);
+		}
+
+		.content a.url {
+			margin: 0.5em;
+			font-size: 1.5em;
+			line-height: 1.75em;
+			text-decoration: none;
+		}
+		
+		.content .link a {
+			margin: 0 0 0 0.5em !important;
+			padding: 0 !important;
+			font-family: 'Courier New', Courier, monospace;
+		}
+
+		.content .link img {
+			margin: 0;
+			padding: 0;
+			vertical-align: middle;
+			height: 1.75em !important;
+		}
+
+		img.gray {
+			filter: grayscale(100%);
+		}
+
+		.content img {
+			margin: 0.5em;
+		}
+
+		.content-top,
+		.content-bottom {
+			position: absolute;
+			width: 100%;
+			height: 64px;
+			z-index: 1;
+		}
+		.content-top {
+			top: 0;
+			background: linear-gradient(to top, rgba(34,34,34,0), rgba(34,34,34,1));
+		}
+		.content-bottom {
+			bottom: 0;
+			background: linear-gradient(to bottom, rgba(34,34,34,0), rgba(34,34,34,1));
+		}
+
+		.content .split > div {
+			margin: 2em 2em;
+			border: 1px dashed #888;
+		}
+
+		.img-display {
+			display: inline-block;
+			margin: 12px auto;
+			padding: 8px;
+			border: 2px solid rgba(128, 128, 128, 0.2);
+			background-color: rgba(48, 48, 48, 0.2);
+			text-align: center;
+			transition: all 0.25s;
+		}
+		.img-display:hover {
+			border: 2px solid rgba(128, 128, 128, 0.5);
+			background-color: rgba(48, 48, 48, 0.5);
+		}
+		.img-display * {
+			display: block;
+			margin: 4px;
+			max-width: 400px;
+		}
+		.img-display iframe,
+		.img-display img {
+			border: 2px outset #666;
+		}
+		.img-display a {
+			padding-top: 0; /* So it stays close to the target on the top. */
+			box-shadow: none;
+			transition: all 1s;
+		}
+		.img-display:hover a {
+			color: #ff0; /* Makes it brighter since the background gets brighter. */
+		}
+		.img-display > img:not(:first-child),
+		.img-display > iframe:not(:first-child) { /* Kind of hack to make images not too close. */
+			margin-top: 12px;
+		}
+		.img-display > span {
+			padding-top: 0; /* So it stays close to the target on the top. */
+			box-shadow: none;
+		}
+
+		.fc-text {
+			display: block;
+			max-width: none;
+		}
+
+		/*
+		.item {
+			margin: 0.5em;
+			padding: 0.5em;
+			display: inline-block;
+			vertical-align: middle;
+			box-shadow: 0px 0px 6px #888;
+			transition: transform 0.6s;
+		}
+
+		@keyframes rainbow
+		{
+			from, to { box-shadow: 0 0 12px 0 navy }
+			50% { box-shadow: 0 0 12px 0 blue }
+		}
+
+		.item:hover {
+			animation: rainbow 2s infinite;
+			transition: transform 0.6s;
+		}
+		*/
+	</style>
+</head>
+<body>
+
+	<div class="page-title-container jarallax cover" data-img-src="Images/TimeMachine/Title_Back.jpg">
+		<div class="page-title">時光機</div>
+		<div class="page-title-text">
+			<p>
+				這一頁主要是記錄站長對毀滅戰士營的認識與了解。站長當初在營上是個不算核心，但還算活耀的成員，因此關於營上的點點滴滴還略知一二。不過現在回首觀看過去留下的資料，清楚地體會了一時的舉手之勞都能對未來產生深遠的影響。毀滅戰士營本身是個實例。營長號召了同好進行團體活動並建立網站，就算現在活動甚少、網頁也長久沒有更新，營的存在本身就會讓之後加入 Doom 這個世界的玩家們了解到還有這樣的一個團體。
+			</p>
+			<p>
+				除了介紹毀滅戰士營，站長也會介紹自己與電腦遊戲的緣分，到如何接觸到 Doom，直到現在。Doom 在站長生命中佔有重要的地位，它的影響不是只有娛樂而已，它讓我對電腦如何運作產生興趣，進而幫我開啟了寫程式這道大門 (縱使我不是資訊類組的一樣能享受其中 XD)，也認識到 Doom 遊戲引擎的首席設計師 John Carmack。從他身上學習到了不只是工程師的美德，也學習到看待事物的觀點。(各位有興趣的話可以直接找他這幾年來的貼文或是獲獎時的發言，內容無華麗詞藻也不令人振奮，但充滿了深遠的思緒與正面能量) 簡言之，對站長而言，這一款遊戲已經不單純只是遊戲了。
+			</p>
+		</div>
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			站長的電腦遊戲歲月始於 90 年代早期，玩得第一款令人入迷的遊戲是叫百戰百勝 - 電玩篇，共兩片 5.25 磁片。當時用一台旭青 286 電腦搭配單色螢幕和無法調整音量的 PC 喇叭依舊玩得不亦樂乎。這遊戲讓站長小小年紀就習到廢寢忘食的技能，更成為當時長輩們茶餘飯後的笑點...
+		</p>
+		<p>
+			依然記得百戰百勝有五款遊戲、得要用專屬密碼本才能進入遊戲、磁片被各種理由消失、小人吃垃圾食物變大胖子然後死於運動過量、電腦玩家輸了扯斷搖桿還流淚的畫面...兒時回憶啊!
+		</p>
+	</div>
+
+	<div class="content jarallax darker" data-img-src="Images/TimeMachine/FutureClassics.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="img-display">
+				<img src="https://www.myabandonware.com/media/screenshots/f/future-classics-collection-we/thumbs/future-classics-collection_3.png"/>
+				<span>選擇頁面</span>
+			</div>
+			<div class="img-display">
+				<img src="https://www.myabandonware.com/media/screenshots/f/future-classics-collection-we/thumbs/future-classics-collection_5.png"/>
+				<span>新立體俄羅斯方塊</span>
+			</div>
+			<div class="img-display">
+				<img src="https://www.myabandonware.com/media/screenshots/f/future-classics-collection-we/thumbs/future-classics-collection_7.png"/>
+				<span>磁片保護者</span>
+			</div>
+			<div class="img-display">
+				<img src="https://www.myabandonware.com/media/screenshots/f/future-classics-collection-we/thumbs/future-classics-collection_9.png"/>
+				<span>減肥計畫</span>
+			</div>
+			<div class="img-display">
+				<img src="https://www.myabandonware.com/media/screenshots/f/future-classics-collection-we/thumbs/future-classics-collection_11.png"/>
+				<span>失落的迷宮</span>
+			</div>
+			<div class="img-display">
+				<img src="https://www.myabandonware.com/media/screenshots/f/future-classics-collection-we/thumbs/future-classics-collection_14.png"/>
+				<span>坦克大決戰</span>
+			</div>
+			<div class="center fc-text">圖片皆來自於 My Abandonware</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			大驚喜! 沒想到寫這個回憶的同時讓我重新找到了這款遊戲，有興趣的人可到此看看 (可線上玩喔!)
+		</p>
+		<div class="center">
+			<a href="https://www.myabandonware.com/game/future-classics-collection-we" target="_blank">Future Classics Collection - My Abandonware</a>
+		</div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			時間來到了 90 年代中期，在當時流行 <a href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E7%9B%98" target="_blank">3.5 磁片</a>的背景下，光碟片就是高級的象徵。在朋友的介紹下，接觸到了<a href="https://zh.wikipedia.org/wiki/%E5%A4%A7%E8%A3%9C%E5%B8%96_(%E9%9B%BB%E8%85%A6%E8%A1%93%E8%AA%9E)" target="_blank">大補帖</a>。這片大補帖裡有很多知名遊戲的試玩版(當然啦，那時根本不知道有名)，大部分都是平面捲軸或是固定畫面的遊戲，這類遊戲裡站長較喜歡的就是雷電系列了，像是 <a href="https://www.gog.com/game/tyrian_2000" target="_blank">Tyrian 2</a> 讓站長瘋了好一陣子。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/TyrianGOG.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="img-display">
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/m0sEOT4gQkQ" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				<span>Tyrian 2000 預告影片</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			除了平面遊戲以外，還在大補帖內發現到令人耳目一新的遊戲，它就是毀滅戰士 Doom。第一次打開 Doom 的時候完全被那豐富的畫面和效果所吸引：順暢的 3D 畫面、複雜的幾何地形、主角會因為受傷開始流鼻血，最後滿臉通紅倒在地上、震撼的音效、洗腦的 E1M1 音樂...
+		</p>
+		<p>
+			事實上，站長第一次打開 Doom 時其實卡在 E1M1 的第一道門。當時根本不知道要怎麼開門，也不知道那其實是一道門。但就算只探索了那麼小小的空間，已經讓站長決定下次要再回來試一次而不是放棄這款遊戲。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DoomE1M1.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="img-display">
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/18TTxhoF_EI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				<span>毀滅戰士 E1M1 音樂</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			Doom 是在站長小學的時候進入我的世界，那時還常常在學校和同學討論遊戲內容。同學談到二代一開始有兩個人背對你，第一大關最後一關有五顏六色、會跑來撞你的「鐵牛」，這些從文字去幻想遊戲畫面的那種期待感，是現在直接看從宣傳影片就看到一切所感受不到的。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/D2M23.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="img-display">
+				<img src="Images/TimeMachine/D2M1.jpg"/>
+				<span>二代第一關</span>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/E1M8.jpg"/>
+				<span>第一大關最後一關的鐵牛</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			後來也在同一片光碟裡找到了異教徒(Heretic)、毀滅巫師(Hexen)、天旋地轉(Descent)、龍霸三合會(Rise of the Triad)等同類型的遊戲，之後在其他來源接觸到了毀滅公爵(Duke Nukem)、血祭(Blood)等其他 FPS。
+		</p>
+		<p>
+			除了毀滅戰士外，站長也很喜歡的還有天旋地轉的音樂及血祭的氣氛。但這一切都無法取代第一次接觸到的 Doom。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/BloodM1.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="img-display">
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/Dr_U_Mqkako" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				<span>天旋地轉 第一關音樂</span>
+			</div>
+			<div class="img-display">
+				<iframe width="560" height="315" src="https://www.youtube.com/embed/o_n6l0oXOGs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+				<span>血祭 第一關</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			到了 90 年代晚期，站長已開始嘗試用 DeeP97 修改地圖，當時把 D2M32 放了滿滿的機械巨魔然後用 3.5 磁片傳給朋友分享。那時也開始嘗試設計地圖結構，但摸索了好一陣子才慢慢了解到一些概念，這時還是獨自摸索，沒有網路上看到其他的同好。
+		</p>
+	</div>
+
+	<div class="story-box">
+		<p>
+			千禧年左右就開始看到各路高手了，最早看到的是 tnlkm 的網站。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/Doom.png">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="title">tnlkm's DooM Page</div>
+			<div><img src="Images//TimeMachine/tnlkm_Logo.gif"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFDEAD0.png" title="網站已不存在"/>
+				<a class="url" href="https://web.archive.org/web/20030807200720/http://www.tnlkm.idv.tw/" title="時光機連結" target="_blank">http://tnlkm.idv.tw</a>
+				<a href="https://web.archive.org/web/2003*/http://www.tnlkm.idv.tw/" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/tnlkm.png"/>
+				<span>網站截圖 - 2003/08/10</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			第一次到這網頁時感到很震撼，因為看到了新的技術資料及分享資源。也看到了網頁可以做得如此吸引人，讓站長心中種下了也想做網頁的想法。tnlkm 讓我了解到台灣/華人不僅有人接觸 Doom，一遇到就是這麼專業的。之後除了是這裡的常客外，也開始尋找其他的網站。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/Doom2.png">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="title">DB-第二基地</div>
+			<div><img src="Images//TimeMachine/DoomsPage_Logo.gif"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFST01.png" title="網站正常運行中"/>
+				<a class="url" href="http://w2.loxa.edu.tw/ly80657/" title="網站連結" target="_blank">http://w2.loxa.edu.tw/ly80657/</a>
+				<a href="https://web.archive.org/web/2012*/http://w2.loxa.edu.tw/ly80657/" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>	
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/DoomsPage.png"/>
+				<span>首頁截圖 - 2020/02/06</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			營區弟兄寒雨的網站，不過這是後期的作品。在這之前還有一個<a href="https://web.archive.org/web/20050419163328/http://w2.loxa.com.tw/ly80657/index1.htm" target="_blank">網站</a>，資料很豐富。因此寒雨和 tnlkm 的網站是當時必去的兩個充電區。
+		</p>
+	</div>
+
+	<div class="story-box">
+		<p>
+			站長在這時也開始試著做網頁，靠著 FrontPage 揮灑著創意，但沒把資料保留下來，現在覺得很可惜。而網路爬蟲也沒有備份到 OTZ
+		</p>
+		<p>
+			也在此同時，營長 Darway 出現在我眼前，介紹 Doom Legacy 給我之後就把我帶到 D2M7 裡好好教育一番，讓我感受到 DM 其實...不是很好玩 XD...
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/TNT.png">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="title">毀滅戰士營 DOOM Barracks</div>
+			<div><img src="Images//TimeMachine/DoomBarracks_Logo.gif"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFDEAD0.png" title="網站已不存在"/>
+				<a class="url" href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/" title="備份網站" target="_blank">http://darway.myweb.hinet.net</a>
+				<a href="https://web.archive.org/web/2018*/http://darway.myweb.hinet.net/" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/DoomBarracks.png"/>
+				<span>首頁截圖 (備份版) - 2020/02/06</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			毀滅戰士營的網站經歷了多次的改版，每次的改變營長都有將其<a href="https://doombarracks.github.io/Darway/darway.myweb.hinet.net/DB-HomePage.html#DBHistory" target="_blank">記錄下來</a>，成為現在寶貴的資料。網站內容除了營長本身的貢獻，也接納了其他戰士提供的精華資料，集成大家貢獻的成果。網站於 2018 年中關閉，但資料有轉移到新空間備份，並將網站內容已失效的連結進行修復，亦企圖將外部參考降到最低，避免未來外部資料下線之後產生新的無效連結。
+		</p>
+	</div>
+
+	<div class="story-box">
+		<p>
+			入營之後，認識了很多人，初期除了享受以前沒有過的 Coop 以外，就是遇到了地圖設計大師 WEOW。
+		</p>
+		<p>
+			WEOW 讓我感受到地圖設計除了製作地圖本身以外，還可以寫腳本控制 (Legacy 的 FraggleScript)。站長在這時期開始挑戰更多的領域，FraggleScript、模擬器專用功能、DeHackEd、Doom Legacy 原始碼、ZDoom。每個領域都帶給我一份成長，而這一切正是因為看到台灣有高手所激發的向上精神。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/Doom3.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="title">WEOW的DOOM之家</div>
+			<div><img src="Images//TimeMachine/WEOW_Logo.gif"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFDEAD0.png" title="網站已不存在"/>
+				<a class="url" href="https://web.archive.org/web/20070923082347/http://weow.myweb.hinet.net/" title="時光機連結" target="_blank">http://weow.myweb.hinet.net</a>
+				<a href="https://web.archive.org/web/2007*/http://weow.myweb.hinet.net/" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/WEOW.png"/>
+				<span>首頁截圖 - 2007/09/23</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			認識了一陣子後，WEOW 也主動邀請我一起參與他製作的網頁，期望將 Doom 的資料能更發揚光大。
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DOOMEternal.png">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="title">Ultimate Doom Legacy</div>
+			<div><img src="Images//TimeMachine/UltimateDoomLegacy_Logo.jpg"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFDEAD0.png" title="網站已不存在"/>
+				<a class="url" href="https://web.archive.org/web/20131010120753/http://www.ult-doomlegacy.url.tw/" title="時光機連結" target="_blank">http://www.ult-doomlegacy.url.tw</a>
+				<a href="https://web.archive.org/web/2013*/http://www.ult-doomlegacy.url.tw/" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/UltimateDoomLegacy.png"/>
+				<span>首頁截圖 - 2013/10/10</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			這個網頁讓我們兩位有段快樂的合作經驗，WEOW 專精於設計與技術上的討論，我則負責遊戲邏輯或數據性的資料整理。可惜這個網頁沒有如願地開花結果，最後在租約到期後關閉網頁空間而結束。(沒錯! 當時以一年 500 NTD 租的)
+		</p>
+	</div>
+
+	<div class="story-box">
+		<p>
+			除了所述的這些網站，還有不少營區弟兄也創造了他們自己的基地
+		</p>
+	</div>
+
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DoomSlayer.jpg">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="title">.::DOOM Forever::. Powered by Mink</div>
+			<div><img src="Images//TimeMachine/DoomForever_Logo.gif"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFDEAD0.png" title="網站已不存在"/>
+				<a class="url" href="https://web.archive.org/web/20060105220458/https://www.johnaxer.idv.tw/mink/doom/index.htm" title="時光機連結" target="_blank">https://www.johnaxer.idv.tw/mink/doom/index.htm</a>
+				<a href="https://web.archive.org/web/2006*/https://www.johnaxer.idv.tw/mink/doom/index.htm" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/DOOMForever.png"/>
+				<span>首頁截圖 - 2006/01/05</span>
+			</div>
+			<div class="split"><div></div></div>
+			<div class="title">Doom Never Dies</div>
+			<div class="separator"></div>
+			<div>
+				<a class="url" href="" target="_blank"></a>
+			</div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFST01.png" title="網站正常運行中"/>
+				<a class="url" href="http://atonisfreak.byethost12.com/doompages/" title="網站連結" target="_blank">http://atonisfreak.byethost12.com/doompages/</a>
+				<a title="無時光機列表"><img src="Images/TimeMachine/BFE2B0.png" class="gray"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/DoomNeverDies.png"/>
+				<span>網站截圖 - 2020/02/06</span>
+			</div>
+			<div class="split"><div></div></div>
+			<div class="title">Doom: Brove Lab</div>
+			<div><img src="Images//TimeMachine/DoomBravoLab_Logo.jpg"/></div>
+			<div class="separator"></div>
+			<div class="link">
+				<img src="Images//TimeMachine/STFDEAD0.png" title="網站已不存在"/>
+				<a class="url" href="https://web.archive.org/web/20091027005856/http://hk.geocities.com/timothydoomplanet/" title="時光機連結" target="_blank">http://hk.geocities.com/timothydoomplanet/</a>
+				<a href="https://web.archive.org/web/2009*/http://hk.geocities.com/timothydoomplanet/" title="時光機列表" target="_blank"><img src="Images/TimeMachine/BFE2B0.png"/></a>
+			</div>
+			<div class="img-display">
+				<img src="Images/TimeMachine/DoomBravoLab.png"/>
+				<span>網站截圖 - 2011/10/17</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			毀滅戰士營早期是在留言板和 <a href="https://zh.wikipedia.org/wiki/Yahoo!_Messenger" target="_blank">Yahoo 即時通</a>聯繫，接下來大家從 Yahoo 移到 <a href="https://zh.wikipedia.org/wiki/Windows_Live_Messenger" target="_blank">MSN</a> 聯繫，因為 MSN 能聯絡到更多的戰士。此時期是使用 Legacy 連線。這時候大家除了連線，地圖設計也很活躍，再加上營長每年舉辦的夏季死鬥大賽 (DBSDMT)，營區活動非常踴躍。
+		</p>
+		<p>
+			除了用即時通以外，毀滅戰士營還有一個專屬論壇，提供大家交流各方資訊。短短幾年內就聚集了大量的資料，成為大家主要的聚集地。
+		</p>
+	</div>
+	
+	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DBGameBase.png">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="img-display">
+				<img src="Images/TimeMachine/DBForum.png"/>
+				<span>DOOM Barracks 專屬論壇 - 2012/01/03</span>
+			</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			當 Legacy 有種停滯不前的狀態時，ZDaemon、Skulltag 等後起之星逐漸成為了大家的主流模擬器，後期的 DBSDMT 也是使用 ZDaemon 來舉辦。
+		</p>
+		<p>
+			說到營裡最可惜的事情，站長認為莫過於兩個事件：
+			<ul>
+				<li>一個是 MSN 宣布關閉，大家平日通訊的工具突然關閉了。縱使還有其他工具，要改變一個習慣不容易，更何況是一群人。而且有些人只能透過 MSN 聯繫，這意味著 MSN 關閉會導致一些同伴從此失聯</li>
+				<li>另一個則是專屬論壇空間無預警關閉，留下錯愕的每一個人。在論壇即將關閉的時候，營上的活動已經很寂靜了，剩大家有時不時在論壇上發個言，維持一下熱度。當論壇都沒有的時候，大家連聊天八卦的地方都沒了</li>
+			</ul>
+			綜合以上兩點，毀滅戰士營已進入了大家忙碌於個人生活的階段。
+		</p>
+	</div>
+
+	<div class="story-box">
+		<p>
+			最後想跟各位分享的是，站長看起來也有過不少作品，為什麼好像什麼都沒有留下的樣子?
+		</p>
+		<p>
+			這要把時間往回推到站長當兵前，當時摔了資料硬碟(3.5 吋機械式，從 50 公分的高度落下)，立刻上電就發現它不行了。雖然知道有資料救援，但當時腦袋閃過一個念頭：
+		</p>
+	</div>
+
+	<div class="content">
+		<div class="content-top"></div>
+		<div class="box">
+			<div class="lesson">就算沒有這些東西，我一樣能往前走</div>
+		</div>
+		<div class="content-bottom"></div>
+	</div>
+
+	<div class="story-box">
+		<p>
+			所以當下就決定放下這顆硬碟。過去的照片、通訊錄、遊戲資料(網頁、地圖、程式、作品)、私人資料、專題、論文等東西，就讓它們去吧。這故事告訴我們，備份很重要、備份很重要、備份很重要，很重要所以講三遍。
+		</p>
+		<p>
+			時間快轉到 2018 年，毀滅戰士營已沉靜了多年，當年這群大部分的學生們應該都受到了社會的洗禮，忙碌於現實生活中。而這時營長 Darway 決定關閉多年的網站，站長不希望就這樣結束，所以建立了這個網站作為毀滅戰士營的延續。
+		</p>
+		<p>
+			站長相信和我一起經歷過這個階段的每位戰士都有他/她們自己的故事。正是因為這樣，更不想讓這些回憶隨著營長網頁的關閉慢慢消逝掉。也讓現在因為新版的 DOOM 而來到這裡的新血們認識到過去有一群玩著不一樣的遊戲，但同樣熱血的人們熱愛著 Doom。
+		</p>
+	</div>
+
+	<div class="story-box">
+		<p>
+			後話：準備這個網站的才發現到<a href="https://zh.wikipedia.org/wiki/%E7%BD%91%E7%AB%99%E6%97%B6%E5%85%89%E6%9C%BA" target="_blank">有人</a>早有先見之明，使用網路爬蟲將歷史保存起來。回想那時代的資訊標準，當時能做到這樣的備份，令人肅然起敬。		
+		</p>
+	</div>
+
+	<change-log>
+		<div class="main">
+			<ul>
+				<li>2020/02/13：頁面建立</li>
+			</ul>
+		</div>
+	</change-log>
+
+	<footer>此頁面於 2020 年 02 月 13 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.12.0/jarallax.min.js"></script>
+	<script src="Scripts/DBScripts.js"></script>
+	<script>
+		$(document).ready(function() {
+			// Creates parallax effect.
+			$(".jarallax").each(function() {
+				var t = $(this);
+				t.jarallax({ speed: 0 });
+			});
+
+			// Sets opacity.
+			$(".jarallax div")
+				.filter(function() {
+					var id = $(this).attr("id");
+					return typeof(id) === "string" ? id.startsWith("jarallax-container-") : false;
+				})
+				.each(function() {
+					$(this).addClass("bg-img");
+				});
+
+			// Initializes changelog.
+			DBScripts.InitializeChangelog();
+		});
+	</script>
+</body>
+</html>

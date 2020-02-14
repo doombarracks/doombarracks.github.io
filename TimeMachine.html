@@ -83,6 +83,10 @@
 			filter: grayscale(100%);
 		}
 
+		.show-back .bg-img {
+			opacity: 0.8;
+		}
+
 		.content img {
 			margin: 0.5em;
 		}
@@ -200,7 +204,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax darker" data-img-src="Images/TimeMachine/FutureClassics.jpg">
+	<div class="content jarallax" data-img-src="Images/TimeMachine/FutureClassics.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -630,6 +634,17 @@
 				.each(function() {
 					$(this).addClass("bg-img");
 				});
+
+			$(".jarallax .box").click(function() {
+				let t = $(this);
+				t.parent(".jarallax")
+					.addClass("show-back")
+					.delay(3000)
+					.queue(function(next) {
+						$(this).removeClass("show-back");
+						next();
+					});
+			});
 
 			// Initializes changelog.
 			DBScripts.InitializeChangelog();

@@ -126,11 +126,16 @@ a:hover {
 
 .bg-img {
 	opacity: 0.3;
+	transition: opacity 1s;
 	z-index: -2; /* So it can be blocked by gradients. */
 }
 
 .darker .bg-img {
 	opacity: 0.15;
+}
+
+.brighter .bg-img {
+	opacity: 0.45;
 }
 
 /*

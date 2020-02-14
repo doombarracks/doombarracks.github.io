@@ -868,8 +868,8 @@
 		}
 
 		$(document)
-			.scroll(function() { UpdateOrbs(); })
-			.resize(function() { UpdateOrbs(); });
+			.scroll(UpdateOrbs)
+			.resize(UpdateOrbs);
 	</script>
 </body>
 </html>

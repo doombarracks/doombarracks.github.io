@@ -47,7 +47,7 @@
 			transition: opacity 1.5s linear;
 		}
 
-		.no-animation * {
+		.page-title-container * {
 			transition: none !important;
 		}
 
@@ -178,7 +178,7 @@
 	</style>
 </head>
 <body>
-	<div class="page-title-container jarallax cover no-animation" data-img-src="Images/TimeMachine/Title_Back.jpg">
+	<div class="page-title-container jarallax cover" data-img-src="Images/TimeMachine/Title_Back.jpg">
 		<div class="page-title">時光機</div>
 		<div class="page-title-text">
 			<p>
@@ -632,7 +632,9 @@
 					$(this).addClass("bg-img");
 				});
 
-			$(".jarallax").click(function() {
+			$(".jarallax")
+				.filter(function() { return !$(this).hasClass("page-title-container") } )
+				.click(function() {
 				$(this).clearQueue("recover")
 					.stop()
 					.addClass("show-back")

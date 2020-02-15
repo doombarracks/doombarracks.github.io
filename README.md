@@ -1,2 +1,2 @@
 # doombarracks.github.io
-Doom Barracks website.
+DOOM Barracks website.

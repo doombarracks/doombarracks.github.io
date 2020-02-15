@@ -39,6 +39,26 @@
 
 		.content .box {
 			padding: 80px 0;
+			opacity: 1;
+			transition: all 1.5s linear;
+		}
+
+		.bg-img {
+			transition: opacity 1.5s linear;
+		}
+
+		.no-animation * {
+			transition: none !important;
+		}
+
+		.initial .bg-img {
+			opacity: 0.8;
+		}
+
+		.initial .box {
+			opacity: 0;
+			pointer-events: none;
+			-webkit-user-select: none;
 		}
 
 		.content .title {
@@ -155,33 +175,10 @@
 			display: block;
 			max-width: none;
 		}
-
-		/*
-		.item {
-			margin: 0.5em;
-			padding: 0.5em;
-			display: inline-block;
-			vertical-align: middle;
-			box-shadow: 0px 0px 6px #888;
-			transition: transform 0.6s;
-		}
-
-		@keyframes rainbow
-		{
-			from, to { box-shadow: 0 0 12px 0 navy }
-			50% { box-shadow: 0 0 12px 0 blue }
-		}
-
-		.item:hover {
-			animation: rainbow 2s infinite;
-			transition: transform 0.6s;
-		}
-		*/
 	</style>
 </head>
 <body>
-
-	<div class="page-title-container jarallax cover" data-img-src="Images/TimeMachine/Title_Back.jpg">
+	<div class="page-title-container jarallax cover no-animation" data-img-src="Images/TimeMachine/Title_Back.jpg">
 		<div class="page-title">時光機</div>
 		<div class="page-title-text">
 			<p>
@@ -204,7 +201,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax" data-img-src="Images/TimeMachine/FutureClassics.jpg">
+	<div class="content jarallax initial" data-img-src="Images/TimeMachine/FutureClassics.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -251,7 +248,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/TyrianGOG.jpg">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/TyrianGOG.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -271,7 +268,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DoomE1M1.jpg">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/DoomE1M1.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -288,7 +285,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/D2M23.jpg">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/D2M23.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -312,7 +309,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/BloodM1.jpg">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/BloodM1.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -339,7 +336,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/Doom.png">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/Doom.png">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="title">tnlkm's DooM Page</div>
@@ -364,7 +361,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/Doom2.png">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/Doom2.png">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="title">DB-第二基地</div>
@@ -398,7 +395,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/TNT.png">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/TNT.png">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="title">毀滅戰士營 DOOM Barracks</div>
@@ -432,7 +429,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/Doom3.jpg">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/Doom3.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="title">WEOW的DOOM之家</div>
@@ -457,7 +454,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DOOMEternal.png">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/DOOMEternal.png">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="title">Ultimate Doom Legacy</div>
@@ -488,7 +485,7 @@
 		</p>
 	</div>
 
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DoomSlayer.jpg">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/DoomSlayer.jpg">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="title">.::DOOM Forever::. Powered by Mink</div>
@@ -544,7 +541,7 @@
 		</p>
 	</div>
 	
-	<div class="content jarallax cover" data-img-src="Images/TimeMachine/DBGameBase.png">
+	<div class="content jarallax cover initial" data-img-src="Images/TimeMachine/DBGameBase.png">
 		<div class="content-top"></div>
 		<div class="box">
 			<div class="img-display">
@@ -635,10 +632,8 @@
 					$(this).addClass("bg-img");
 				});
 
-			$(".jarallax .box").click(function() {
-				let t = $(this);
-				t.parent(".jarallax")
-					.addClass("show-back")
+			$(".jarallax").click(function() {
+				$(this).addClass("show-back")
 					.delay(3000)
 					.queue(function(next) {
 						$(this).removeClass("show-back");
@@ -646,9 +641,33 @@
 					});
 			});
 
+			// Initialize visuals.
+			UpdateVisuals();
+
 			// Initializes changelog.
 			DBScripts.InitializeChangelog();
 		});
+
+		function UpdateVisuals() {
+			var y0 = window.scrollY,
+				y1 = y0 + window.innerHeight;
+
+			$(".initial").each(function() {
+				var t = $(this);
+
+				var top = t.offset().top;
+				var bottom = top + t.height();
+
+				var threshold = Math.min((y1 - y0) * 0.75, (bottom - top) * 0.75);
+				if (Math.min(y1, bottom) - Math.max(y0, top) >= threshold) {
+					t.removeClass("initial");
+				}
+			});
+		}
+
+		$(document)
+			.scroll(UpdateVisuals)
+			.resize(UpdateVisuals);
 	</script>
 </body>
 </html>

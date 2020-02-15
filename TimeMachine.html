@@ -633,12 +633,14 @@
 				});
 
 			$(".jarallax").click(function() {
-				$(this).addClass("show-back")
+				$(this).clearQueue("recover")
+					.stop()
+					.addClass("show-back")
 					.delay(3000)
 					.queue(function(next) {
 						$(this).removeClass("show-back");
 						next();
-					});
+					}, "recover");
 			});
 
 			// Initialize visuals.

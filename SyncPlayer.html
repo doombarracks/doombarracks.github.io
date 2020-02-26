@@ -1,0 +1,3177 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-158627278-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-158627278-1');
+	</script>
+
+	<title>YouTube Sync</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-1/css/all.min.css">
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		body {
+			min-width: 320px;
+		}
+
+		#yt_sync_container {
+			position: relative;
+			margin: auto;
+			padding: 0;
+			width: 100vw;
+			height: 100vh;
+			background-color: #222;
+			font-size: 0;
+			overflow: hidden;
+		}
+
+		ul.msg-box {
+			position: absolute;
+			left: 8px;
+			top: 8px;
+			margin: 0;
+			padding: 0;
+			z-index: 2;
+			font-family: "DooM";
+			font-size: 14px;
+			list-style-type: none;
+		}
+
+		/* Message line. */
+		ul.msg-box > li {
+			margin: 0;
+			padding: 0;
+		}
+
+		ul.msg-box > li > span {
+			margin: 0;
+			padding: 4px 12px;
+			text-transform: uppercase;
+			text-shadow: -1px -1px 0.1em black, -1px 1px 0.1em black, 1px -1px 0.1em black, 1px 1px 0.1em black;
+			overflow: hidden;
+			border-radius: 4px;
+			background-color: rgba(0, 0, 0, 0.2);
+		}
+
+		ul.msg-box > li.say {
+			line-height: 26px;
+		}
+
+		/* Player name. */
+		ul.msg-box > li.say > span > span:nth-child(1) {
+			color: cyan;
+		}
+		ul.msg-box > li.say > span > span:nth-child(1):after {
+			content: ": ";
+		}
+
+		/* Chat content. */
+		ul.msg-box > li.say > span > span:nth-child(2) {
+			color: #ddd;
+		}
+
+		ul.msg-box > li.set-player {
+			line-height: 26px;
+		}
+		
+		/* Set player message. */
+		ul.msg-box > li.set-player > span {
+			color: yellow;
+		}
+
+		ul.msg-box > li.set-player > span > span.name {
+			color: cyan;
+		}
+
+		/* Map. */
+		ul.msg-box > li.map {
+			line-height: 52px;
+		}
+		ul.msg-box > li.map > span {
+			padding: 8px 20px;
+			color: #fff;
+			font-size: 26px;
+			border-radius: 12px;
+		}
+
+		/* Player name. */
+		ul.msg-box > li.kick > span > span:nth-child(1) {
+			color: magenta;
+		}
+		ul.msg-box > li.kick > span > span:nth-child(1):after {
+			content: " ";
+		}
+
+		/* Kick message. */
+		ul.msg-box > li.kick > span > span:nth-child(2) {
+			color: yellow;
+		}
+
+		/* Sychronization failed message. */
+		ul.msg-box > li.sync-fail > span {
+			color: red;
+		}
+
+		.yt_sync_box {
+			position: absolute;
+			margin: 0;
+			padding: 0;
+			z-index: 1;
+		}
+
+		.yt_sync_box > * {
+			pointer-events: none;
+			user-select: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		.box_cover {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			opacity: 0;
+		}
+
+		.box_cover.drag_src {
+			opacity: 0.25;
+			background-color: white;
+		}
+
+		.box_cover.drag_dst {
+			opacity: 0.25;
+			background-color: red;
+		}
+
+		/* Video box. */
+		.yt_sync_box > iframe {
+			box-sizing: border-box;
+			width: 100%;
+			height: 100%;
+			transition: opacity 1s;
+			opacity: 0.25;
+		}
+
+		.yt_sync_box.desync > iframe {
+			border-width: 4px;
+			border-color: red;
+			animation: desync-animation 5s infinite;
+		}
+
+		@keyframes desync-animation {
+			0%   { border-color:red; }
+			50%  { border-color:yellow;}
+			100% { border-color:red; }
+		}
+
+		.yt_sync_box.connected > iframe{
+			opacity: 1;
+		}
+
+		/* Player name. */
+		.yt_sync_box > div.name {
+			position: absolute;
+			top: 8px;
+			width: 100%;
+			font-family: "DooM";
+			font-size: 16px;
+			line-height: 16px;
+			text-transform: uppercase;
+			color: #444;
+			text-shadow: -1px -1px 0.1em black, -1px 1px 0.1em black, 1px -1px 0.1em black, 1px 1px 0.1em black;
+			text-align: center;
+			transition: color 1s;
+		}
+
+		.yt_sync_box.connected > div.name {
+			color: #ddd;
+			transition: color 1s;
+		}
+
+		.yt_sync_box > div.debugger {
+			pointer-events: all;
+			position: absolute;
+			left: 50%;
+			top: 10%;
+			transform: translateX(-50%);
+			z-index: 10;
+		}
+		.yt_sync_box > div.debugger > * {
+			font-size: 12px;
+			padding: 2px;
+		}
+		.yt_sync_box > div.debugger > .btn {
+			cursor: pointer;
+			border: 1px solid white;
+			border-radius: 4px;
+			background-color: rgba(0, 0, 0, 0.25);
+			white-space: nowrap;
+		}
+
+		#debugger-global {
+			pointer-events: all;
+			position: fixed;
+			font-size: 12px;
+			color: cyan;
+			right: 0.25em;
+			top: 0.25em;
+			z-index: 10;
+		}
+		#debugger-global > .btn {
+			cursor: pointer;
+			margin: 1px;
+			padding: 1px;
+			border: 1px solid cyan;
+			border-radius: 4px;
+			background-color: rgba(0, 0, 0, 0.25);
+			white-space: nowrap;
+		}
+
+		/* Controls container. */
+		#yt_sync_container .control {
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			opacity: 0;
+			font-size: 16px; /* Base font size for all children. */
+			transition: opacity 0.3s;
+			z-index: 3;
+		}
+
+		#yt_sync_container .control:hover,
+		#yt_sync_container .control.show {
+			opacity: 1;
+		}
+
+		#yt_sync_container .control > .progress {
+			position: relative;
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 3.5em;
+			overflow: hidden;
+		}
+
+		#yt_sync_container .control > .progress > .back {
+			position: absolute;
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 0.625em;
+			bottom: 0;
+			overflow: hidden;
+		}
+
+		#yt_sync_container .control > .progress > .bar {
+			position: absolute;
+			cursor: pointer;
+			width: 100%;
+			height: 0.3em;
+			left: 0;
+			bottom: 0.45em;
+			background-color: white;
+		}
+		
+		#yt_sync_container .control > .progress > .bar > .elapsed {
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 100%;
+			width: 0%; /* Determined by script. */
+			background-color: red;
+		}
+		
+		#yt_sync_container .control > .progress > .bar > .seek-before {
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 100%;
+			width: 0%; /* Determined by script. */
+			background-color: yellow;
+		}
+		
+		#yt_sync_container .control > .progress > .bar > .seek-after {
+			position: absolute;
+			left: 0;
+			top: 0;
+			height: 100%;
+			width: 0%; /* Determined by script. */
+			background-color: cyan;
+		}
+		
+		#yt_sync_container .control > .progress > .pointer {
+			position: absolute;
+			pointer-events: none;
+			border-radius: 50%;
+			height: 1.2em;
+			width: 1.2em;
+			left: 0%; /* Determined by script. */
+			/*top: calc(50% - 0.6em);*/
+			bottom: 0;
+			background-color: red;
+			transform: translateX(-50%);
+		}
+
+		.bar-time {
+			position: absolute;
+			pointer-events: none;
+			background-color: black;
+			padding: 0.5em;
+			opacity: 0;
+			height: 1.25em;
+			line-height: 1.25em;
+			text-align: center;
+			width: auto;
+			top: 0;
+			left: 0%; /* Determined by script. */
+			transform: translateX(-50%);
+			transition: opacity 0.5s;
+		}
+
+		.bar-time.show {
+			opacity: 0.8;
+			transition: opacity 0.2s;
+		}
+
+		#yt_sync_container .control > .buttons {
+			position: relative;
+			margin: 0;
+			padding: 0 0.75em 0.25em 0.75em;
+			width: calc(100% - 1.5em);
+			height: auto;
+			overflow: hidden;
+		}
+
+		#yt_sync_container .control > .buttons .left {
+			float: left;
+		}
+
+		#yt_sync_container .control > .buttons .right {
+			float: right;
+		}
+
+		#yt_sync_container .control > .buttons .btn {
+			position: relative;
+			width: 3em;
+			height: 2.4em;
+			text-align: center;
+			text-shadow: 2px 2px #000000;
+		}
+
+		#yt_sync_container .control > .buttons .btn i {
+			position: absolute;
+			cursor: pointer;
+			left: 50%;
+			top: 50%;
+			font-size: 1.5em;
+			transform: translate(-50%, -50%);
+			transition: opacity 0.5s, font-size 0.5s;
+		}
+
+		.btn.music > i.mute,
+		.btn.sound > i.mute {
+			color: #444;
+		}
+
+		#time-display {
+			padding: 0 1em 0 1em;
+			font-size: 1.25em;
+			font-family: "Tahoma";
+			color: white;
+			white-space: nowrap;
+			pointer-events: none;
+			user-select: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="sync_videos">
+		<div id="yt_sync_container">
+			<ul class="msg-box"></ul>
+			<div class="control">
+				<div class="progress">
+					<div class="bar">
+						<div class="seek-after"></div>
+						<div class="elapsed"></div>
+						<div class="seek-before"></div>
+					</div>
+					<div class="pointer"></div>
+					<div class="bar-time"></div>
+				</div>
+				<div class="buttons">
+					<div class="play btn left">
+						<i class="fa fa-play"></i>
+					</div>
+					<div class="music btn left">
+						<i class="fa fa-music"></i>
+						<audio loop style="display:none"><source /></audio>
+					</div>
+					<div class="sound btn left">
+						<i class="fa fa-volume-up"></i>
+					</div>
+					<div class="time btn left">
+						<span id="time-display"></span>
+					</div>
+					<div class="full-screen btn right">
+						<i class="fa fa-expand-arrows-alt"></i>
+					</div>
+					<div class="btn right">
+						<i class="fa fa-cog"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script defer src="https://www.youtube.com/iframe_api"></script>
+	<script defer>
+		$(document).ready(function() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const videojs = urlParams.get("videojs");
+			//"Coop_UV_D1E1_Howie_QQW94_Timothy_Caesar_27m51s"
+			Initializer.LoadDemoScript(videojs);
+		});
+
+		function onYouTubeIframeAPIReady() {
+			Initializer.APIReady();
+		}
+
+		// Class to make sure demo will be run after YouTube API is loaded.
+		var Initializer = new function() {
+			var _ytApiReady = false;
+			var _pendingDemoInfo;
+
+			this.APIReady = function() {
+				_ytApiReady = true;
+				if (_pendingDemoInfo) {
+					Initializer.PrepareDemo(_pendingDemoInfo);
+					_pendingDemoInfo = undefined;
+				}
+			}
+
+			this.LoadDemoScript = function(fileName) {
+				let script = document.createElement("script");
+				script.onload = function () {
+					Initializer.PrepareDemo(singleDemoInfo);
+				};
+				$("#SingleDemoScript").remove();
+				script.src = "GameInfo/DemoInfo/" + fileName + ".js";
+				script.id = "SingleDemoScript";
+				document.head.appendChild(script);
+			}
+
+			this.PrepareDemo = function(demoInfo) {
+				if (!_ytApiReady) {
+					_pendingDemoInfo = demoInfo;
+					return;
+				}
+				DemoPlayer.Initialize(demoInfo, "sync_videos");
+			}
+		}
+
+		var DemoPlayer = new function() {
+			var _userContainerJq;
+			var _containerJq;
+			var _demo;
+			var _syncVideoList;
+
+			var _outOfSync = false;
+
+			var _scanLoopIntervalID = 0;
+
+			this.Initialize = function(demo, containerID) {
+				this.Close();
+
+				// Make our own container so we have full control over it.
+				_containerJq = $("#yt_sync_container");
+				if (_containerJq.length == 0) {
+					_containerJq = $("<div id='yt_sync_container'></div>");
+				}
+//_containerJq.empty().append("<ul class='msg-box'></ul><div class='control'></div>");
+
+				// Use container to enclose everything.
+				_userContainerJq = $("#" + containerID);
+				_userContainerJq.append(_containerJq);
+
+				VideoSync.Start(demo);
+				UI.Start();
+
+				_scanLoopIntervalID = setInterval(ScanLoop, 100);
+			}
+
+			this.Close = function() {
+				Activity.Close();
+				UI.Close();
+				VideoSync.Close();
+			}
+
+			function ScanLoop() {
+				CheckDesync();
+				VideoSync.ScanLoop();
+				Activity.ScanLoop();
+				Sound.ScanLoop();
+				Music.ScanLoop();
+			}
+
+			function CheckDesync() {
+				if (!VideoSync.IsPlaying()) return;
+
+				// Uses time from the first video as reference.
+				let vt = VideoSync.GetSyncVideosCurrentTime();
+
+				let oos = false;
+				for (var i in _syncVideoList) {
+					let sv = _syncVideoList[i];
+					let t = typeof(sv) !== "undefined" && typeof(sv.Player) !== "undefined" && typeof(sv.Player.getCurrentTime) === "function"
+						? sv.Player.getCurrentTime() - sv.VideoInfo.ZeroTime - _demo.ActivityTimeOffset
+						: vt;
+					if (Math.abs(t - vt) >= 1.0) {
+						$("#" + sv.BoxID).addClass("desync");
+						oos = true;
+					}
+					else {
+						$("#" + sv.BoxID).removeClass("desync");
+					}
+				}
+
+				if (oos && !_outOfSync) {
+					console.log("Video gets out of sync.");
+					UI.AddLine("sync-fail", "<span>Video gets out of sync.</span>", 1000, 10000);
+				}
+				_outOfSync = oos;
+			}
+
+			var DemoInfoFile = new function() {
+				function LoadFile(path) {
+					$.getScript(path, function(data, textStatus, jqxhr) {
+						;
+					});
+				}
+				this.LoadFile = LoadFile;
+			}
+
+			var VideoSync = new function() {
+				var _initialized = false;
+
+				this.Start = function(demo) {
+					_demo = demo;
+
+					if (typeof(_demo.ActivityTimeOffset) !== "number") {
+						_demo.ActivityTimeOffset = 0.0;
+					}
+					if (typeof(_demo.ActivityTimeScale) !== "number") {
+						_demo.ActivityTimeScale = 1.0;
+					}
+
+					_tpn2svl = {};
+					_syncVideoList = [];
+					let videos = demo.Videos;
+					for (let i in videos) {
+						// Make a deep copy of source info.
+						let info = videos[i];
+
+						// Create UI objects.
+						let iFrameID = "yt_sync_" + info.VideoID;
+						let boxID = "yt_box_" + info.VideoID
+						_containerJq.append(
+							"<div id='" + boxID + "' class='yt_sync_box'>" +
+								"<div class='box_cover'></div>" +
+								"<div id='" + iFrameID + "'></div>" +
+								"<div class='name'>" + info.PlayerName + "</div>" +
+							"</div>");
+
+						let syncVideo = {
+							VideoInfo: info,
+							IFrameID: iFrameID,
+							BoxID: boxID,
+							Player: undefined,
+							YouTubeLoadReady: false,
+						};
+
+						let player = new YT.Player(iFrameID, {
+							videoId: info.VideoID,
+							/* // Width and height will be automatically fit to css-defined size.
+							width: 400,
+							height: 300,
+							*/
+							playerVars: {
+								autoplay: 0, // This parameter specifies whether the initial video will automatically start to play when the player loads. Supported values are 0 or 1. The default value is 0.
+								cc_load_policy: 0, // Setting the parameter's value to 1 causes closed captions to be shown by default, even if the user has turned captions off. The default behavior is based on user preference.
+								controls: 0, // This parameter indicates whether the video player controls are displayed
+								disablekb: 1, // Setting the parameter's value to 1 causes the player to not respond to keyboard controls. The default value is 0, which means that keyboard controls are enabled.
+								enablejsapi: 0, // 	Setting the parameter's value to 1 enables the player to be controlled via IFrame or JavaScript Player API calls. The default value is 0, which means that the player cannot be controlled using those APIs.
+								fs: 0, // Setting this parameter to 0 prevents the fullscreen button from displaying in the player. The default value is 1, which causes the fullscreen button to display.
+								iv_load_policy: 1, // Setting the parameter's value to 1 causes video annotations to be shown by default, whereas setting to 3 causes video annotations to not be shown by default. The default value is 1.
+								loop: 0, // In the case of a single video player, a setting of 1 causes the player to play the initial video again and again. In the case of a playlist player (or custom player), the player plays the entire playlist and then starts again at the first video.
+								modestbranding: 0, // This parameter lets you use a YouTube player that does not show a YouTube logo. Set the parameter value to 1 to prevent the YouTube logo from displaying in the control bar. Note that a small YouTube text label will still display in the upper-right corner of a paused video when the user's mouse pointer hovers over the player.
+								rel: 0, // This parameter indicates whether the player should show related videos when playback of the initial video ends. Supported values are 0 and 1. The default value is 1.
+								showinfo: 0, // Setting the parameter's value to 0 causes the player to not display information like the video title and uploader before the video starts playing.
+								start: typeof(info.StartTime) === "number" ? info.StartTime : 0,
+							},
+							events: {
+								onReady: function(event) { YTE_OnReady(syncVideo, event); },
+								onStateChange: function(event) { YTE_OnStateChange(syncVideo, event); },
+								onPlaybackQualityChange: function(event) { YTE_OnPlaybackQualityChange(syncVideo, event); },
+								onPlaybackRateChange: function(event) { YTE_OnPlaybackRateChange(syncVideo, event); },
+								onError: function(event) { YTE_OnError(syncVideo, event); }
+							}
+						});
+
+						syncVideo.Player = player;
+						syncVideo.Seek = { Time: 0.0, Seeking: false, Mute: false, Debug: false };
+						_syncVideoList.push(syncVideo);
+
+						let tpn = DemoHelper.GetTruePlayerName(info.PlayerName);
+						_tpn2svl[tpn] = syncVideo;
+
+						//AttachDebugger(tpn);
+					}
+
+					_initialized = true;
+				}
+
+				this.Close = function() {
+					if (Array.isArray(_syncVideoList)) {
+						for (let i in _syncVideoList) {
+							_syncVideoList[i].Player.destroy();
+						}
+					}
+					_syncVideoList = undefined;
+					_demo = undefined;
+				}
+
+				this.GetPrimarySyncVideo = function() {
+					for (var i in _syncVideoList)
+					{
+						let boxDOM = $("#" + _syncVideoList[i].BoxID)[0];
+						if (UI.GetBoxIndex(boxDOM) === 0) {
+							return _syncVideoList[i];
+						}
+					}
+					return undefined;
+				}
+
+				var _tpn2svl; // True player name to sync video list.
+
+				this.GetSyncVideo = function(truePlayerName) {
+					return _tpn2svl[truePlayerName];
+				}
+
+				var _syncVideosDuration;
+				this.GetSyncVideosDuration = function() {
+					return _syncVideosDuration;
+				}
+
+				this.GetSyncVideosCurrentTime = function() {
+					let sv = this.GetPrimarySyncVideo();
+
+					return typeof(sv) !== "undefined" && typeof(sv.Player) !== "undefined" && typeof(sv.Player.getCurrentTime) === "function"
+						? sv.Player.getCurrentTime() - sv.VideoInfo.ZeroTime - _demo.ActivityTimeOffset
+						: 0.0;
+				}
+
+				this.IsPlaying = function() {
+					return VideoSync.GlobalPlayState === YT.PlayerState.PLAYING;
+				}
+
+				function UpdateGlobalPlayState() {
+					let playing = true,
+						paused = false,
+						ended = false,
+						buffering = false;
+					for (let i in _syncVideoList) {
+						let ps = _syncVideoList[i].Player.getPlayerState();
+						if (ps != YT.PlayerState.PLAYING) playing = false;
+						if (ps == YT.PlayerState.PAUSED) paused = true;
+						if (ps == YT.PlayerState.ENDED) ended = true;
+						if (ps == YT.PlayerState.BUFFERING) buffering = true;
+
+						/*
+						switch (event.data) {
+							case YT.PlayerState.UNSTARTED:
+							case YT.PlayerState.ENDED:
+							case YT.PlayerState.PLAYING:
+							case YT.PlayerState.PAUSED:
+							case YT.PlayerState.BUFFERING:
+							case YT.PlayerState.CUED:
+						}
+						*/
+					}
+
+					let state = YT.PlayerState.UNSTARTED;
+					if (playing) state = YT.PlayerState.PLAYING;
+					if (paused) state = YT.PlayerState.PAUSED;
+					if (buffering) state = YT.PlayerState.BUFFERING;
+					if (ended) state = YT.PlayerState.ENDED;
+					
+					VideoSync.GlobalPlayState = state;
+				}
+				this.GlobalPlayState = -1; // YT.PlayerState.UNSTARTED
+
+				this.ScanLoop = function() {
+					if (!_initialized) return;
+					CheckVideoSynchronization();
+				}
+
+				var _syncTime = undefined;
+				var _syncMute = undefined;
+
+				function CheckVideoSynchronization() {
+					if (!isFinite(_syncTime) || _syncTime < 0) return;
+
+					let synced = true;
+
+					// Mute sound.
+					Sound.ForceMute(true);
+
+					for (let k in _syncVideoList) {
+						let sv = _syncVideoList[k];
+						let p = sv.Player;
+
+						if (typeof(p.getCurrentTime) !== "function"
+							|| typeof(p.getPlayerState) !== "function") {
+							synced = false; // Flag sync fail as an error.
+							continue;
+						}
+
+						// Actual video time.
+						let vt = _syncTime + sv.VideoInfo.ZeroTime + _demo.ActivityTimeOffset;
+
+						// Check whether this video is at correct time.
+						let dt = Math.abs(p.getCurrentTime() - vt);
+						if (dt >= 0.1) {
+							// Too far, we need to seek video.
+
+							let state = p.getPlayerState();
+							let pause = dt < 1;
+							switch (state) {
+								case YT.PlayerState.PLAYING:
+									p.seekTo(vt);
+									break;
+								case YT.PlayerState.BUFFERING:
+									pause = true;
+									break;
+								case YT.PlayerState.UNSTARTED:
+								case YT.PlayerState.CUED:
+								case YT.PlayerState.PAUSED:
+								case YT.PlayerState.ENDED:
+									p.seekTo(vt);
+									break;
+							}
+
+							if (pause) p.pauseVideo();
+							else p.playVideo();
+
+							synced = false; // Not synchronized in this iteration.
+						}
+						else {
+							// Close enough, we should keep it paused.
+
+							let state = p.getPlayerState();
+							switch (state) {
+								case YT.PlayerState.PLAYING:
+									p.pauseVideo();
+									p.seekTo(vt);
+									break;
+								case YT.PlayerState.PAUSED:
+									break;
+								case YT.PlayerState.BUFFERING:
+									p.pauseVideo();
+									break;
+								case YT.PlayerState.ENDED:
+									p.seekTo(vt);
+								case YT.PlayerState.UNSTARTED:
+								case YT.PlayerState.CUED:
+									p.playVideo();
+									break;
+							}
+
+							if (state !== YT.PlayerState.PAUSED) {
+								synced = false;
+							}
+						}
+					}
+					if (!synced) return;
+
+					// All synchronized. We can continue playing.
+					for (let k in _syncVideoList) {
+						let p = _syncVideoList[k].Player;
+						p.playVideo();
+					}
+
+					// Recover sound.
+					Sound.ForceMute(false);
+
+					// Reset value.
+					_syncTime = undefined;
+					UI.UpdateSeekBar(_syncTime);
+				}
+
+				function AttachDebugger(tpn) {
+					let sv = _tpn2svl[tpn];
+
+					function GetCurrentTime() {
+						return typeof(sv) !== "undefined" && typeof(sv.Player) !== "undefined" && typeof(sv.Player.getCurrentTime) === "function"
+							? sv.Player.getCurrentTime()
+							: 0;
+					}
+
+					// Attach local/video-specific debugger.
+					let dbg = $("<div class='debugger'>"
+						+ "<span class='btn'>-0.01</span>"
+						+ "<span class='btn'>-0.05</span>"
+						+ "<span class='btn'>-0.1</span>"
+						+ "<span class='time'>" + sv.VideoInfo.ZeroTime.toFixed(2) + "</span>"
+						+ "<span class='btn'>+0.1</span>"
+						+ "<span class='btn'>+0.05</span>"
+						+ "<span class='btn'>+0.01</span>"
+						+ "</div>");
+
+					dbg.find(".btn").click(function() {
+						let tMin = 0,
+							tMax = VideoSync.GetSyncVideosDuration();
+
+						let shift = parseFloat($(this).html());
+						let zt = sv.VideoInfo.ZeroTime + shift;
+						zt = zt < tMin ? tMin : (zt > tMax ? tMax : zt);
+						sv.VideoInfo.ZeroTime = zt;
+
+						dbg.find(".time").html(zt.toFixed(2));
+
+						//VideoSync.SynchronizeTimeDelta(-Math.max(2 - shift, 2));
+						let t = (Activity.GetClosestActivityTime("Say") - _demo.ActivityTimeOffset) / _demo.ActivityTimeScale - 2;
+						VideoSync.SynchronizeTime(t);
+					});
+
+					$("#" + sv.BoxID).append(dbg);
+
+					// Attach global debugger.
+					let gDbgJq = $("#debugger-global");
+					if (gDbgJq.length > 0) return;
+					let gDbg = $("<div id='debugger-global'>"
+						+ "<span class='btn'>-0.0005</span>"
+						+ "<span class='btn'>-0.0001</span>"
+						+ "<span class='btn'>-0.00005</span>"
+						+ "<span class='btn'>-0.00001</span>"
+						+ "<span class='time'>" + _demo.ActivityTimeScale.toFixed(5) + "</span>"
+						+ "<span class='btn'>+0.00001</span>"
+						+ "<span class='btn'>+0.00005</span>"
+						+ "<span class='btn'>+0.0001</span>"
+						+ "<span class='btn'>+0.0005</span>"
+						+ "</div>");
+
+					gDbg.find(".btn").click(function() {
+						let shift = parseFloat($(this).html());
+						let ats = _demo.ActivityTimeScale + shift;
+						ats = Math.max(ats, 0);
+						_demo.ActivityTimeScale = ats;
+
+						gDbg.find(".time").html(ats.toFixed(5));
+
+						//VideoSync.SynchronizeTimeDelta(-2);
+						let t = (Activity.GetClosestActivityTime("Say") - _demo.ActivityTimeOffset) / _demo.ActivityTimeScale - 2;
+						VideoSync.SynchronizeTime(t);
+					});
+
+					$("#yt_sync_container").append(gDbg);
+				}
+
+				function YTE_OnReady(syncVideo, event) {
+					syncVideo.YouTubeLoadReady = true;
+
+					//syncVideo.Player.setPlaybackRate(0.1);
+
+					// Check if all videos are ready.
+					for (let i in _syncVideoList) {
+						if (!_syncVideoList[i].YouTubeLoadReady) return;
+					}
+
+					// Get video length to start UI.
+					let duration = Infinity;
+					for (let i in _syncVideoList) {
+						let sv = _syncVideoList[i];
+						duration = Math.min(sv.Player.getDuration() - sv.VideoInfo.ZeroTime - _demo.ActivityTimeOffset, duration);
+					}
+					_syncVideosDuration = duration;
+					UI.BuildControls();
+
+					// Starts activities.
+					Activity.Start();
+
+					// Starts video.
+					YTP_Synchronize(0.0);
+				}
+
+				function YTE_OnStateChange(syncVideo, event) {
+					let s0 = VideoSync.GlobalPlayState;
+
+					UpdateGlobalPlayState();
+
+					/*
+					let color = "transparent";
+					switch (event.data) {
+						case YT.PlayerState.UNSTARTED:
+							color = "#37474F"; // unstarted = gray
+							break;
+						case YT.PlayerState.ENDED:
+							color = "#FFFF00"; // ended = yellow
+							break;
+						case YT.PlayerState.PLAYING:
+							color = "#33691E"; // playing = green
+							break;
+						case YT.PlayerState.PAUSED:
+							color = "#DD2C00"; // paused = red
+							break;
+						case YT.PlayerState.BUFFERING:
+							color = "#AA00FF"; // buffering = purple
+							break;
+						case YT.PlayerState.CUED: // Ready to play, but not buffered.
+							color = "#FF6DOO"; // video cued = orange
+							break;
+					}
+
+					$("#" + syncVideo.IFrameID)
+						.css("border-color", color)
+						.css("border-width", 4);
+					*/
+
+					let s1 = VideoSync.GlobalPlayState;
+					if (s0 != s1) {
+						UI.StateChanged(s1);
+						Music.StateChanged(s1);
+					}
+
+				}
+
+				function YTE_OnPlaybackQualityChange(syncVideo, event) {
+
+				}
+
+				function YTE_OnPlaybackRateChange(syncVideo, event) {
+
+				}
+
+				function YTE_OnError(syncVideo, event) {
+
+				}
+
+				function Seek(syncVideo, time, debug) {
+					let s = syncVideo.Seek,
+						p = syncVideo.Player;
+					s.Time = time + syncVideo.VideoInfo.ZeroTime + _demo.ActivityTimeOffset; // Actual video time.
+					if (!s.Seeking) {
+						s.Seeking = true;
+						s.Debug = typeof(debug) === "boolean" ? debug : false;
+						s.Mute = p.isMuted();
+					}
+					p.mute();
+					p.playVideo();
+					p.seekTo(s.Time);
+				}
+
+				var _playIntervalID;
+
+				function YTP_Play() {
+					for (let i in _syncVideoList) {
+						let p = _syncVideoList[i].Player;
+						p.playVideo();
+					}
+
+					clearInterval(_playIntervalID);
+					_playIntervalID = setInterval(function() {
+						// Play by brute force.
+
+						let allPlaying = true;
+						for (let i in _syncVideoList) {
+							let p = _syncVideoList[i].Player;
+							if (p.getPlayerState() != YT.PlayerState.PLAYING) {
+								p.playVideo();
+								allPlaying = false;
+							}
+						}
+						if (allPlaying) {
+							clearInterval(_playIntervalID);
+						}
+					}, 100);
+				}
+
+				this.Play = function() {
+					YTP_Play();
+				}
+
+				function YTP_Pause() {
+					for (let i in _syncVideoList) {
+						_syncVideoList[i].Player.pauseVideo();
+					}
+				}
+
+				this.Pause = function() {
+					YTP_Pause();
+				}
+
+				function YTP_Synchronize(time) {
+					let t = Math.max(Math.min(time, VideoSync.GetSyncVideosDuration()), 0);
+					_syncTime = t;
+					UI.UpdateSeekBar(t);
+					Activity.Seek(t);
+				}
+				
+				this.SynchronizeTime = function(time) {
+					YTP_Synchronize(time);
+				}
+
+				this.SynchronizeTimeDelta = function(dt) {
+					let t = isFinite(_syncTime) ? _syncTime : VideoSync.GetSyncVideosCurrentTime();
+					YTP_Synchronize(Math.max(Math.min(t + dt, VideoSync.GetSyncVideosDuration()), 0));
+				}
+			}
+
+			var UI = new function() {
+				var _resizeTimeoutID;
+				var _refreshControlsIntervalID;
+				var _uiLayoutStyle;
+				var _controlJq;
+
+				let enumValue = 0;
+
+				// UILS = UI layout style
+				const UILS_Tile = enumValue++;
+				const UILS_MainAndThumbnails = enumValue++;
+
+				this.Start = function() {
+					// Adds control bar.
+
+					// Do not always resize to save performance.
+					$(window).resize(function() {
+						clearTimeout(_resizeTimeoutID);
+						_resizeTimeoutID = setTimeout(function() {
+							RefreshBoxes();
+							_resizeTimeoutID = 0;
+						}, 100);
+					});
+
+					_controlJq = _containerJq.find(".control");
+
+					// Bind click events.
+					_controlJq.find(".bar")
+						.click(function(e) { ProgressBarClick($(this), e); })
+						.mousemove(function(e) { ProgressBarHover($(this), e, true); })
+						.hover(
+							function(e) { ProgressBarHover($(this), e, true); },
+							function(e) { ProgressBarHover($(this), e, false); } );
+					_controlJq.find(".play").click(function(e) { PlayBtnClick($(this), e) });
+					_controlJq.find(".full-screen").click(function(e) { ToggleFullScreen(_userContainerJq[0]); });
+
+					clearInterval(_refreshControlsIntervalID);
+					_refreshControlsIntervalID = setInterval(RefreshControlsLoop, 100);
+
+					// Initialize all variables.
+					_map = undefined;
+
+					// Initialize music and sound.
+					Music.Initialize();
+					Sound.Initialize();
+
+					// Set default style.
+					_uiLayoutStyle = UILS_Tile;
+					InitializeBoxes();
+					ResetBoxIndices();
+					RefreshBoxes();
+
+					// Make controls more convenient.
+					$(document).keydown(function(event) {
+						let key = event.key;
+						if (key.length === 1) key = key.toLowerCase();
+
+						switch (key) {
+							case "l": NextLayoutStyle(); break;
+							case "r": break;
+							case "ArrowLeft": VideoSync.SynchronizeTimeDelta(-5); break;
+							case "ArrowUp": VideoSync.SynchronizeTimeDelta(-10); break;
+							case "ArrowRight": VideoSync.SynchronizeTimeDelta(5); break;
+							case "ArrowDown": VideoSync.SynchronizeTimeDelta(10); break;
+						}
+					});
+				}
+
+				this.Close = function() {
+					// Flushes UI container.
+					if (_userContainerJq) {
+						_userContainerJq.empty();
+						_userContainerJq = undefined;
+					}
+
+					clearInterval(_resizeTimeoutID);
+					clearInterval(_refreshControlsIntervalID);
+				}
+
+				// Builds controls for this video player.
+				this.BuildControls = function() {
+					let duration = VideoSync.GetSyncVideosDuration();
+				}
+
+				function InitializeBoxes() {
+					_containerJq.find(".yt_sync_box").each(function() {
+						function _TriggerDOM(jqe) {
+							return jqe.originalEvent.target;
+						}
+						function _GetCoverJQ(jqe) {
+							return $(_TriggerDOM(jqe)).find(".box_cover");
+						}
+						function _SetDataBoxIndex(jqe) {
+							let e = jqe.originalEvent;
+							e.dataTransfer.setData("text/plain", GetBoxIndex(e.target).toString());
+						}
+						function _GetDataBoxIndex(jqe) {
+							return parseInt(jqe.originalEvent.dataTransfer.getData("text/plain"));
+						}
+
+						let t = $(this);
+						t.attr("draggable", "true")
+							// Events fired on the draggable target (the source element)
+							.on("dragstart", function(jqe) {
+								//jqe.originalEvent.preventDefault();
+								_SetDataBoxIndex(jqe);
+								_GetCoverJQ(jqe).addClass("drag_src");
+							})
+							.on("drag", function(jqe) {
+								//jqe.originalEvent.preventDefault();
+							})
+							.on("dragend", function(jqe) {
+								_GetCoverJQ(jqe).removeClass("drag_src");
+							})
+							// Events fired on the drop target
+							.on("dragenter", function(jqe) {
+								jqe.originalEvent.preventDefault();
+								let c = _GetCoverJQ(jqe);
+								if (c.hasClass("drag_src")) return;
+								c.addClass("drag_dst");
+							})
+							.on("dragover", function(jqe) {
+								jqe.originalEvent.preventDefault();
+							})
+							.on("dragleave", function(jqe) {
+								_GetCoverJQ(jqe).removeClass("drag_dst");
+							})
+							.on("drop", function(jqe) {
+								let c = _GetCoverJQ(jqe);
+								c.removeClass("drag_dst");
+								if (c.hasClass("drag_src")) return;
+								SwapBoxes(_GetDataBoxIndex(jqe), GetBoxIndex(_TriggerDOM(jqe)));
+							});
+					});
+
+					ResetBoxIndices();
+				}
+
+				function ResetBoxIndices() {
+					let i = 0;
+					_containerJq.find(".yt_sync_box").each(function() {
+						SetBoxIndex(this, i++);
+					});
+				}
+
+				function GetBoxIndex(boxDOM) {
+					return $(boxDOM).data("box-index");
+				}
+				this.GetBoxIndex = GetBoxIndex;
+
+				this.GetPrimaryBox = function() {
+					let dom;
+					_containerJq.find(".yt_sync_box").each(function() {
+						if (GetBoxIndex(this) === 0) {
+							dom = this;
+						}
+					});
+					return dom;
+				}
+
+				function SetBoxIndex(boxDOM, i) {
+					$(boxDOM).data("box-index", i);
+				}
+
+				function GetBoxesDOM() {
+					let boxes = [];
+					_containerJq.find(".yt_sync_box").each(function() {
+						boxes[GetBoxIndex(this)] = this;
+					});
+					return boxes;
+				}
+
+				function RefreshBoxes() {
+					let containerW = _containerJq.width(),
+						containerH = _containerJq.height();
+					let aspectRatio = 4 / 3; // Currently all videos are with this aspect ratio, so we calculate it once here.
+					let boxes = GetBoxesDOM();
+					let refreshPosAndSize = function(jq, maxWidth, maxHeight, ar, x0, y0) {
+						let arBox = maxWidth / maxHeight;
+						let w, h;
+						if (arBox >= ar) {
+							w = maxWidth;
+							h = w / ar;
+						}
+						else {
+							h = maxHeight;
+							w = h * ar;
+						}
+						let x = x0 + (maxWidth - w) * 0.5,
+							y = y0 + (maxHeight - h) * 0.5;
+						jq.css("width", w.toFixed(3) + "px")
+							.css("height", h.toFixed(3) + "px")
+							.css("left", x.toFixed(3) + "px")
+							.css("top", y.toFixed(3) + "px");
+					}
+					switch (_uiLayoutStyle) {
+						case UILS_Tile: {
+								let boxCount = boxes.length;
+								let cAR = containerW / containerH; // Container's aspect ratio.
+
+								// Find a combination with least empty space.
+								let bestEmptyArea = Infinity;
+								let bestRowCount, bestColCount, bestBlockW, bestBlockH;
+								for (let i = 1; i <= boxCount; i++) {
+									let row = Math.ceil(boxCount / i); // Number of rows required.
+									let rcAR = aspectRatio * i / row;
+									let blockW, blockH;
+									if (rcAR > cAR) {
+										blockW = containerW / i;
+										blockH = blockW / aspectRatio;
+									}
+									else {
+										blockH = containerH / row;
+										blockW = blockH * aspectRatio;
+									}
+									let emptyArea = containerW * containerH - blockW * blockH * boxCount;
+									if (emptyArea < bestEmptyArea) {
+										bestEmptyArea = emptyArea;
+										bestRowCount = row;
+										bestColCount = i;
+										bestBlockW = blockW;
+										bestBlockH = blockH;
+									}
+								}
+
+								let x0 = (containerW - (bestColCount * bestBlockW)) * 0.5,
+									x = x0,
+									y = (containerH - (bestRowCount * bestBlockH)) * 0.5;
+								let r = 0; c = 0;
+								for (let i = 0; i < boxCount; i++) {
+									refreshPosAndSize($(boxes[i]), bestBlockW, bestBlockH, aspectRatio, x, y);
+									if (++c >= bestColCount) {
+										c = 0;
+										x = x0;
+										r++;
+										y += bestBlockH;
+									}
+									else {
+										x += bestBlockW;
+									}
+								}
+							}
+							break;
+						case UILS_MainAndThumbnails: {
+								// The first box is main and the rest of them will be thumbnails.
+
+								const MinThumbnailScale = 0.2; // Min thubmnail is 0.2 of width and height to the size of main video.
+
+								// Determine gap between thumbnails.
+								let tnGap = Math.min(containerW, containerH, 1024) / 1024 * 16; // Max 16 pixels between thumbnails.
+
+								let boxCount = boxes.length;
+								let tnCount = boxCount - 1;
+								let cAR = containerW / containerH; // Container's aspect ratio.
+								let tnRight = cAR >= aspectRatio; // Thumbnail at the right side.
+								if (tnRight) {
+									const MaxRowCount = 4;
+
+									// Maximum possible size for main video.
+									let mainH = containerH,
+										mainW = mainH * aspectRatio;
+
+									// Minimum possible columns.
+									let minColCount = Math.ceil(tnCount / MaxRowCount);
+
+									// Minimum allowable size for thumbnails.
+									let tnMinH = (containerH - (MaxRowCount - 1) * tnGap) / MaxRowCount,
+										tnMinW = tnMinH * aspectRatio;
+
+									// Minimum required width to contain all thumbnails.
+									let tnContMinW = minColCount * (tnMinW + tnGap);
+
+									let tnW, tnRow;
+									if (containerW >= mainW + tnContMinW) {
+										// Tries to find a biggest thumbnail size.
+										let avW = containerW - mainW,
+											avH = containerH;
+										tnW = -Infinity;
+										tnRow = MaxRowCount;
+										for (let r = Math.min(MaxRowCount, tnCount); r >= 1; r--) {
+											let c = Math.ceil(tnCount / r);
+											let tnTestW1 = (avW - c * tnGap) / c, // Max width with respect to available width.
+												tnTestW2 = ((avH - (r - 1) * tnGap) / r) * aspectRatio, // Max width with respect to available height.
+												tnTestW = Math.min(tnTestW1, tnTestW2);
+											if (tnTestW >= tnMinW && tnTestW >= tnW) { // This combination is possible.
+												tnW = tnTestW;
+												tnRow = r;
+											}
+										}
+									}
+									else {
+										// We need to use min thumbnail size and shrink main video.
+										mainW = containerW - tnContMinW;
+										mainH = mainW / aspectRatio;
+										tnW = tnMinW;
+										tnRow = Math.min(MaxRowCount, tnCount);
+									}
+
+									let tnCol = Math.ceil(tnCount / tnRow),
+										tnH = tnW / aspectRatio;
+
+/*
+									console.log("tnRow x tnCol = " + tnRow + " x " + tnCol);
+									console.log("tnW x tnH = " + tnW + " x " + tnH);
+*/
+
+									// Arranges main video.
+									let x = (containerW - (mainW + (tnGap + tnW) * tnCol)) * 0.5,
+										y = (containerH - mainH) * 0.5;
+									refreshPosAndSize($(boxes[0]), mainW, mainH, aspectRatio, x, y);
+
+									// Arranges thumbnail videos.
+									let x0 = x + mainW + tnGap;
+									x = x0;
+									y = (containerH - (tnH * tnRow + (tnRow - 1) * tnGap)) * 0.5;
+									let c = 0;
+									for (let i = 1; i <= tnCount; i++) {
+										refreshPosAndSize($(boxes[i]), tnW, tnH, aspectRatio, x, y);
+										c++;
+										if (c >= tnCol) {
+											x = x0;
+											y += tnGap + tnH;
+											c = 0;
+										}
+										else {
+											x += tnGap + tnW;
+										}
+									}
+								}
+								else {
+									const MaxColCount = 4;
+
+									// Maximum possible size for main video.
+									let mainW = containerW,
+										mainH = mainW / aspectRatio;
+
+									// Minimum possible rows.
+									let minRowCount = Math.ceil(tnCount / MaxColCount);
+
+									// Minimum allowable size for thumbnails.
+									let tnMinW = (containerW - (MaxColCount - 1) * tnGap) / MaxColCount,
+										tnMinH = tnMinW / aspectRatio;
+
+									// Minimum required height to contain all thumbnails.
+									let tnContMinH = minRowCount * (tnMinH + tnGap);
+
+									let tnH, tnCol;
+									if (containerH >= mainH + tnContMinH) {
+										// Tries to find a biggest thumbnail size.
+										let avH = containerH - mainH,
+											avW = containerW;
+										tnH = -Infinity;
+										tnCol = MaxColCount;
+										for (let c = Math.min(MaxColCount, tnCount); c >= 1; c--) {
+											let r = Math.ceil(tnCount / c);
+											let tnTestH1 = (avH - r * tnGap) / r, // Max height with respect to available width.
+												tnTestH2 = ((avW - (c - 1) * tnGap) / c) / aspectRatio, // Max height with respect to available width.
+												tnTestH = Math.min(tnTestH1, tnTestH2);
+											if (tnTestH >= tnMinH && tnTestH >= tnH) { // This combination is possible.
+												tnH = tnTestH;
+												tnCol = c;
+											}
+										}
+									}
+									else {
+										// We need to use min thumbnail size and shrink main video.
+										mainH = containerH - tnContMinH;
+										mainW = mainH * aspectRatio;
+										tnH = tnMinH;
+										tnCol = Math.min(MaxColCount, tnCount);
+									}
+
+									let tnRow = Math.ceil(tnCount / tnCol),
+										tnW = tnH * aspectRatio;
+
+									// Arranges main video.
+									let x = (containerW - mainW) * 0.5,
+										y = (containerH - (mainH + (tnGap + tnH) * tnRow)) * 0.5;
+									refreshPosAndSize($(boxes[0]), mainW, mainH, aspectRatio, x, y);
+
+									// Arranges thumbnail videos.
+									let x0 = (containerW - (tnW * tnCol + (tnCol - 1) * tnGap)) * 0.5;
+									x = x0;
+									y += mainH + tnGap;
+									let c = 0;
+									for (let i = 1; i <= tnCount; i++) {
+										refreshPosAndSize($(boxes[i]), tnW, tnH, aspectRatio, x, y);
+										c++;
+										if (c >= tnCol) {
+											x = x0;
+											y += tnGap + tnH;
+											c = 0;
+										}
+										else {
+											x += tnGap + tnW;
+										}
+									}
+								}
+							}
+							break;
+						default:
+							console.log("Undefined UI layout style: " + _uiLayoutStyle);
+							break;
+					}
+					// Keep aspect ratio to fit parent.
+				}
+
+				function NextLayoutStyle() {
+					if (_uiLayoutStyle == UILS_MainAndThumbnails) {
+						_uiLayoutStyle = UILS_Tile;
+					}
+					else {
+						_uiLayoutStyle++;
+					}
+
+					RefreshBoxes();
+				}
+
+				function SwapBoxes(box0, box1) {
+					function _GetBoxIndex(b) {
+						if (typeof(b) === "object") b = GetBoxIndex(b);
+						return typeof(b) === "number" ? b : 0;
+					}
+
+					let bn0 = _GetBoxIndex(box0),
+						bn1 = _GetBoxIndex(box1);
+					if (bn0 === bn1 || bn0 < 0 || bn1 < 0) return;
+					let boxes = GetBoxesDOM();
+					if (bn0 >= boxes.length || bn1 >= boxes.length) return;
+					SetBoxIndex(boxes[bn0], bn1);
+					SetBoxIndex(boxes[bn1], bn0);
+					RefreshBoxes();
+				}
+
+				function RefreshControlsLoop() {
+					let duration = VideoSync.GetSyncVideosDuration(),
+						time = VideoSync.GetSyncVideosCurrentTime();
+
+					if (!isFinite(duration) || !isFinite(time)) return;
+
+					let k = (time / duration * 100).toFixed(2) + "%";
+					_controlJq.find(".elapsed").css("width", k);
+					_controlJq.find(".pointer").css("left", k);
+
+					let tcDuration = GetTimeComponents(duration),
+						tcTime = GetTimeComponents(time);
+					$("#time-display").html(FormatTimeComponents(tcTime) + " / " + FormatTimeComponents(tcDuration));
+				}
+
+				function ProgressBarClick(jq, e) {
+					/*
+					let o = jq.offset();
+					let x = e.pageX - o.left,
+						y = e.pageY - o.top;
+					*/
+					let k = (e.pageX - jq.offset().left) / jq.width();
+					VideoSync.SynchronizeTime(VideoSync.GetSyncVideosDuration() * k);
+				}
+
+				function ProgressBarHover(jq, e, show) {
+					// Get text based on the position we are selecting.
+					let k = (e.pageX - jq.offset().left) / jq.width();
+					let duration = VideoSync.GetSyncVideosDuration();
+					let text = show && isFinite(duration)
+						? FormatTimeComponents(GetTimeComponents(duration * k))
+						: "";
+
+					// Invalid state.
+					let btJq = $(".bar-time");
+					if (text === "") {
+						btJq.removeClass("show");
+						return;
+					}
+
+					btJq.css("left", (k * 100.0).toFixed(2) + "%")
+						.html(text)
+						.addClass("show");
+				}
+
+				this.UpdateSeekBar = function(time) {
+					let k = (isFinite(time) ? (time / VideoSync.GetSyncVideosDuration()) : 0);
+					let after = time >= VideoSync.GetSyncVideosCurrentTime();
+					_controlJq.find(".seek-after").css("width", ((after ? k : 0) * 100).toFixed(2) + "%");
+					_controlJq.find(".seek-before").css("width", ((!after ? k : 0) * 100).toFixed(2) + "%");
+				}
+
+				function PlayBtnClick(iq, e) {
+					switch (VideoSync.GlobalPlayState) {
+						case YT.PlayerState.PLAYING:
+							VideoSync.Pause();
+							break;
+						default:
+						case YT.PlayerState.PAUSED:
+							VideoSync.Play();
+							break;
+						case YT.PlayerState.ENDED:
+							VideoSync.SynchronizeTime(0);
+							VideoSync.Play();
+							break;
+					}
+				}
+
+				function GetTimeComponents(time) {
+					return time > 0
+					? {
+						Hour:  Math.floor(time / 3600),
+						Minute: Math.floor((time % 3600) / 60),
+						Second: Math.floor(time % 60)
+					}
+					: {
+						Hour: 0,
+						Minute: 0,
+						Second: 0
+					};
+				}
+
+				function FormatTimeComponents(tc) {
+					return (tc.Hour > 0 ? (h.toString() + ":") : "")
+						+ ("0" + tc.Minute.toString()).substr(-2)
+						+ ":" +("0" + tc.Second.toString()).substr(-2);
+				}
+
+				var _playBtnClassList;
+
+				function StateChanged(state) {
+					let list = _playBtnClassList;
+					if (typeof(list) !== "object") {
+						list = {};
+						list[YT.PlayerState.UNSTARTED] = "fa-play";
+						list[YT.PlayerState.ENDED] = "fa-redo";
+						list[YT.PlayerState.PLAYING] = "fa-pause";
+						list[YT.PlayerState.PAUSED] = "fa-play";
+						list[YT.PlayerState.BUFFERING] = "fa-cloud-download-alt";
+						_playBtnClassList = list;
+					}
+
+					let targetClass = list[VideoSync.GlobalPlayState];
+					if (!targetClass) targetClass = "fa-stop";
+
+					let btnJq = $(".play i");
+					function updateButton(btnClass) {
+						if (btnClass === targetClass) {
+							btnJq.addClass(btnClass);
+						}
+						else {
+							btnJq.removeClass(btnClass);
+						}
+					}
+
+					for (let k in list) {
+						updateButton(list[k]);
+					}
+				}
+				this.StateChanged = StateChanged;
+
+				function ToggleFullScreen(element) {
+					if (!document.fullscreenElement &&	// alternative standard method
+						!document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+						if (element.requestFullscreen) {
+							element.requestFullscreen();
+						} else if (element.mozRequestFullScreen) {
+							element.mozRequestFullScreen();
+						} else if (element.webkitRequestFullscreen) {
+							element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+						}
+						
+						$(".full-screen i")
+							.removeClass("fa-expand-arrows-alt")
+							.addClass("fa-compress-arrows-alt");
+					} else {
+						if (document.cancelFullScreen) {
+							document.cancelFullScreen();
+						} else if (document.mozCancelFullScreen) {
+							document.mozCancelFullScreen();
+						} else if (document.webkitCancelFullScreen) {
+							document.webkitCancelFullScreen();
+						}
+
+						$(".full-screen i")
+							.removeClass("fa-compress-arrows-alt")
+							.addClass("fa-expand-arrows-alt");
+					}
+				}
+
+				this.AddLine = function(msgClass, htmlContent, fadeTime, stayTime) {
+					let jq = $("<li class='" + msgClass + "'>" + htmlContent + "</li>");
+					_containerJq.find(".msg-box").append(jq);
+					setTimeout(function() {
+						UI.FinishLine(jq, fadeTime);
+					}, stayTime);
+				}
+
+				this.GetMessageByClass = function(msgClass) {
+					return _containerJq.find(".msg-box ." + msgClass);
+				}
+
+				this.FinishLine = function(jq, fadeTime) {
+					jq.finish().animate({
+						"height": "0",
+						"opacity": "0"
+					}, fadeTime, "swing", function() {
+						jq.remove();
+					});
+				}
+			}
+
+			var Music = new function() {
+				var _initialized = false;
+
+				var _musicIsReady = false;
+				var _musicPlayRetryID = 0;
+				var _stopTimer_ms = 0;
+
+				var _volume = 1.0;
+				var _volumeFactor = 1.0;
+
+				function GetBtnJq() {
+					return $(".music.btn i");
+				}
+
+				function GetAudioJq() {
+					return $(".music.btn audio");
+				}
+
+				function Initialize() {
+					let btn = GetBtnJq();
+					btn[0].muted = false;
+					btn.click(Toggle);
+
+					RefreshBtn();
+
+					let playAudio = function () {
+						let audioDOM = GetAudioJq()[0];
+						let promise = audioDOM.play();
+
+						var result = promise.then(
+							function(v) { // Fulfilled.
+								_musicIsReady = true;
+								StopPlayRetry();
+								return v; 
+							},
+							function(e) { // Rejected.
+								_musicPlayRetryID = setTimeout(playAudio, 250); // Keep trying.
+							}
+						);
+					};
+
+					GetAudioJq().bind("canplay", playAudio);
+
+					_initialized = true;
+				}
+				this.Initialize = Initialize;
+
+				this.ScanLoop = function() {
+					if (!_initialized) return;
+					CheckMusic();
+					CheckVolume();
+				}
+
+				function CheckMusic() {
+					if (VideoSync.IsPlaying()) {
+						_stopTimer_ms = 0;
+					}
+					else {
+						_stopTimer_ms += 100; // Adds 100 ms.
+					}
+
+					let vf = 1.0 - (_stopTimer_ms - 10000) / 20000;
+					vf = vf > 1.0 ? 1.0 : (vf < 0 ? 0 : vf);
+
+					// We can pause music since there's no volume.
+					if (vf <= 0) Music.Pause();
+
+					_volumeFactor = vf;
+				}
+
+				function CheckVolume() {
+					GetAudioJq()[0].volume = _volume * _volumeFactor;
+				}
+
+				function StopPlayRetry() {
+					clearTimeout(_musicPlayRetryID);
+					_musicPlayRetryID = 0;
+				}
+
+				function Toggle() {
+					let audio = GetAudioJq()[0];
+					audio.muted = !audio.muted;
+					RefreshBtn();
+				}
+
+				function GetMusicPath(wad, name) {
+					let w = GameInfo.WadInfo[wad];
+					if (!w) return;
+					let d = w.Data[name]; // Search by name directly.
+					if (!d) { // If it is not name, use "Music" tag instead.
+						for (let k in w.Data) {
+							let wdm = w.Data[k].Music;
+							if (typeof (wdm) === "string" && wdm.startsWith(name)) {
+								d = w.Data[k];
+								break;
+							}
+						}
+					}
+					if (!d) return;
+					let m = d.Music;
+					if (typeof (m) !== "string") return;
+
+					let tokens = m.split("|");
+					switch (tokens.length) {
+						case 1: return "https://doombarracks.github.io/DoomMusic/" + wad + "/" + tokens[0];
+						case 2: return GetMusicPath(tokens[0], tokens[1]);
+					}
+					return undefined;
+				}
+
+				function SetMusicByMap(wad, name) {
+					SetMusic(GetMusicPath(wad, name));
+				}
+				this.SetMusicByMap = SetMusicByMap;
+
+				function SetMusic(path) {
+					if (typeof (path) !== "string") return;
+
+					// Find music type.
+					let i = path.lastIndexOf(".");
+					if (i <= 0) return undefined;
+					let ext = path.substr((i + 1) - path.length);
+					let type;
+					switch (ext.toLowerCase()) {
+						case "opus": type = "audio/ogg; codecs=opus"; break;
+						case "mp3": type = "audio/mpeg"; break;
+						default: return;
+					}
+
+					let audio = GetAudioJq();
+					let source = audio.find("source");
+
+					// Do not load twice.
+					if (source[0].src === path) return;
+
+					source[0].src = path;
+					source[0].type = type;
+
+					StopPlayRetry();
+					audio[0].load();
+					_musicIsReady = false;
+				}
+				this.SetMusic = SetMusic;
+
+				function Pause() {
+					if (!_musicIsReady) return;
+					GetAudioJq()[0].pause();
+				}
+				this.Pause = Pause;
+
+				function Unpause() {
+					if (!_musicIsReady) return;
+					GetAudioJq()[0].play();
+				}
+				this.Unpause = Unpause;
+
+				function StateChanged(state) {
+					switch (state) {
+						case YT.PlayerState.UNSTARTED: break;
+						case YT.PlayerState.BUFFERING: break;
+						case YT.PlayerState.CUED: break;
+						case YT.PlayerState.PLAYING: Unpause(); break;
+						case YT.PlayerState.PAUSED: break;
+						case YT.PlayerState.ENDED: break;
+					}
+				}
+				this.StateChanged = StateChanged;
+
+				function RefreshBtn() {
+					let btn = GetBtnJq();
+					let mute = GetAudioJq()[0].muted;
+
+					if (mute) {
+						btn.addClass("mute");
+					}
+					else {
+						btn.removeClass("mute");
+					}
+				}
+			}
+
+			var Sound = new function () {
+				var _mute = false;
+				var _force = false;
+				var _volume = 100;
+
+				function GetBtnJq() {
+					return $(".sound.btn i");
+				}
+
+				this.ScanLoop = function() {
+					CheckSound();
+				}
+
+				function CheckSound() {
+					let mute = _force || _mute;
+					let volume = _volume;
+					ForEachYoutubePlayerDOM(function (p) {
+						if (typeof(p.isMuted) === "function" && p.isMuted() != mute) {
+							if (mute) p.mute();
+							else p.unMute();
+						}
+						if (typeof(p.getVolume) === "function" && p.getVolume() != volume) {
+							p.setVolume(volume);
+						}
+					});
+				}
+
+				this.ForceMute = function(force) {
+					_force = force;
+				}
+
+				function GetYoutubePlayerDOMs() {
+					let players = [];
+					for (let i in _syncVideoList) {
+						players.push(_syncVideoList[i].Player);
+					}
+					return players;
+				}
+
+				function ForEachYoutubePlayerDOM(f) {
+					let players = GetYoutubePlayerDOMs();
+					for (let i in players) {
+						f(players[i]);
+					}
+				}
+
+				function Initialize() {
+					let btn = GetBtnJq();
+					btn.click(Toggle);
+					RefreshBtn();
+				}
+				this.Initialize = Initialize;
+
+				function IsMuted() {
+					return _mute;
+					/*
+					let mute = false;
+					ForEachYoutubePlayerDOM(function (p) {
+						if (typeof (p.isMuted) === "function") {
+							mute |= p.isMuted();
+						}
+					});
+					return mute;
+					*/
+				}
+
+				function Mute(mute) {
+					if (mute) {
+						ForEachYoutubePlayerDOM(function (p) {
+							if (typeof(p.mute) === "function") p.mute();
+						});
+					}
+					else {
+						ForEachYoutubePlayerDOM(function (p) {
+							if (typeof(p.unMute) === "function") p.unMute();
+						});
+					}
+				}
+				this.Mute = Mute;
+
+				function Toggle() {
+					Mute(!_mute)
+					_mute = !_mute;
+					RefreshBtn();
+				}
+
+				function RefreshBtn() {
+					let btnJq = GetBtnJq();
+					if (IsMuted()) {
+						btnJq.addClass("mute");
+					}
+					else {
+						btnJq.removeClass("mute");
+					}
+				}
+			}
+
+			var Activity = new function() {
+				var _initialized = false;
+
+				var _activityTime;
+
+				// For performance.
+				var _optimizedActivities; // For better performance.
+				var _seekActivities; // For better performance during seeking.
+
+				// For tracing data within the whole demo.
+				var _game; // Game for other references.
+				var _map; // Name of the map.
+				var _players; // Name of all players. Key: true player name, Value: in-game player name.
+
+				// Out of sync message indicator.
+				var _outOfSync = false;
+
+				var _musicStopTimer = 0;
+
+				this.Start = function() {
+					BuildActivities();
+
+					_activityTime = 0.0; // Reset last monitoring time.
+
+					_game = _demo.Game;
+					_map = undefined;
+					let players = {};
+					for (let i in _demo.Videos) {
+						players[_demo.Videos[i].PlayerName] = undefined;
+					}
+					_players = players;
+
+					_initialized = true;
+				}
+
+				this.Close = function() {
+					clearInterval(_scanLoopIntervalID);
+					_scanLoopIntervalID = 0;
+				}
+
+				this.ScanLoop = function() {
+					if (!_initialized) return;
+					CheckActivity();_initialized
+				}
+
+				function GetActivityCurrentTime() {
+					return VideoSync.GetSyncVideosCurrentTime() * _demo.ActivityTimeScale + _demo.ActivityTimeOffset;
+				}
+
+				function CheckActivity() {
+					if (!VideoSync.IsPlaying()) return;
+
+					// Uses time from the first video as reference.
+					let vt = GetActivityCurrentTime();
+
+					// This loop iterate every 0.1 second, so we assume this is long enough to cut-off and consider a seek operation.
+					if (vt - _activityTime < 1.0) {
+						let activities = GetCrossingActivities(vt);
+						if (activities.length > 0) { // We got some activities.
+							ProcessActivities(activities);
+						}
+					}
+
+					// All operations are done, we now update time so it can be referenced in the next iteration.
+					_activityTime = vt;
+				}
+
+				this.Seek = function(time) {
+					// Add offset back.
+					time += _demo.ActivityTimeOffset;
+
+					_activityTime = time;
+
+					// New table to compare with the old one.
+					let map;
+					let players = {};
+
+					for (let i in _demo.Videos) {
+						let pn = _demo.Videos[i].PlayerName;
+						let tpn = DemoHelper.GetTruePlayerName(pn);
+						players[tpn] = {
+							Operation: "Kick",
+							PlayerName: typeof(_players[tpn]) !== "undefined" ? _players[tpn] : pn,
+							MessageType: 5, // Our own message.
+							Tic: 0
+						};
+					}
+
+					for (let i in _seekActivities) {
+						let a = _seekActivities[i];
+
+						// Do not proceed since we passed time.
+						if (a.Tic / 35.0 > time) {
+							break;
+						}
+
+						switch (a.Operation) {
+							case "Map":
+								map = a.MapName;
+								break;
+							case "SetPlayer":
+								players[a.TruePlayerName] = a;
+								break;
+							case "Kick":
+								players[a.TruePlayerName] = a;
+								break;
+						}
+					}
+
+					// Updates map name.
+					if (map !== _map) {
+						ActOp_Map(map);
+					}
+
+					// Updates player names.
+					let aSort = [];
+					for (let tn in players) {
+						aSort.push(players[tn]);
+					}
+					aSort.sort(function(x, y) { return x.Tic > y.Tic; });
+					for (let i in aSort) {
+						let a = aSort[i];
+						if (a.Operation === "SetPlayer") {
+							ActOp_SetPlayer(a.PlayerName);
+						}
+						else {
+							ActOp_Kick(a.PlayerName, a.MessageType);
+						}
+					}
+				}
+
+				// Gets an array of all activities we passed in ascending order by time.
+				function GetCrossingActivities(time) {
+					// Time goes backwards.
+					if (time < _activityTime) {
+						return [];
+					}
+
+					let i0 = GetActivityIndexByTime(_activityTime),
+						i1 = GetActivityIndexByTime(time);
+					return i0 != i1 ? _optimizedActivities.slice(i0, i1) : [];
+				}
+
+				// Gets first activity index not yet reached by specified time.
+				// If there is no activitiy left, -1 will be returned.
+				function GetActivityIndexByTime(time) {
+					let a = _optimizedActivities;
+					let aLen = a.length;
+					let tic = time * 35.0;
+					
+					// Checks boundaries.
+					if (tic <= a[0].Tic) return 0;
+					if (tic > a[aLen - 1].Tic) return aLen;
+
+					// We can safely do binary search here.
+					let lower = 0, upper = aLen - 1;
+					let loopCount = 0;
+					while (lower < upper && loopCount < aLen) {
+						let i = (lower + upper) >> 1;
+						if (i == lower && lower < upper) i++; // Prevents to stuck at the same index.
+						else if (i == upper && upper > lower) i--; // Prevents to stuck at the same index.
+						let t1 = a[i].Tic,
+							t0 = i == 0 ? 0 : a[i - 1].Tic;
+						if (tic > t1) { // Already passed.
+							lower = i;
+						}
+						else if (tic >= t0) { // Gotcha! (tic >= t0 && tic <= t1)
+							return i;
+						}
+						else { // Not yet. (tic < t0)
+							upper = i;
+						}
+						loopCount++;
+					}
+
+					return 0;
+				}
+
+				function GetClosestActivityTime(operation) {
+					let ct = GetActivityCurrentTime();
+					let i = GetActivityIndexByTime(ct) - 1;
+
+					while (i >= 0
+						&& operation
+						&& _optimizedActivities[i].Operation !== operation) {
+						i--;
+					}
+					return i >= 0 ? _optimizedActivities[i].Tic / 35 : 0;
+				}
+				this.GetClosestActivityTime = GetClosestActivityTime;
+
+				// Build activity tables for better performance.
+				function BuildActivities() {
+					let activities = _demo.Activity;
+					let optimized = []; // Optimized activity table mainly eliminates duplicate SetPlayer operations.
+					let seek = []; // Seek activity table mainly eliminates "Say" operations since they are unnecessary for seeking.
+					let nameTable = {}; // For eliminating duplicate names.
+					let tpn; // True player name.
+					for (let i in activities) {
+						let a = activities[i];
+
+						// Generates this first to save performance.
+						if (a.hasOwnProperty("PlayerName")) {
+							tpn = DemoHelper.GetTruePlayerName(a.PlayerName);
+							a.TruePlayerName = tpn;
+						}
+						else {
+							tpn = undefined;
+						}
+
+						switch (a.Operation) {
+							case "Say":
+								optimized.push(a);
+								break;
+							case "Map":
+								optimized.push(a);
+								seek.push(a);
+								break;
+							case "Kick":
+								nameTable[tpn] = undefined;
+								optimized.push(a);
+								seek.push(a);
+								break;
+							case "SetPlayer":
+								if (nameTable[tpn] !== a.PlayerName) {
+									nameTable[tpn] = a.PlayerName;
+									optimized.push(a); // Adds only when name changes.
+									seek.push(a);
+								}
+								break;
+						}
+					}
+					_optimizedActivities = optimized;
+					_seekActivities = seek;
+				}
+
+				function ActOp_Say(playerName, message) {
+					UI.AddLine("say", "<span><span>" + playerName + "</span><span>" + message + "</span></span>", 300, 8000);
+				}
+
+				function ActOp_SetPlayer(playerName) {
+					let tpn = DemoHelper.GetTruePlayerName(playerName);
+					let pnLast = _players[tpn];
+					if (pnLast !== playerName) { // Display only when name changes.
+						if (typeof(pnLast) !== "undefined") { // Player changes name.
+							UI.AddLine("set-player", "<span>Player <span class='name'>" + pnLast + "</span> renamed to <span class='name'>" + playerName + "</span>.</span>", 300, 10000);
+						}
+						else { // Player enters game.
+							UI.AddLine("set-player", "<span>Player <span class='name'>" + playerName + "</span> joins the game.</span>", 300, 10000);
+						}
+						_players[tpn] = playerName;
+
+						let sv = VideoSync.GetSyncVideo(tpn);
+						if (typeof(sv) !== "undefined") {
+							$("#" + sv.BoxID).addClass("connected");
+						}
+					}
+				}
+
+				function ActOp_Map(mapName) {
+					if (mapName) {
+						UI.FinishLine(UI.GetMessageByClass("map"), 1000);
+						UI.AddLine("map", "<span>" + DemoHelper.GetMapFullName(mapName, _demo.Game, _demo.PWADs) + "</span>", 1000, 15000);
+						Music.SetMusicByMap(_game, mapName);
+					}
+					_map = mapName;
+				}
+
+				function ActOp_Kick(playerName, msgType) {
+					let tpn = DemoHelper.GetTruePlayerName(playerName);
+					let p = _players[tpn];
+
+					if (typeof(p) === "undefined" || p.Operation == "Kick") {
+						return;
+					}
+
+					let msg;
+					switch (msgType) {
+						case 1: msg = "has been kicked. (Go away)"; break;
+						case 2: msg = "has been kicked. (Consistency failure)"; break;
+						case 4: msg = "left the game. (Connection timeout)"; break;
+						case 3: msg = "left the game."; break;
+						case 5: msg = "removed. (Video time restore)"; break; // New message by our own.
+					}
+					UI.AddLine("kick", "<span><span>" + playerName + "</span><span>" + msg + "</span></span>", 300, 10000);
+
+					_players[tpn] = undefined;
+
+					let sv = VideoSync.GetSyncVideo(tpn);
+					if (typeof(sv) !== "undefined") {
+						$("#" + sv.BoxID).removeClass("connected");
+					}
+				}
+
+				function GetHtmlFriendlyString(str) {
+					let result = "";
+					for (let i = 0, len = str.length; i < len; i++) {
+						let c = str.charAt(i);
+						switch (c) {
+							case " ": c = "&nbsp;"; break;
+							case "&": c = "&amp;"; break;
+							case "<": c = "&lt;"; break;
+							case ">": c = "&gt;"; break;
+							// Reserved.
+							case "©": c = "&copy;"; break;
+							case "®": c = "&reg;"; break;
+							case "™": c = "&trade;"; break;
+							case "é": c = "&eacute;"; break;
+							case "è": c = "&egrave;"; break;
+							case "ñ": c = "&ntilde;"; break;
+							case "¢": c = "&cent;"; break;
+						}
+						result += c;
+					}
+					return result;
+				}
+
+				// Processes all activities.
+				function ProcessActivities(activities) {
+					for (let i in activities) {
+						let a = activities[i];
+						switch (a.Operation) {
+							case "Say":
+								ActOp_Say(a.PlayerName, GetHtmlFriendlyString(a.Message));
+								break;
+							case "SetPlayer":
+								ActOp_SetPlayer(a.PlayerName);
+								break;
+							case "Map":
+								ActOp_Map(a.MapName);
+								break;
+							case "Kick":
+								ActOp_Kick(a.PlayerName, a.MessageType);
+								break;
+							default:
+								console.warning("Unknown activity operation: " + a.Operation);
+								break;
+						}
+					}
+				}
+			}
+		}
+
+		var GameInfo = new function() {
+			this.WadInfo = {
+				Doom: {
+					Name: "DOOM",
+					Path: "Doom",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_INTRO.opus" },
+						TitleA: { Type: "Music", Name: "標題音樂 (OPL 專用)", Music: "D_INTROA.opus" },
+						E1M1: { Name: "Hangar", Music: "D_E1M1.opus" },
+						E1M2: { Name: "Nuclear Plant", Music: "D_E1M2.opus" },
+						E1M3: { Name: "Toxin Refinery", Music: "D_E1M3.opus" },
+						E1M4: { Name: "Command Control", Music: "D_E1M4.opus" },
+						E1M5: { Name: "Phobos Lab", Music: "D_E1M5.opus" },
+						E1M6: { Name: "Central Processing", Music: "D_E1M6.opus" },
+						E1M7: { Name: "Computer Station", Music: "D_E1M7.opus" },
+						E1M8: { Name: "Phobos Anomaly", Music: "D_E1M8.opus" },
+						E1M9: { Name: "Military Base", Music: "D_E1M9.opus" },
+						E2M1: { Name: "Deimos Anomaly", Music: "D_E2M1.opus" },
+						E2M2: { Name: "Containment Area", Music: "D_E2M2.opus" },
+						E2M3: { Name: "Refinery", Music: "D_E2M3.opus" },
+						E2M4: { Name: "Deimos Lab", Music: "D_E2M4.opus" },
+						E2M5: { Name: "Command Center", Music: "Doom|D_E1M7" },
+						E2M6: { Name: "Halls of the Damned", Music: "D_E2M6.opus" },
+						E2M7: { Name: "Spawning Vats", Music: "D_E2M7.opus" },
+						E2M8: { Name: "Tower of Babel", Music: "D_E2M8.opus" },
+						E2M9: { Name: "Fortress of Mystery", Music: "D_E2M9.opus" },
+						E3M1: { Name: "Hell Keep", Music: "Doom|D_E2M9" },
+						E3M2: { Name: "Slough of Despair", Music: "D_E3M2.opus" },
+						E3M3: { Name: "Pandemonium", Music: "D_E3M3.opus" },
+						E3M4: { Name: "House of Pain", Music: "Doom|D_E1M8" },
+						E3M5: { Name: "Unholy Cathedral", Music: "Doom|D_E1M7" },
+						E3M6: { Name: "Mt. Erebus", Music: "Doom|D_E1M6" },
+						E3M7: { Name: "Limbo", Music: "Doom|D_E2M7" },
+						E3M8: { Name: "Dis", Music: "D_E3M8.opus" },
+						E3M9: { Name: "Warrens", Music: "Doom|D_E1M9" },
+						E4M1: { Name: "Hell Beneath", Music: "Doom|D_E1M8" },
+						E4M2: { Name: "Perfect Hatred", Music: "Doom|D_E3M2" },
+						E4M3: { Name: "Sever the Wicked", Music: "Doom|D_E3M3" },
+						E4M4: { Name: "Unruly Evil", Music: "Doom|D_E1M5" },
+						E4M5: { Name: "They Will Repent", Music: "Doom|D_E2M7" },
+						E4M6: { Name: "Against Thee Wickedly", Music: "Doom|D_E2M4" },
+						E4M7: { Name: "And Hell Followed", Music: "Doom|D_E2M6" },
+						E4M8: { Name: "Unto the Cruel", Music: "Doom|D_E1M7" },
+						E4M9: { Name: "Fear", Music: "Doom|D_E1M9" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "Doom|D_E2M3" },
+						Victory: { Type: "Music", Name: "破關音樂", Music: "D_VICTOR.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_BUNNY.opus" },
+					},
+				},
+				Doom2: {
+					Name: "Doom II: Hell on Earth",
+					Path: "Doom2",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "Entryway", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "Underhalls", Music: "D_STALKS.opus" },
+						MAP03: { Name: "The Gauntlet", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "The Focus", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "The Waste Tunnels", Music: "D_DOOM.opus" },
+						MAP06: { Name: "The Crusher", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Dead Simple", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Tricks and Traps", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "The Pit", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Refueling Base", Music: "D_DEAD.opus" },
+						MAP11: { Name: "'O' of Destruction!", Music: "Doom2|D_STALKS" },
+						MAP12: { Name: "The Factory", Music: "Doom2|D_THE_DA" },
+						MAP13: { Name: "Downtown", Music: "Doom2|D_DOOM" },
+						MAP14: { Name: "The Inmost Dens", Music: "Doom2|D_DDTBLU" },
+						MAP15: { Name: "Industrial Zone", Music: "Doom2|D_RUNNIN" },
+						MAP16: { Name: "Suburbs", Music: "Doom2|D_DEAD" },
+						MAP17: { Name: "Tenements", Music: "Doom2|D_STALKS" },
+						MAP18: { Name: "The Courtyard", Music: "D_ROMERO.opus" },
+						MAP19: { Name: "The Citadel", Music: "Doom2|D_SHAWN" },
+						MAP20: { Name: "Gotcha!", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Nirvana", Music: "Doom2|D_COUNTD" },
+						MAP22: { Name: "The Catacombs", Music: "Doom2|D_DDTBLU" },
+						MAP23: { Name: "Barrels o' Fun", Music: "D_AMPIE.opus" },
+						MAP24: { Name: "The Chasm", Music: "Doom2|D_THE_DA" },
+						MAP25: { Name: "Bloodfalls", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "The Abandoned Mines", Music: "Doom2|D_MESSAG" },
+						MAP27: { Name: "Monster Condo", Music: "Doom2|D_ROMERO" },
+						MAP28: { Name: "The Spirit World", Music: "D_TENSE.opus" },
+						MAP29: { Name: "The Living End", Music: "Doom2|D_SHAWN" },
+						MAP30: { Name: "Icon of Sin", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "Wolfenstein", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Grosse", Music: "D_ULTIMA.opus" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_DM2INT.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				TNT: {
+					Name: "TNT: Evilution",
+					Path: "TNT",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "System Control", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "Human BBQ", Music: "D_STALKS.opus" },
+						MAP03: { Name: "Power Control", Music: "Doom2|D_MESSAG" },
+						MAP04: { Name: "Wormhole", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Hanger", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Open Season", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Prison", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Metal", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "Stronghold", Music: "TNT|D_RUNNIN" },
+						MAP10: { Name: "Redemption", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Storage Facility", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "Crater", Music: "Doom2|D_DDTBLU" },
+						MAP13: { Name: "Nukage Processing", Music: "TNT|D_BETWEE" },
+						MAP14: { Name: "Steel Works", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "Dead Zone", Music: "TNT|D_STALKS" },
+						MAP16: { Name: "Deepest Reaches", Music: "D_DEAD2.opus" },
+						MAP17: { Name: "Processing Area", Music: "TNT|D_DOOM" },
+						MAP18: { Name: "Mill", Music: "TNT|D_DEAD" },
+						MAP19: { Name: "Shipping/Respawning", Music: "Doom2|D_COUNTD" },
+						MAP20: { Name: "Central Processing", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Administration Center", Music: "Doom2|D_IN_CIT" },
+						MAP22: { Name: "Habitat", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "Lunar Mining Project", Music: "Doom2|D_AMPIE" },
+						MAP24: { Name: "Quarry", Music: "Doom2|D_BETWEE" },
+						MAP25: { Name: "Baron's Den", Music: "Doom2|D_DOOM" },
+						MAP26: { Name: "Ballistyx", Music: "TNT|D_DEAD2" },
+						MAP27: { Name: "Mount Pain", Music: "D_DDTBLU.opus" },
+						MAP28: { Name: "Heck", Music: "TNT|D_DDTBL3" },
+						MAP29: { Name: "River Styx", Music: "TNT|D_BETWEE" },
+						MAP30: { Name: "Last Call", Music: "TNT|D_DDTBLU" },
+						MAP31: { Name: "Pharaoh", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Caribbean", Music: "Doom2|D_IN_CIT" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "TNT|D_EVIL" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				Plutonia: {
+					Name: "The Plutonia Experiment",
+					Path: "Plutonia",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "Doom2|D_DM2TTL" },
+						MAP01: { Name: "Congo", Music: "Doom|D_E1M2" },
+						MAP02: { Name: "Well of Souls", Music: "Doom|D_E1M3" },
+						MAP03: { Name: "Aztec", Music: "Doom|D_E1M6" },
+						MAP04: { Name: "Caged", Music: "Doom|D_E1M4" },
+						MAP05: { Name: "Ghost Town", Music: "Doom|D_E1M9" },
+						MAP06: { Name: "Baron's Lair", Music: "Doom|D_E1M8" },
+						MAP07: { Name: "Caughtyard", Music: "Doom|D_E2M1" },
+						MAP08: { Name: "Realm", Music: "Doom|D_E2M2" },
+						MAP09: { Name: "Abattoire", Music: "Doom|D_E3M3" },
+						MAP10: { Name: "Onslaught", Music: "Doom|D_E1M7" },
+						MAP11: { Name: "Hunted", Music: "Doom|D_BUNNY" },
+						MAP12: { Name: "Speed", Music: "Doom|D_E3M8" },
+						MAP13: { Name: "The Crypt", Music: "Doom|D_E3M2" },
+						MAP14: { Name: "Genesis", Music: "Doom|D_E2M7" },
+						MAP15: { Name: "The Twilight", Music: "Doom|D_E2M7" },
+						MAP16: { Name: "The Omen", Music: "Doom|D_E2M9" },
+						MAP17: { Name: "Compound", Music: "Doom|D_E1M1" },
+						MAP18: { Name: "Neurosphere", Music: "Doom|D_E1M7" },
+						MAP19: { Name: "NME", Music: "Doom|D_E1M5" },
+						MAP20: { Name: "The Death Domain", Music: "Doom2|D_MESSAG" },
+						MAP21: { Name: "Slayer", Music: "Doom2|D_READ_M" },
+						MAP22: { Name: "Impossible Mission", Music: "Doom2|D_DDTBLU" },
+						MAP23: { Name: "Tombstone", Music: "Doom2|D_AMPIE" },
+						MAP24: { Name: "The Final Frontier", Music: "Doom2|D_THE_DA" },
+						MAP25: { Name: "The Temple of Darkness", Music: "Doom2|D_ADRIAN" },
+						MAP26: { Name: "Bunker", Music: "Doom2|D_MESSAG" },
+						MAP27: { Name: "Anti-Christ", Music: "Doom|D_E2M1" },
+						MAP28: { Name: "The Sewers", Music: "Doom|D_E2M2" },
+						MAP29: { Name: "Odyssey of Noises", Music: "Doom|D_E1M1" },
+						MAP30: { Name: "The Gateway of Hell", Music: "Doom|D_VICTOR" },
+						MAP31: { Name: "Cyberden", Music: "Doom|D_E1M8" },
+						MAP32: { Name: "Go 2 It", Music: "Doom|D_E2M7" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "Doom2|D_DM2INT" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "Doom2|D_READ_M" },
+					},
+				},
+				Heretic: {
+					Name: "Heretic: Shadow of the Serpent Riders",
+					Path: "Heretic",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "MUS_TITL.opus" },
+						E1M1: { Name: "The Docks", Music: "MUS_E1M1.opus" },
+						E1M2: { Name: "The Dungeons", Music: "MUS_E1M2.opus" },
+						E1M3: { Name: "The Gatehouse", Music: "MUS_E1M3.opus" },
+						E1M4: { Name: "The Guard Tower", Music: "MUS_E1M4.opus" },
+						E1M5: { Name: "The Citadel", Music: "MUS_E1M5.opus" },
+						E1M6: { Name: "The Cathedral", Music: "MUS_E1M6.opus" },
+						E1M7: { Name: "The Crypts", Music: "MUS_E1M7.opus" },
+						E1M8: { Name: "Hell's Maw", Music: "MUS_E1M8.opus" },
+						E1M9: { Name: "The Graveyard", Music: "MUS_E1M9.opus" },
+						E2M1: { Name: "The Crater", Music: "MUS_E2M1.opus" },
+						E2M2: { Name: "The Lava Pits", Music: "MUS_E2M2.opus" },
+						E2M3: { Name: "The River of Fire", Music: "MUS_E2M3.opus" },
+						E2M4: { Name: "The Ice Grotto", Music: "MUS_E2M4.opus" },
+						E2M5: { Name: "The Catacombs", Music: "Heretic|MUS_E1M4" },
+						E2M6: { Name: "The Labyrinth", Music: "MUS_E2M6.opus" },
+						E2M7: { Name: "The Great Hall", Music: "MUS_E2M7.opus" },
+						E2M8: { Name: "The Portals of Chaos", Music: "MUS_E2M8.opus" },
+						E2M9: { Name: "The Glacier", Music: "MUS_E2M9.opus" },
+						E3M1: { Name: "The Storehouse", Music: "Heretic|MUS_E1M1" },
+						E3M2: { Name: "The Cesspool", Music: "MUS_E3M2.opus" },
+						E3M3: { Name: "The Confluence", Music: "MUS_E3M3.opus" },
+						E3M4: { Name: "The Azure Fortress", Music: "Heretic|MUS_E1M6" },
+						E3M5: { Name: "The Ophidian Lair", Music: "Heretic|MUS_E1M3" },
+						E3M6: { Name: "The Halls of Fear", Music: "Heretic|MUS_E1M2" },
+						E3M7: { Name: "The Chasm", Music: "Heretic|MUS_E1M5" },
+						E3M8: { Name: "D'Sparil's Keep", Music: "Heretic|MUS_E1M9" },
+						E3M9: { Name: "The Aquifer", Music: "Heretic|MUS_E2M6" },
+						E4M1: { Name: "Catafalque", Music: "Heretic|MUS_E1M6" },
+						E4M2: { Name: "Blockhouse", Music: "Heretic|MUS_E1M2" },
+						E4M3: { Name: "Ambulatory", Music: "Heretic|MUS_E1M3" },
+						E4M4: { Name: "Sepulcher", Music: "Heretic|MUS_E1M4" },
+						E4M5: { Name: "Great Stair", Music: "Heretic|MUS_E1M5" },
+						E4M6: { Name: "Halls of the Apostate", Music: "Heretic|MUS_E1M1" },
+						E4M7: { Name: "Ramparts of Perdition", Music: "Heretic|MUS_E1M7" },
+						E4M8: { Name: "Shattered Bridge", Music: "Heretic|MUS_E1M8" },
+						E4M9: { Name: "Mausoleum", Music: "Heretic|MUS_E1M9" },
+						E5M1: { Name: "Ochre Cliffs", Music: "Heretic|MUS_E2M1" },
+						E5M2: { Name: "Rapids", Music: "Heretic|MUS_E2M2" },
+						E5M3: { Name: "Quay", Music: "Heretic|MUS_E2M3" },
+						E5M4: { Name: "Courtyard", Music: "Heretic|MUS_E2M4" },
+						E5M5: { Name: "Hydratyr", Music: "Heretic|MUS_E1M4" },
+						E5M6: { Name: "Colonnade", Music: "Heretic|MUS_E2M6" },
+						E5M7: { Name: "Foetid Manse", Music: "Heretic|MUS_E2M7" },
+						E5M8: { Name: "Field of Judgement", Music: "Heretic|MUS_E2M8" },
+						E5M9: { Name: "Skein of D'Sparil", Music: "Heretic|MUS_E2M9" },
+						E6M1: { Name: "Raven's Lair", Music: "Heretic|MUS_E3M2" },
+						E6M2: { Name: "Water Shrine", Music: "Heretic|MUS_E3M3" },
+						E6M3: { Name: "American's Legacy", Music: "Heretic|MUS_E1M6" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "MUS_INTR.opus" },
+						Victory: { Type: "Music", Name: "破關音樂", Music: "MUS_CPTD.opus" },
+					},
+				},
+				Hexen: {
+					Name: "Hexen",
+					Path: "Hexen",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "HEXEN.opus" },
+						H1M1: { Name: "Winnowing Hall", Music: "WINNOWR.opus" },
+						H1M2: { Name: "Seven Portals", Music: "JACHR.opus" },
+						H1M3: { Name: "Guardian of Ice", Music: "SIMONR.opus" },
+						H1M4: { Name: "Guardian of Fire", Music: "WUTZITR.opus" },
+						H1M5: { Name: "Guardian of Steel", Music: "FALCONR.opus" },
+						H1M6: { Name: "Bright Crucible", Music: "LEVELR.opus" },
+						H2M1: { Name: "Shadow Wood", Music: "CRYPTR.opus" },
+						H2M2: { Name: "Darkmere", Music: "SWAMPR.opus" },
+						H2M3: { Name: "Caves of Circe", Music: "DEEPR.opus" },
+						H2M4: { Name: "Wastelands", Music: "FUBASR.opus" },
+						H2M5: { Name: "Sacred Grove", Music: "GROVER.opus" },
+						H2M6: { Name: "Hypostyle", Music: "FORTR.opus" },
+						H3M1: { Name: "Heresiarch's Seminary", Music: "VOIDR.opus" },
+						H3M2: { Name: "Dragon Chapel", Music: "CHAP_1R.opus" },
+						H3M3: { Name: "Griffin Chapel", Music: "CHAP_3R.opus" },
+						H3M4: { Name: "Deathwind Chapel", Music: "CHAP_4R.opus" },
+						H3M5: { Name: "Orchard of Lamentations", Music: "CHIPPYR.opus" },
+						H3M6: { Name: "Silent Refectory", Music: "PERCR.opus" },
+						H3M7: { Name: "Wolf Chapel", Music: "SECRETR.opus" },
+						H4M1: { Name: "Forsaken Outpost", Music: "FOOJAR.opus" },
+						H4M2: { Name: "Castle of Grief", Music: "SIXATER.opus" },
+						H4M3: { Name: "Gibbet", Music: "WOBABYR.opus" },
+						H4M4: { Name: "Effluvium", Music: "Hexen|CRYPTR" },
+						H4M5: { Name: "Dungeons", Music: "FANTAR.opus" },
+						H4M6: { Name: "Desolate Garden", Music: "BLECHR.opus" },
+						H5M1: { Name: "Necropolis", Music: "BONESR.opus" },
+						H5M2: { Name: "Zedek's Tomb", Music: "OCTOR.opus" },
+						H5M3: { Name: "Menelkir's Tomb", Music: "RITHMR.opus" },
+						H5M4: { Name: "Traductus' Tomb", Music: "STALKR.opus" },
+						H5M5: { Name: "Vivarium", Music: "BORKR.opus" },
+						H5M6: { Name: "Dark Crucible", Music: "CRUCIBR.opus" },
+						Intermission: { Type: "Music", Name: "換關音樂", Music: "HUB.opus" },
+						Victory1: { Type: "Music", Name: "破關音樂 1", Music: "HALL.opus" },
+						Victory2: { Type: "Music", Name: "破關音樂 2", Music: "ORB.opus" },
+						Victory3: { Type: "Music", Name: "破關音樂 3", Music: "CHESS.opus" },
+						Unused1: { Name: "Unused 1", Music: "CHAP_2R.opus" },
+						Unused2: { Name: "Unused 2", Music: "CHARTR.opus" },
+						EH1M1: { Name: "Ruined Village", Music: "Hexen|WINNOWR" },
+						EH1M2: { Name: "Blight", Music: "Hexen|JACHR" },
+						EH1M3: { Name: "Sump", Music: "Hexen|VOIDR" },
+						EH1M4: { Name: "Catacomb", Music: "Hexen|DEEPR" },
+						EH1M5: { Name: "Badlands", Music: "Hexen|FUBASR" },
+						EH1M6: { Name: "Brackenwood", Music: "Hexen|SIXATER" },
+						EH1M7: { Name: "Pyre", Music: "Hexen|CHAP_1R" },
+						EH2M1: { Name: "Constable's Gate", Music: "Hexen|BONESR" },
+						EH2M2: { Name: "Treasury", Music: "Hexen|WUTZITR" },
+						EH2M3: { Name: "Market Place", Music: "Hexen|CHAP_2R" },
+						EH2M4: { Name: "Locus Requiescat", Music: "Hexen|OCTOR" },
+						EH2M5: { Name: "Ordeal", Music: "Hexen|STALKR" },
+						EH2M6: { Name: "Armory", Music: "Hexen|FALCONR" },
+						EH3M1: { Name: "Nave", Music: "Hexen|CHAP_3R" },
+						EH3M2: { Name: "Chantry", Music: "Hexen|PERCR" },
+						EH3M3: { Name: "Abattoir", Music: "Hexen|RITHMR" },
+						EH3M4: { Name: "Dark Watch", Music: "Hexen|FOOJAR" },
+						EH3M5: { Name: "Cloaca", Music: "Hexen|CRYPTR" },
+						EH3M6: { Name: "Ice Hold", Music: "Hexen|SIMONR" },
+						EH3M7: { Name: "Dark Citadel", Music: "Hexen|CRUCIBR" },
+						DMM1: { Name: "Transit", Music: "Hexen|GROVER" },
+						DMM2: { Name: "Over N Under", Music: "Hexen|FORTR" },
+						DMM3: { Name: "Deathfog", Music: "Hexen|SWAMPR" },
+						DMM4: { Name: "Castle of Pain", Music: "Hexen|WOBABYR" },
+						DMM5: { Name: "Sewer Pit", Music: "Hexen|BLECHR" },
+						DMM6: { Name: "The Rose", Music: "Hexen|FALCONR" },
+					},
+				},
+				AV: {
+					Name: "Alien Vendetta",
+					Path: "AV",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "Sunset", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "Rusty Rage", Music: "Doom|D_E2M1" },
+						MAP03: { Name: "Cargo Depot", Music: "Doom|D_E1M4" },
+						MAP04: { Name: "Seclusion", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Crimson Tide", Music: "Doom|D_VICTOR" },
+						MAP06: { Name: "Hillside Siege", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Showdown", Music: "Doom|D_E2M3" },
+						MAP08: { Name: "Beast Island", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "Castle Gardens", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Toxic Touch", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Nemesis", Music: "Doom|D_E1M8" },
+						MAP12: { Name: "Entropy", Music: "Doom|D_E1M2" },
+						MAP13: { Name: "Suicidal Tendencies", Music: "Doom|D_E2M2" },
+						MAP14: { Name: "Overwhelming Odds", Music: "Doom|D_E1M6" },
+						MAP15: { Name: "Bulls on Parade", Music: "Heretic|MUS_E2M3" },
+						MAP16: { Name: "Mutual Destruction", Music: "Doom|D_E2M7" },
+						MAP17: { Name: "Nukefall", Music: "TNT|D_DDTBLU" },
+						MAP18: { Name: "Lake Poison", Music: "TNT|D_BETWEE" },
+						MAP19: { Name: "Alien Resurrection", Music: "Heretic|MUS_E1M1" },
+						MAP20: { Name: "Misri Halek", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "One Flew Over The Caco's Nest", Music: "D_COUNT2.opus" },
+						MAP22: { Name: "Rubicon", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "Blood Sacrifice", Music: "Doom|D_E1M7" },
+						MAP24: { Name: "Clandestine Complex", Music: "D_THEDA3.opus" },
+						MAP25: { Name: "Demonic Hordes", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "Dark Dome", Music: "Doom2|D_IN_CIT" },
+						MAP27: { Name: "Stench of Evil", Music: "Doom|D_E1M5" },
+						MAP28: { Name: "Whispering Shadows", Music: "Doom|D_E2M6" },
+						MAP29: { Name: "Fire Walk With Me", Music: "Heretic|MUS_E1M4" },
+						MAP30: { Name: "Point Dreadful", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "Killer Colours", Music: "D_EVIL.opus" },
+						MAP32: { Name: "No Guts No Glory", Music: "Heretic|MUS_E1M9" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "Heretic|MUS_E1M9" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				MM: {
+					Name: "Memento Mori",
+					Path: "MM",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "The Teleporter", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "The Bridge", Music: "D_STALKS.opus" },
+						MAP03: { Name: "Interlock", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "The Stand", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Hell's Kitchen", Music: "D_DOOM.opus" },
+						MAP06: { Name: "The Powerstation", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Not That Simple", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "And the Dead Shall Rise", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "High-Tech Grave", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "The Mansion", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Halls of Insanity", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "Kinetics", Music: "D_THEDA2.opus" },
+						MAP13: { Name: "The Inmost Dens II", Music: "D_DOOM2.opus" },
+						MAP14: { Name: "Aquaduct", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "Karmacoma", Music: "D_RUNNI2.opus" },
+						MAP16: { Name: "Stoned", Music: "MM|D_DOOM" },
+						MAP17: { Name: "House of Thorn", Music: "MM|D_STALKS" },
+						MAP18: { Name: "A Dead Man's Town", Music: "MM|D_RUNNIN" },
+						MAP19: { Name: "Maltraiter", Music: "MM|D_SHAWN" },
+						MAP20: { Name: "Mountain Depot", Music: "MM|D_THE_DA" },
+						MAP21: { Name: "Twilight Lab", Music: "MM|D_STLKS2" },
+						MAP22: { Name: "The Escape", Music: "MM|D_RUNNI2" },
+						MAP23: { Name: "Showdown", Music: "MM|D_THEDA2" },
+						MAP24: { Name: "Diehard", Music: "MM|D_DEAD" },
+						MAP25: { Name: "Cesspool", Music: "MM|D_IN_CIT" },
+						MAP26: { Name: "Between Scattered Corpses", Music: "MM|D_BETWEE" },
+						MAP27: { Name: "Fort Hades", Music: "MM|D_COUNTD" },
+						MAP28: { Name: "City of the Unavenged", Music: "MM|D_STALKS" },
+						MAP29: { Name: "Island of Death", Music: "MM|D_RUNNIN" },
+						MAP30: { Name: "Viper", Music: "MM|D_THE_DA" },
+						MAP31: { Name: "Technology Base", Music: "MM|D_IN_CIT" },
+						MAP32: { Name: "The Hidden Slime Factory", Music: "MM|D_DEAD" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_DM2INT.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				MM2: {
+					Name: "Memento Mori II",
+					Path: "MM2",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "Outpost", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "The Feeding Pit", Music: "D_STALKS.opus" },
+						MAP03: { Name: "...And Hell Beneath", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "Ratamahatta", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Rites of Passage", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Trapped", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Frustration", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Stigmata", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "Sabbath Sewer", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Clear for Death", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Sewer Shutdown", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "The Waterway", Music: "D_THEDA2.opus" },
+						MAP13: { Name: "Devils Paradise", Music: "D_DOOM2.opus" },
+						MAP14: { Name: "A Question of Time", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "The Devil's Coterie", Music: "D_RUNNI2.opus" },
+						MAP16: { Name: "The Nephilim", Music: "D_DEAD2.opus" },
+						MAP17: { Name: "No One", Music: "D_STLKS3.opus" },
+						MAP18: { Name: "Regulate", Music: "D_ROMERO.opus" },
+						MAP19: { Name: "The Shaft", Music: "D_SHAWN2.opus" },
+						MAP20: { Name: "The Experiment", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Sanctuary", Music: "D_COUNT2.opus" },
+						MAP22: { Name: "R.R.F. Refinary", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "No Way Out", Music: "D_AMPIE.opus" },
+						MAP24: { Name: "Io Lab", Music: "D_THEDA3.opus" },
+						MAP25: { Name: "Forgotten Town", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "Base Exposure", Music: "D_MESSG2.opus" },
+						MAP27: { Name: "The Silos", Music: "D_ROMER2.opus" },
+						MAP28: { Name: "Corporate Hell", Music: "D_TENSE.opus" },
+						MAP29: { Name: "Kings of Metal", Music: "D_SHAWN3.opus" },
+						MAP30: { Name: "It", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "DejaVu", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Dances with Demons", Music: "D_ULTIMA.opus" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_DM2INT.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				HR2: {
+					Name: "Hell Revealed II",
+					Path: "HR2",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "IGNITION!", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "High Voltage", Music: "D_STALKS.opus" },
+						MAP03: { Name: "Shackled", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "Reluctant Pain", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Insatanity", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Revival", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Not That Simple II", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Ballistics", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "The Siege II", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Base Blaze", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Raw Hatred", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "Anti Static", Music: "D_THEDA2.opus" },
+						MAP13: { Name: "Hardcore", Music: "D_DOOM2.opus" },
+						MAP14: { Name: "Metal Meltdown", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "The Path II", Music: "D_RUNNI2.opus" },
+						MAP16: { Name: "The Chapel Of Black Granite", Music: "D_DEAD2.opus" },
+						MAP17: { Name: "An Eye For An Eye", Music: "D_STLKS3.opus" },
+						MAP18: { Name: "Excess Meat", Music: "D_ROMERO.opus" },
+						MAP19: { Name: "Mind Trap", Music: "D_SHAWN2.opus" },
+						MAP20: { Name: "Fear Of The Dark", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Conflux", Music: "D_COUNT2.opus" },
+						MAP22: { Name: "Sewer Slaughter", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "When The Heavens Fall", Music: "D_AMPIE.opus" },
+						MAP24: { Name: "The Inmost Dens III", Music: "D_THEDA3.opus" },
+						MAP25: { Name: "The End Is Nigh", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "Dis 2000", Music: "D_MESSG2.opus" },
+						MAP27: { Name: "Resistance Remains", Music: "D_ROMER2.opus" },
+						MAP28: { Name: "Beyond The Sea", Music: "D_TENSE.opus" },
+						MAP29: { Name: "Hell's Cauldron", Music: "D_SHAWN3.opus" },
+						MAP30: { Name: "Source Control", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "The Descent II", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Playground", Music: "D_ULTIMA.opus" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_DM2INT.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				MarsWar: {
+					Name: "Mars War",
+					Path: "MarsWar",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "Terraforming Station", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "Theta Base", Music: "D_STALKS.opus" },
+						MAP03: { Name: "Manufacturing Plant", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "Alpha Base", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Crash Sight", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Beta Base", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Infestation", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Bunker Zero", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "Death Management", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Transport Ship", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Drop Ship", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "Operations", Music: "D_THEDA2.opus" },
+						MAP13: { Name: "Warehouse", Music: "D_DOOM2.opus" },
+						MAP14: { Name: "Civilian Center", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "The Fringes", Music: "D_RUNNI2.opus" },
+						MAP16: { Name: "Enlightenment", Music: "D_DEAD2.opus" },
+						MAP17: { Name: "Commercial Sector", Music: "D_STLKS3.opus" },
+						MAP18: { Name: "The Edge", Music: "D_ROMERO.opus" },
+						MAP19: { Name: "The Foundation", Music: "D_SHAWN2.opus" },
+						MAP20: { Name: "Land of the Lame", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Highway to Hell", Music: "D_COUNT2.opus" },
+						MAP22: { Name: "Xerox", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "The Gates of Hell", Music: "D_AMPIE.opus" },
+						MAP24: { Name: "83' E", Music: "D_THEDA3.opus" },
+						MAP25: { Name: "1984", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "Maximum Security", Music: "D_MESSG2.opus" },
+						MAP27: { Name: "Marketing", Music: "D_ROMER2.opus" },
+						MAP28: { Name: "Doom User Interface", Music: "D_TENSE.opus" },
+						MAP29: { Name: "Choices", Music: "D_SHAWN3.opus" },
+						MAP30: { Name: "Icon of Sin", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "Wolfenstein", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Hell Labs", Music: "D_ULTIMA.opus" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_DM2INT.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				Plutonia2: {
+					Name: "The Plutonia Experiment 2",
+					Path: "Plutonia2",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "Plutonia|MAP03" },
+						MAP01: { Name: "Comeback", Music: "D_JP_PYR.opus" },
+						MAP02: { Name: "Jungle Spirits", Music: "D_JR_BLO.opus" },
+						MAP03: { Name: "Skull Island", Music: "D_SR_GAT.opus" },
+						MAP04: { Name: "Filth", Music: "Plutonia|MAP01" },
+						MAP05: { Name: "Flooded Chapel", Music: "D_JP_DEA.opus" },
+						MAP06: { Name: "Collider Complex", Music: "Plutonia|MAP06" },
+						MAP07: { Name: "Enemy Caught", Music: "D_JR_ROC.opus" },
+						MAP08: { Name: "Harmany", Music: "D_JR_GAM.opus" },
+						MAP09: { Name: "Wormhole Zone", Music: "D_JP_BAT.opus" },
+						MAP10: { Name: "Cosmodrome", Music: "D_JP_AST.opus" },
+						MAP11: { Name: "Arch-Violence", Music: "D_JP_BEC.opus" },
+						MAP12: { Name: "Imprisoned", Music: "D_EB_UND.opus" },
+						MAP13: { Name: "Hard Facility", Music: "Plutonia|MAP13" },
+						MAP14: { Name: "Charon Eclipse", Music: "D_JR_SAM.opus" },
+						MAP15: { Name: "Where Hate Runs Red", Music: "D_SR_STA.opus" },
+						MAP16: { Name: "Predatorium", Music: "D_EB_COM.opus" },
+						MAP17: { Name: "Nuclear Horror", Music: "D_SR_NIG.opus" },
+						MAP18: { Name: "Buckets of Blood", Music: "D_JP_SIL.opus" },
+						MAP19: { Name: "Hecknology", Music: "D_JP_DWE.opus" },
+						MAP20: { Name: "Lurking Fear", Music: "D_JR_END.opus" },
+						MAP21: { Name: "Assassin", Music: "D_PC_MAR.opus" },
+						MAP22: { Name: "Locus Perditus", Music: "Plutonia|MAP22" },
+						MAP23: { Name: "Aztecorum", Music: "Plutonia|MAP27" },
+						MAP24: { Name: "Outpost of the Evil Dead", Music: "D_EB_AGA.opus" },
+						MAP25: { Name: "Black Ice", Music: "D_JP_SAN.opus" },
+						MAP26: { Name: "Plutopia", Music: "D_JP_PLU.opus" },
+						MAP27: { Name: "Red Hot", Music: "D_PC_OUT.opus" },
+						MAP28: { Name: "The Bloodwall", Music: "D_RP_GUT.opus" },
+						MAP29: { Name: "Ticket to Eternity", Music: "D_JR_HUN.opus" },
+						MAP30: { Name: "The Gatewatcher", Music: "D_JP_CAT.opus" },
+						MAP31: { Name: "Cybernation", Music: "Doom|E2M6" },
+						MAP32: { Name: "Go 4 It", Music: "D_JP_NOB.opus" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_JA_CER.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_JP_WAS.opus" },
+					},
+				},
+				Scythe2: {
+					Name: "Scythe 2",
+					Path: "Scythe2",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "Castle Entryway", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "Rooftop Warzone", Music: "D_STALKS.opus" },
+						MAP03: { Name: "Castle Gardens II", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "Cursed Cellars", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Halls of Anguish", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Temple Entryway", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Temple of Isis", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Graverobbers", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "Valley of the Queen", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Pharoas Tomb", Music: "D_DEAD.opus" },
+						MAP11: { Name: "UAC Base X", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "Battlegrounds", Music: "D_THEDA2.opus" },
+						MAP13: { Name: "Mining Project", Music: "D_DOOM2.opus" },
+						MAP14: { Name: "The Haunted Mines", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "End of the Line", Music: "D_RUNNI2.opus" },
+						MAP16: { Name: "Mr. X", Music: "D_DEAD2.opus" },
+						MAP17: { Name: "Canyon of Blood", Music: "Heretic|E1M3" },
+						MAP18: { Name: "Living Lands", Music: "Hexen|FOOJAR" },
+						MAP19: { Name: "Withering Away", Music: "D_SHAWN2.opus" },
+						MAP20: { Name: "The Gates", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Doom Gardens", Music: "D_COUNT2.opus" },
+						MAP22: { Name: "The Garden Base II", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "Whispering Winds", Music: "Heretic|MUS_E2M2" },
+						MAP24: { Name: "Gaia's Temple", Music: "D_THEDA3.opus" },
+						MAP25: { Name: "Forgotten City", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "Death", Music: "D_MESSG2.opus" },
+						MAP27: { Name: "Afterlife II", Music: "D_ROMER2.opus" },
+						MAP28: { Name: "Nightmare", Music: "D_TENSE.opus" },
+						MAP29: { Name: "Dust to Dust", Music: "D_SHAWN3.opus" },
+						MAP30: { Name: "Haunting Dreams", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "Secret", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Super Secret", Music: "Doom|D_E2M3" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "Scythe2|Title" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "Doom2|EndGame" },
+					},
+				},
+				TwZone: {
+					Name: "The Twilight Zone",
+					Path: "TwZone",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "Doom|E2M2" },
+						MAP01: { Name: "Nazi Combat Base", Music: "Doom|E3M3" },
+						MAP02: { Name: "Bustin' Bones", Music: "Doom|E3M2" },
+						MAP03: { Name: "Storage House", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "Fortress", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "Underground Hell", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Hell Knight Station", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Bad Newt Base", Music: "Doom|E1M4" },
+						MAP08: { Name: "Seeing Red", Music: "Doom|E1M5" },
+						MAP09: { Name: "The Ultimate Adventure", Music: "Doom2|MAP09" },
+						MAP10: { Name: "Flakky", Music: "Doom|E2M9" },
+						MAP11: { Name: "Containment Area", Music: "Doom|E2M2" },
+						MAP12: { Name: "Dark Base", Music: "Doom|E2M7" },
+						MAP13: { Name: "Spellcaster", Music: "Doom2|EndGame" },
+						MAP14: { Name: "Hell", Music: "Heretic|E1M5" },
+						MAP15: { Name: "The Forbidden City", Music: "Doom|E1M2" },
+						MAP16: { Name: "Dungeon of D'Sparil", Music: "Heretic|E1M9" },
+						MAP17: { Name: "Mucus Production Plant", Music: "Doom|E2M4" },
+						MAP18: { Name: "The Base of Joe", Music: "D_ROMERO.opus" },
+						MAP19: { Name: "Painful Memories", Music: "Doom|E1M6" },
+						MAP20: { Name: "The Last Battle", Music: "Doom2|MAP30" },
+						MAP21: { Name: "The Lost Facillity", Music: "Heretic|E1M7" },
+						MAP22: { Name: "Heat", Music: "Heretic|E2M2" },
+						MAP23: { Name: "Spaceswitch", Music: "D_AMPIE.opus" },
+						MAP24: { Name: "The Great Pyramid", Music: "Heretic|E1M3" },
+						MAP25: { Name: "Boxy", Music: "Doom2|MAP25" },
+						MAP26: { Name: "Technologic", Music: "D_MESSG2.opus" },
+						MAP27: { Name: "Gutted", Music: "Doom|E1M8" },
+						MAP28: { Name: "Arachnozone", Music: "Heretic|E1M8" },
+						MAP29: { Name: "Anomaly", Music: "Doom|E2M1" },
+						MAP30: { Name: "Pray for Hell", Music: "TNT|MAP06" },
+						MAP31: { Name: "Beige", Music: "Doom|E1M9" },
+						MAP32: { Name: "Hellkeep, 6 Dec, 5139AD", Music: "Doom|E2M8" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "Doom|E2M3" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "Doom|Victory" },
+					},
+				},
+				TwZone2: {
+					Name: "The Twilight Zone II: Final Dreams",
+					Path: "TwZone2",
+					Data: {
+						Title: { Type: "Music", Name: "標題音樂", Music: "D_DM2TTL.opus" },
+						MAP01: { Name: "Sputnik Port", Music: "D_RUNNIN.opus" },
+						MAP02: { Name: "triton", Music: "D_STALKS.opus" },
+						MAP03: { Name: "Nemesis", Music: "D_COUNTD.opus" },
+						MAP04: { Name: "Memento", Music: "D_BETWEE.opus" },
+						MAP05: { Name: "TNT Barons", Music: "D_DOOM.opus" },
+						MAP06: { Name: "Burnett Mining Complex", Music: "D_THE_DA.opus" },
+						MAP07: { Name: "Suffocate", Music: "D_SHAWN.opus" },
+						MAP08: { Name: "Porpoise", Music: "D_DDTBLU.opus" },
+						MAP09: { Name: "Gymea Mentos", Music: "D_IN_CIT.opus" },
+						MAP10: { Name: "Facillity", Music: "D_DEAD.opus" },
+						MAP11: { Name: "Termite Mound", Music: "D_STLKS2.opus" },
+						MAP12: { Name: "Death Ship", Music: "D_THEDA2.opus" },
+						MAP13: { Name: "D'Sparil's Domain", Music: "D_DOOM2.opus" },
+						MAP14: { Name: "Hazard Base", Music: "D_DDTBL2.opus" },
+						MAP15: { Name: "Stardate Institute", Music: "D_RUNNI2.opus" },
+						MAP16: { Name: "Subspace", Music: "D_DEAD2.opus" },
+						MAP17: { Name: "Spacelab", Music: "D_STLKS3.opus" },
+						MAP18: { Name: "The Gypsy", Music: "D_ROMERO.opus" },
+						MAP19: { Name: "Disaster Area", Music: "D_SHAWN2.opus" },
+						MAP20: { Name: "Corcous", Music: "D_MESSAG.opus" },
+						MAP21: { Name: "Processing Labs", Music: "D_COUNT2.opus" },
+						MAP22: { Name: "Despair", Music: "D_DDTBL3.opus" },
+						MAP23: { Name: "Who Stole The Health", Music: "D_AMPIE.opus" },
+						MAP24: { Name: "The Abyss", Music: "D_THEDA3.opus" },
+						MAP25: { Name: "Amy's Keep", Music: "D_ADRIAN.opus" },
+						MAP26: { Name: "Den of Insanity", Music: "D_MESSG2.opus" },
+						MAP27: { Name: "Place of Reckoning", Music: "D_ROMER2.opus" },
+						MAP28: { Name: "Unholy", Music: "D_TENSE.opus" },
+						MAP29: { Name: "Caverns of Darkness", Music: "D_SHAWN3.opus" },
+						MAP30: { Name: "Jon's Arena", Music: "D_OPENIN.opus" },
+						MAP31: { Name: "Morass", Music: "D_EVIL.opus" },
+						MAP32: { Name: "Meorhanal 4 Yul", Music: "D_ULTIMA.opus" },
+						Intermission: { Type: "Music", Name: "過關音樂", Music: "D_DM2INT.opus" },
+						EndGame: { Type: "Music", Name: "結局音樂", Music: "D_READ_M.opus" },
+					},
+				},
+				Vilcore: {
+					Name: "The Vilecore",
+					Path: "vilecore",
+					Data: {
+						MAP01: { Name: "Evilzone", Music: "" },
+						MAP02: { Name: "Halls Of Doom", Music: "" },
+						MAP03: { Name: "Revenant Court", Music: "" },
+						MAP04: { Name: "Barriers", Music: "" },
+						MAP05: { Name: "Hellknight's Temple", Music: "" },
+						MAP06: { Name: "Powersurger", Music: "" },
+						MAP07: { Name: "Demonic Outpost", Music: "" },
+						MAP08: { Name: "Temple Of Fiends", Music: "" },
+						MAP09: { Name: "The Vile Complex", Music: "" },
+						MAP10: { Name: "Nukage Plant", Music: "" },
+						MAP11: { Name: "Doomcatraz", Music: "" },
+						MAP12: { Name: "The Chaos Site", Music: "" },
+						MAP13: { Name: "The Morbid arena", Music: "" },
+						MAP14: { Name: "The Baron's Causeway", Music: "" },
+						MAP15: { Name: "Ashwall Plaza", Music: "" },
+						MAP16: { Name: "The Dreadhold", Music: "" },
+						MAP17: { Name: "Aztecore", Music: "" },
+						MAP18: { Name: "Doomed Castle", Music: "" },
+						MAP19: { Name: "The Bridge at Kazadoom", Music: "" },
+						MAP20: { Name: "Forsaken Mines", Music: "" },
+						MAP21: { Name: "The Rife Hive", Music: "" },
+						MAP22: { Name: "Doomhenge", Music: "" },
+						MAP23: { Name: "Hellish Junction", Music: "" },
+						MAP24: { Name: "Chemical Facility", Music: "" },
+						MAP25: { Name: "Blood Fountain", Music: "" },
+						MAP26: { Name: "Hellpitt Temple", Music: "" },
+						MAP27: { Name: "Infested Tomb", Music: "" },
+						MAP28: { Name: "Energy Well", Music: "" },
+						MAP29: { Name: "Paths Of Chaos", Music: "" },
+						MAP30: { Name: "Battle Hex", Music: "" },
+						MAP31: { Name: "Bloodstone", Music: "" },
+						MAP32: { Name: "The Vilecore", Music: "" },
+					},
+				}
+			};
+		};
+
+		var DemoHelper = new function() {
+			// Gets full map name of specified map.
+			this.GetMapFullName = function(name, iwad, pwads) {
+				let info = GetMapInfo(name, iwad, pwads);
+				return typeof(info) !== "undefined" ? (name + ": " + info.Name) : name;
+			}
+		
+			function GetMapInfo(name, iwad, pwads) {
+				// The correct way should be mergin two object and overwrite by the newer one.
+				// But I think there is no such need for all our demos.
+
+				let table = undefined;
+				let wadInfo = GameInfo.WadInfo;
+
+				if (typeof(iwad) !== "string") iwad = "";
+				iwad = iwad.toLowerCase().replace(".wad", "");
+				switch (iwad) {
+					case "doom": table = wadInfo.Doom; break;
+					case "doom2": table = wadInfo.Doom2; break;
+					case "tnt": table = wadInfo.TNT; break;
+					case "plutonia": table = wadInfo.Plutonia; break;
+					default: table = name.startsWith("map") ? wadInfo.Doom2 : wadInfo.Doom;
+				}
+
+				if (Array.isArray(pwads)) {
+					for (let i in pwads) {
+						let pwad = pwads[i].toLowerCase().replace(".wad", "");
+						switch (pwad) {
+							case "mm2": table = wadInfo["Memento Mori II"]; break;
+							case "hr2":
+							case "hr2final": table = wadInfo["Hell Revealed II"]; break;
+							case "marswar":
+							case "marsw301": table = wadInfo["Mars War"]; break;
+							case "twzone2": table = wadInfo["The Twilight Zone 2"]; break;
+							case "vilcore": table = wadInfo["The Vilecore"]; break;
+							//default: console.log("Unrecognized PWAD: " + pwads[i]);
+						}
+					}
+				}
+
+				return table.Data[name.toUpperCase()];
+			}
+
+			// Maps in-game player name to actual player name we are familiar with.
+			this.GetTruePlayerName = function(inGameName) {
+				switch (inGameName.toLowerCase()) {
+					case "doom nobody":
+					case "doomenergy": return "DoomEnergy";
+					case "rock1246": return "Rock1246";
+					case "aj": return "AJ";
+					case "no95": return "No95";
+					case "dino": return "Dino";
+					case "shon": return "Shon";
+					case "mario":
+					case "d.b-mario": return "Mario";
+					case "unicode": return "Unicode";
+					case "qqw94": return "QQW94";
+					case "e.f":
+					case "extremely fantasy":
+					case "-=d.b=- e.f.":
+					case "=d.b= e.f":
+					case "=d.b=e.f": return "EF";
+					case "orcs":
+					case "kevin": return "Orcs";
+					case "904631": return "904631";
+					case "jackgo0932": return "Jackgo0932";
+					case "timothy":
+					case "=tcl=": return "Timothy";
+					case "guy": return "Guy";
+					case "mdt":
+					case "m.d.t":
+					case "doom.mike":
+					case "= mike =":
+					case "super.mike.doom.team":
+					case "my no is mike":
+					case "my name no mike":
+					case "mike len":
+					case "mike":
+					case "mike.boss":
+					case "=db= - mike.boss":
+					case "mike.doom.team": return "Mike";
+					case "yoyo": return "Yoyo";
+					case "ajneok": return "AJNeoK";
+					case "terminator": return "Terminator";
+					case "ash ketchum 2005": // Not sure.
+					case "arthas": return "Arthas";
+					case "howie": return "Howie";
+					case "caesar": return "Caesar";
+					case "mink": return "Mink";
+					case "darway": return "Darway";
+					case "ringo": return "Ringo";
+					case "e007x": return "E007X";
+					case "orz gordon sto": return "Gordon";
+					case "dakki": return "Dakki";
+					case "kenny": return "Kenny";
+					case "tnlkm": return "Tnlkm";
+					case "uac": return "UAC";
+					case "pkmx": return "PkmX";
+					case "lui chun kei": return "Angus";
+					case "weow": return "WEOW";
+					case "ghost": return "Ghost";
+					case "sprite": return "Sprite";
+					case "saiste": return "Saiste";
+					case "superman": return "Superman";
+					case "paul": return "Paul";
+					case "jj.mig":
+					case "rei": return "Rei";
+					case "hunter": return "Hunter";
+					case "link": return "Link";
+					case "jack": return "Jack";
+					case "hbo": return "HBO";
+					case "oda":
+					case "to":
+					case "jeffliu":
+					case "masayn":
+					case "masayan": return "Masayan";
+					case "ash": return "Ash";
+					case "y.s.c":
+					case "ysc": return "YSC";
+					case "secreet":
+					case "[db]starlove": return "Secreet";
+					case "[dj-db]jinwoo":
+					case "[dj]mr.trooper": return "JinWooKo";
+					case "dr.kill": return "Dr.Kill";
+					case "chromatic.hp": return "Chromatic.HP";
+					case "logo": return "Logo";
+					case "warrior": return "Vegetto";
+					// Special names with invalid characters, so their names should be manually processed first.
+					case "james bond": return "James Bond";
+					case "bb": return "BB";
+					// Judges or spectators in DBSDMT 2005.
+					case "aloven": // Skip.
+					case "repo": // Skip.
+					case "dth-000": // Skip.
+					case "artist-hong": // Skip.
+					case "user": // Skip.
+					case "administrator": break; // Skip.
+				}
+				return this.IsTruePlayerName(name) ? name : undefined;
+			}
+
+			// Checks whether this name is true player name.
+			this.IsTruePlayerName = function(name) {
+				switch (name) {
+					case "904631":
+					case "AJ":
+					case "AJNeoK":
+					case "Angus":
+					case "Arthas":
+					case "Ash":
+					case "BB":
+					case "Caesar":
+					case "Chromatic.HP":
+					case "Dakki":
+					case "Darway":
+					case "Dino":
+					case "DoomEnergy":
+					case "Dr.Kill":
+					case "E007X":
+					case "EF":
+					case "Ghost":
+					case "Gordon":
+					case "Guy":
+					case "HBO":
+					case "Howie":
+					case "Hunter":
+					case "Jack":
+					case "Jackgo0932":
+					case "James Bond":
+					case "JinWooKo":
+					case "Kenny":
+					case "Link":
+					case "Logo":
+					case "Mario":
+					case "Masayan":
+					case "Mike":
+					case "Mink":
+					case "No95":
+					case "Orcs":
+					case "Paul":
+					case "PkmX":
+					case "QQW94":
+					case "Rei":
+					case "Ringo":
+					case "Rock1246":
+					case "Saiste":
+					case "Secreet":
+					case "Shon":
+					case "Sprite":
+					case "Superman":
+					case "Terminator":
+					case "Timothy":
+					case "Tnlkm":
+					case "UAC":
+					case "Unicode":
+					case "Vegetto":
+					case "WEOW":
+					case "Yoyo":
+					case "YSC": return true;
+				}
+				return false;
+			}
+		}
+	</script>
+</body>
+</html>

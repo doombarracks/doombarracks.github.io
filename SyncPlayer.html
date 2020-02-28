@@ -422,9 +422,11 @@
 					<div class="full-screen btn right">
 						<i class="fa fa-expand-arrows-alt"></i>
 					</div>
+					<!--
 					<div class="btn right">
 						<i class="fa fa-cog"></i>
 					</div>
+					-->
 				</div>
 			</div>
 		</div>
@@ -1163,7 +1165,7 @@
 							.on("drop", function(jqe) {
 								jqe.stopPropagation();
 								jqe.preventDefault();
-								
+
 								let c = _GetCoverJQ(jqe);
 								c.removeClass("drag_dst");
 								if (c.hasClass("drag_src")) return;

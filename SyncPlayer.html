@@ -1732,7 +1732,7 @@
 				function GetMusicPath(wad, name) {
 					let w = GameInfo.WadInfo[wad];
 					if (!w) return;
-					let d = w.Data[name]; // Search by name directly.
+					let d = w.Data[name.toUpperCase()]; // Search by name directly.
 					if (!d) { // If it is not name, use "Music" tag instead.
 						for (let k in w.Data) {
 							let wdm = w.Data[k].Music;

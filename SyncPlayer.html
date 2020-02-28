@@ -1161,6 +1161,9 @@
 								_GetCoverJQ(jqe).removeClass("drag_dst");
 							})
 							.on("drop", function(jqe) {
+								jqe.stopPropagation();
+								jqe.preventDefault();
+								
 								let c = _GetCoverJQ(jqe);
 								c.removeClass("drag_dst");
 								if (c.hasClass("drag_src")) return;

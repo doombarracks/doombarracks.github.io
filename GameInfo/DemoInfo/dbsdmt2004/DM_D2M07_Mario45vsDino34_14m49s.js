@@ -1,0 +1,37 @@
+var singleDemoInfo = {
+	Game: "Doom2",
+	Activity: [
+		{ Tic: 1, Operation: "Map", MapName: "MAP07" },
+		{ Tic: 2, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 7, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 37, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "dino" },
+		{ Tic: 368, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 372, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "dino" },
+		{ Tic: 399, Operation: "SetPlayer", PlayerNumber: 2, PlayerName: "mario" },
+		{ Tic: 474, Operation: "Say", PlayerName: "darway", Message: "HI" },
+		{ Tic: 605, Operation: "Say", PlayerName: "mario", Message: "Y" },
+		{ Tic: 609, Operation: "Say", PlayerName: "dino", Message: "HI" },
+		{ Tic: 677, Operation: "Say", PlayerName: "mario", Message: "OK" },
+		{ Tic: 720, Operation: "Say", PlayerName: "darway", Message: "WAIT" },
+		{ Tic: 902, Operation: "Map", MapName: "map07" },
+		{ Tic: 1092, Operation: "Say", PlayerName: "darway", Message: "GO" },
+		{ Tic: 1330, Operation: "Say", PlayerName: "darway", Message: "DINO VS MARIO" },
+		{ Tic: 1654, Operation: "Say", PlayerName: "darway", Message: "FRAG LIMIT 45" },
+		{ Tic: 12073, Operation: "Say", PlayerName: "mario", Message: "..." },
+		{ Tic: 31032, Operation: "Kick", PlayerName: "mario", MessageType: 3 },
+	],
+	ActivityTimeOffset: 25,
+	ActivityTimeScale: 0.9998,
+	Videos: [
+		{
+			PlayerName: "dino",
+			VideoID: "XPMlQbesyDw",
+			ZeroTime: 1.1,
+		},
+		{
+			PlayerName: "mario",
+			VideoID: "b2iHHE77WGw",
+			ZeroTime: 1.1,
+		},
+	],
+};

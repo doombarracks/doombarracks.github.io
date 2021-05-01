@@ -1,0 +1,35 @@
+var singleDemoInfo = {
+	Game: "Doom2",
+	Activity: [
+		{ Tic: 1, Operation: "Map", MapName: "MAP01" },
+		{ Tic: 2, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 8, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 39, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "mario" },
+		{ Tic: 136, Operation: "Say", PlayerName: "darway", Message: "HI" },
+		{ Tic: 193, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 196, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "mario" },
+		{ Tic: 225, Operation: "SetPlayer", PlayerNumber: 2, PlayerName: "james bond" },
+		{ Tic: 267, Operation: "Say", PlayerName: "mario", Message: "OK" },
+		{ Tic: 292, Operation: "Say", PlayerName: "darway", Message: "WAIT" },
+		{ Tic: 517, Operation: "Map", MapName: "MAP01" },
+		{ Tic: 978, Operation: "Say", PlayerName: "darway", Message: "GO" },
+		{ Tic: 1380, Operation: "Say", PlayerName: "darway", Message: "JAMS VS MARIO" },
+		{ Tic: 12972, Operation: "Say", PlayerName: "james bond", Message: "GOOD" },
+		{ Tic: 38560, Operation: "Say", PlayerName: "james bond", Message: "LOST" },
+		{ Tic: 38919, Operation: "Kick", PlayerName: "mario", MessageType: 3 },
+	],
+	ActivityTimeOffset: 14,
+	ActivityTimeScale: 0.99985,
+	Videos: [
+		{
+			PlayerName: "mario",
+			VideoID: "z-SHGaN655A",
+			ZeroTime: 1.0,
+		},
+		{
+			PlayerName: "james bond",
+			VideoID: "Et_zFeo52uM",
+			ZeroTime: 1.0,
+		},
+	],
+};

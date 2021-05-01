@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-158627278-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-158627278-1');
+	</script>
+
+	<title>DBSDMT</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	<link rel="stylesheet" href="Styles/DBStyles.css">
+	<style>
+		.portal-orb {
+			background-image: url('Images/Animation/Doom_InvulnerabilitySphere_R1.gif');
+		}
+		
+		.page-title {
+			font-family: Tahoma, sans-serif;
+		}
+
+		.separator {
+			display: block;
+			margin: 18px 0;
+			padding: 0;
+			height: 59px;
+			background-image: url('Images/DBSDMT/WALL52.png');
+			background-position-x: center;
+			background-position-y: bottom;
+		}
+
+		.battle-board-container {
+			position: relative;
+		}
+
+		.battle-board {
+			overflow: auto;
+			margin: 1rem;
+			padding: 0.5rem;
+		}
+
+		.dragscroll {
+			cursor: move;
+		}
+
+		.bg-title-container {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			opacity: 0.2;
+			overflow: hidden;
+			pointer-events: none;
+			user-select: none;
+			clip: rect(0, auto, auto, 0); /* To clip fixed bg-title. */
+		}
+
+		.bg-title {
+			position: fixed;
+			font-size: 20vw;
+			font-family: "DooM";
+			opacity: 0;
+			transition: opacity 1s;
+		}
+
+		table.dbsdmt {
+			border: none;
+			border-collapse: collapse;
+			font-size: 16px; /* Changing this to scale the entire table. */
+			margin: 0;
+			padding: 0;
+			line-height: 0;
+			position: relative;
+			table-layout: fixed;
+			user-select: none;
+			width: 100%;
+		}
+
+		table.dbsdmt td {
+			font-size: 1em;
+			font-style: normal;
+			font-family: Arial, sans-serif;
+			font-weight: 700;
+			text-align: center; /* There are excpetions for player elimination text. */
+			text-decoration: none;
+			vertical-align: middle;
+			white-space: nowrap;
+		}
+		table.dbsdmt tr:first-child { height: 2em; } /* Title row. */
+		table.dbsdmt tr:nth-child(1) > td { font-size: 1.5em; } /* Title font size. */
+		table.dbsdmt tr:nth-child(1) > td span { font-family: "標楷體"; } /* Font for Chinese. */
+		table.dbsdmt tr:nth-child(2n+2) { height: 0.3em; } /* Gaps between content rows. */
+		table.dbsdmt tr:nth-child(3) { height: 1.7em; } /* Height of category bar. */
+		table.dbsdmt tr:nth-child(2n+5) { height: 1.4em; } /* Height of content rows. */
+		table.dbsdmt tr:nth-child(-n+5) > td { color: yellow; } /* Font color outside main table. */
+		table.dbsdmt tr:nth-child(n+6) > td { color: #FF9; } /* Font color in main table. */
+		table.dbsdmt .sb { background: #930; }
+		table.dbsdmt .gb { background: #669; }
+		table.dbsdmt .rb { background: red; }
+		table.dbsdmt .bb { background: blue; }
+		table.dbsdmt .mb { background: maroon; }
+		table.dbsdmt .tleft { text-align: left; }
+		table.dbsdmt .tright { text-align: right; }
+
+		table.dbsdmt.lr6 colgroup > col:nth-child(-3n+18),
+		table.dbsdmt.lr7 colgroup > col:nth-child(-3n+21),
+		table.dbsdmt.lr8 colgroup > col:nth-child(-3n+24),
+		table.dbsdmt colgroup > col:nth-child(3n+1) { width: 0.3em; }
+		table.dbsdmt.lr6 colgroup > col:nth-child(-3n+19),
+		table.dbsdmt.lr7 colgroup > col:nth-child(-3n+22),
+		table.dbsdmt.lr8 colgroup > col:nth-child(-3n+25),
+		table.dbsdmt colgroup > col:nth-child(3n) { width: 2em; }
+		table.dbsdmt.lr6 colgroup > col:nth-child(-3n+20), /* 2 + 3 * 6 */
+		table.dbsdmt.lr7 colgroup > col:nth-child(-3n+23),
+		table.dbsdmt.lr8 colgroup > col:nth-child(-3n+26),
+		table.dbsdmt colgroup > col:nth-child(3n+2) { width: 6.25em; }
+
+		/* First two columns are exceptions. */
+		table.dbsdmt colgroup > col:nth-child(1) { width: 0.3em !important; }
+		table.dbsdmt colgroup > col:nth-child(2) { width: 2em !important; }
+
+		.pointer {
+			cursor: pointer;
+		}
+		.menu {
+			position: absolute;
+			border: 2px solid white;
+			border-radius: 0.5em;
+			margin: 0;
+			padding: 1em;
+			background-color: rgba(0, 0, 0, 0.8);
+			text-align: center;
+			left: 0;
+			top: 0;
+			opacity: 0;
+		}
+		.menu div.table { display: table; border-collapse: collapse; }
+		.menu div.table > div { display: table-row; }
+		.menu div.table > div.name { font-weight: bold; }
+		.menu div.table > div > div { display: table-cell; color: white; text-align: center; vertical-align: middle; padding: 0.7em; }
+		.menu div.table > div.trophy > div { color: gold; padding: 0 0 0.5em 0; }
+		.menu div.table > div > div.win { color: red; }
+		.menu div.table > div > div.lose { color: skyblue; }
+		.menu div.table > div > div.img { vertical-align: bottom; }
+		.menu div.table > div > div.img img { display: block; margin-left: auto; margin-right: auto; }
+		.menu hr{
+			height: 1px;
+			border: 0;
+			margin: 0.75em 0 0 0;
+			padding: 0;
+			background: linear-gradient(to right, transparent, gray, gray, transparent);
+		}
+		.menu .title { font-size: 1.2em; font-weight: bold; }
+		.menu a.yt,
+		.menu a.demo { display: block; padding-top: 1em; color: cyan; text-decoration: none; cursor: pointer; }
+
+		@media screen and (orientation:portrait) {
+			table.dbsdmt {
+				font-size: 24px !important;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="portal-orb-container">
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="dmsdmt2004-container"><div>2004</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="dmsdmt2006-container"><div>2006</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="dmsdmt2007-container"><div>2007</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="dmsdmt2008-container"><div>2008</div></div></div>
+		<div class="portal-orb-box"><div class="portal-orb" orb-target="dmsdmt2009-container"><div>2009</div></div></div>
+	</div>
+
+	<div class="page-title-container jarallax cover" data-img-src="Images/DBSDMT/Title_Back.jpg">
+		<div class="page-title">DBSDMT</div>
+		<div class="page-title-text">
+			<p>DBSDMT: Doom Barracks Summer DeathMatch Tournament，是毀滅戰士營營長 Darway 在每年夏天舉辦的一對一死鬥大賽。每位參賽者必須破關斬將，最後由勝部冠軍與敗部冠軍進行總決賽，勝利者即為當年總冠軍。</p>
+			<p>每年舉辦的賽事皆為勝部 VS 敗部，而 2005 年舉辦的 DBSDMT 賽事為循環制，每位參賽者都會與其他人對戰一次。</p>
+		</div>
+		<div class="top-gradient"></div>
+		<div class="bottom-gradient"></div>
+	</div>
+
+	<div class="separator"></div>
+
+	<div class="battle-board-container" id="dmsdmt2004-container">
+		<div class="bg-title-container">
+			<div class="bg-title">
+				2004
+			</div>
+		</div>
+		<div class="battle-board dragscroll">
+			<table id="dbsdmt2004" class="dbsdmt lr6" cellpadding="0" cellspacing="0">
+				<col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col>
+				<tr><td colspan="36" class="mb">2004 DBSDMT <span>賽程表</span></td></tr>
+				<tr><td colspan="36"></td></tr>
+				<tr><td colspan="3"></td><td colspan="14" class="bb">敗部賽程</td><td></td><td colspan="3" class="sb">Start</td><td></td><td colspan="8" class="rb">勝部賽程</td><td></td><td colspan="5" class="mb">冠軍賽程</td></tr>
+				<tr><td colspan="36"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2" class="bb">Round 6</td><td></td><td colspan="2" class="bb">Round 5</td><td></td><td colspan="2" class="bb">Round 4</td><td></td><td colspan="2" class="bb">Round 3</td><td></td><td colspan="2" class="bb">Round 2</td><td></td><td colspan="3" class="sb">Round 1</td><td></td><td colspan="2" class="rb">Round 2</td><td></td><td colspan="2" class="rb">Round 3</td><td></td><td colspan="2" class="rb">Round 4</td><td></td><td colspan="5" class="mb">Final Round</td></tr>
+				<tr><td colspan="36"></td></tr>
+				<tr><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">20</td><td class="bb">JamesBond</td><td class="bb" colspan="17"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="18"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">12</td><td class="bb">Saiste</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rock1246</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">Saiste</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rock1246</td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">904631</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Saiste</td><td class="rb">12</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">904631</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="15"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rock1246</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Mario</td><td class="rb">45</td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">26</td><td class="gb">Rock1246</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rock1246</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Mario</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="11"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2">(淘汰)</td><td class="bb"></td><td colspan="11"></td><td class="gb" colspan="2"></td><td class="gb">Mario</td><td class="gb">45</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="21"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td class="bb">23</td><td class="bb">Rock1246</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Raymond</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Mario</td><td class="rb">28</td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">JamesBond</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">33</td><td class="bb">Jackgo</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Jackgo</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">JamesBond</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">37</td><td class="gb">Jackgo</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Jackgo</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">JamesBond</td><td class="rb">22</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">Mike</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">24</td><td class="bb">Rei</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Mike</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Raymond</td><td class="rb">23</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">Raymond</td><td class="gb">45</td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="27"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">BB</td><td class="bb" colspan="11"></td><td colspan="5"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">DeathSeven</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rei</td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">DeathSeven</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">BB</td><td class="rb">23</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="2"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">BB</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rei</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">AJ</td><td class="rb">4</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">35</td><td class="gb">Rei</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Rei</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">AJ</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="gb" colspan="2"></td><td class="gb">AJ</td><td class="gb">45</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2">總冠軍</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="27"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">39</td><td class="bb">Hunter</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2" class="mb">Unicode</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">28</td><td class="gb">Link</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Dino</td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">32</td><td class="bb">Link</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Unicode</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Dino</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">34</td><td class="bb">Dino</td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">26</td><td class="gb">Dino</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Dino</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Hunter</td><td class="rb">44</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td class="bb">45</td><td class="bb">Mario</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">Hunter</td><td class="gb">45</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="4"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="4"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">4</td><td class="bb">AJ</td><td class="bb" colspan="17"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="4"></td><td class="bb"></td><td colspan="24"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="4"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Mario</td><td class="bb" colspan="23"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="32"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="30"></td><td class="bb">Mario</td><td class="bb">31</td><td class="bb"></td><td colspan="2" class="tleft">(淘汰)</td></tr>
+			</table>
+		</div>
+	</div>
+
+	<div class="separator"></div>
+
+	<div class="battle-board-container" id="dmsdmt2006-container">
+		<div class="bg-title-container">
+			<div class="bg-title">
+				2006
+			</div>
+		</div>
+		<div class="battle-board dragscroll">
+			<table id="dbsdmt2006" class="dbsdmt lr8" cellpadding="0" cellspacing="0">
+				<col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col>
+				<tr><td colspan="45" class="mb">2006 DBSDMT <span>賽程表</span></td></tr>
+				<tr><td colspan="45"></td></tr>
+				<tr><td colspan="3"></td><td colspan="20" class="bb">敗部賽程</td><td></td><td colspan="3" class="sb">Start</td><td></td><td colspan="11" class="rb">勝部賽程</td><td></td><td colspan="5" class="mb">冠軍賽程</td></tr>
+				<tr><td colspan="45"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2" class="bb">Round 8</td><td></td><td colspan="2" class="bb">Round 7</td><td></td><td colspan="2" class="bb">Round 6</td><td></td><td colspan="2" class="bb">Round 5</td><td></td><td colspan="2" class="bb">Round 4</td><td></td><td colspan="2" class="bb">Round 3</td><td></td><td colspan="2" class="bb">Round 2</td><td></td><td colspan="3" class="sb">Round 1</td><td></td><td colspan="2" class="rb">Round 2</td><td></td><td colspan="2" class="rb">Round 3</td><td></td><td colspan="2" class="rb">Round 4</td><td></td><td colspan="2" class="rb">Round 5</td><td></td><td colspan="5" class="mb">Final Round</td></tr>
+				<tr><td colspan="45"></td></tr>
+				<tr><td colspan="9"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">25</td><td class="bb">AJNeoK</td><td class="bb" colspan="20"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">42</td><td class="bb">Jackgo0932</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">Jason</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="11"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Jason</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">38</td><td class="gb">Timothy</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Jason</td><td class="rb">50</td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">42</td><td class="gb">904631</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">21</td><td class="bb">904631</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Jackgo0932</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">Jackgo0932</td><td class="gb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Kenny</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Jason</td><td class="rb">50</td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">Wasami4118</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">12</td><td class="bb">Howie</td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Wasami4118</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Kenny</td><td class="rb">0</td><td class="rb"></td><td colspan="2" class="tleft">(棄權)</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Kenny</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Howie</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">AJNeoK</td><td class="rb">33</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">45</td><td class="gb">Howie</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Howie</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">AJNeoK</td><td class="rb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="gb" colspan="2"></td><td class="gb">AJNeoK</td><td class="gb">50</td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="27"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">E007X</td><td class="bb" colspan="20"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">26</td><td class="bb">Mink</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Jason</td><td class="rb">50</td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">34</td><td class="gb">D.E.</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">28</td><td class="bb">D.E.</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">D.E.</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">D.E.</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">HBO</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">HBO</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">D.E.</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">HBO</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">44</td><td class="gb">CCU</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">D.E.</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">CCU</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Mink</td><td class="rb">36</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="17"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2">(淘汰)</td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">Mink</td><td class="gb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td class="bb">43</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">38</td><td class="bb">Move_Target</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">HBO</td><td class="rb">33</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">47</td><td class="gb">WILL</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">35</td><td class="bb">WILL</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">WILL</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">E007X</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">E007X</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td class="bb">50</td><td class="bb">WILL</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">E007X</td><td class="rb">26</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Jason</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="30"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Move_Target</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">25</td><td class="bb">Webonomics</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Move_Target</td><td class="rb">43</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="17"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="17"></td><td class="bb"></td><td class="gb">38</td><td class="gb">Webonomics</td><td class="gb" colspan="2"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="30"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">48</td><td class="bb">HBO</td><td class="bb" colspan="26"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="30"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">46</td><td class="bb">QQW94</td><td class="bb" colspan="14"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="15"></td><td class="bb"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">QQW94</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Mario</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">39</td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">47</td><td class="gb">Mario</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">40</td><td class="bb">Mario</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Mario</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Mario</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">No95</td><td class="rb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2">總冠軍</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">No95</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2" class="mb">Jason</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(違規-5，淘汰)</td><td class="bb"></td><td class="bb">43</td><td class="bb">Unicode</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">No95</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="4"></td><td></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Mario</td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">43</td><td class="gb">Unicode</td><td class="gb" colspan="2"></td><td colspan="5"></td><td class="rb" colspan="4"></td><td class="rb">No95</td><td class="rb">36</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="27"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Mario</td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">E.F.</td><td class="gb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">18</td><td class="bb">AJ</td><td class="bb" colspan="4"></td><td colspan="3"></td><td class="rb" colspan="4"></td><td class="rb">E.F.</td><td class="rb">43</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td class="gb">18</td><td class="gb">AJ</td><td class="gb" colspan="2"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">38</td><td class="bb">E.F.</td><td class="bb" colspan="20"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="36"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td class="bb">50</td><td class="bb">No95</td><td class="bb" colspan="35"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="41"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="39"></td><td class="bb">No95</td><td class="bb">34</td><td class="bb"></td><td colspan="2" class="tleft">(淘汰)</td></tr>
+			</table>
+		</div>
+	</div>
+
+	<div class="separator"></div>
+
+	<div class="battle-board-container" id="dmsdmt2007-container">
+		<div class="bg-title-container">
+			<div class="bg-title">
+				2007
+			</div>
+		</div>
+		<div class="battle-board dragscroll">
+			<table id="dbsdmt2007" class="dbsdmt lr8" cellpadding="0" cellspacing="0">
+				<col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col>
+				<tr><td colspan="45" class="mb">2007 DBSDMT <span>賽程表</span></td></tr>
+				<tr><td colspan="45"></td></tr>
+				<tr><td colspan="3"></td><td colspan="20" class="bb">敗部賽程</td><td></td><td colspan="3" class="sb">Start</td><td></td><td colspan="11" class="rb">勝部賽程</td><td></td><td colspan="5" class="mb">冠軍賽程</td></tr>
+				<tr><td colspan="45"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2" class="bb">Round 8</td><td></td><td colspan="2" class="bb">Round 7</td><td></td><td colspan="2" class="bb">Round 6</td><td></td><td colspan="2" class="bb">Round 5</td><td></td><td colspan="2" class="bb">Round 4</td><td></td><td colspan="2" class="bb">Round 3</td><td></td><td colspan="2" class="bb">Round 2</td><td></td><td colspan="3" class="sb">Round 1</td><td></td><td colspan="2" class="rb">Round 2</td><td></td><td colspan="2" class="rb">Round 3</td><td></td><td colspan="2" class="rb">Round 4</td><td></td><td colspan="2" class="rb">Round 5</td><td></td><td colspan="5" class="mb">Final Round</td></tr>
+				<tr><td colspan="45"></td></tr>
+				<tr><td colspan="9"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">48</td><td class="bb">904631</td><td class="bb" colspan="20"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb" colspan="2"></td><td class="bb">FreeMan</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">Raymond</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">12</td><td class="bb">FreeMan</td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Raymond</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Raw</td><td class="rb">39</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="14"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">30</td><td class="bb">Orcs</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Raw</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb" colspan="2"></td><td class="bb">(缺)</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Raw</td><td class="rb">50</td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">Steve</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Orcs</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Steve</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">FreeMan</td><td class="rb">4</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">FreeMan</td><td class="gb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Orcs</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Raw</td><td class="rb">50</td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright"></td><td class="bb"></td><td class="gb">46</td><td class="gb">Mario</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Orcs</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Mario</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Orcs</td><td class="rb">21</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Orcs</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="17"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">47</td><td class="bb">Mario</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">904631</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="21"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2" class="tright">(棄權)</td><td class="bb"></td><td class="gb">0</td><td class="gb">Kenny</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Kenny</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">904631</td><td class="rb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="gb" colspan="2"></td><td class="gb">904631</td><td class="gb">50</td><td class="rb"></td><td colspan="8"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="27"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">43</td><td class="bb">QQW94</td><td class="bb" colspan="20"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">WW</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Raw</td><td class="rb">41</td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">No95</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">Shon</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">No95</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">32</td><td class="gb">Shon</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">No95</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">WW</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2">(淘汰)</td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">WW</td><td class="rb">29</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="17"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="gb">29</td><td class="gb">Timothy</td><td class="gb" colspan="2"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">46</td><td class="bb">Rock1246</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">No95</td><td class="rb">35</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">16</td><td class="gb">Shift</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">40</td><td class="bb">Rock1246</td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">31</td><td class="bb">Shift</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Rock1246</td><td class="rb">26</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Rock1246</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">41</td><td class="bb">Tails</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Asdfgh</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">24</td><td class="gb">Tails</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Tails</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">50</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="17"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="17"></td><td class="gb" colspan="2"></td><td class="gb">QQW94</td><td class="gb">50</td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="30"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">No95</td><td class="bb" colspan="26"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="30"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">16</td><td class="bb">Mike</td><td class="bb" colspan="20"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">45</td><td class="bb">Unicode</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Unicode</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">39</td><td class="gb">HBO</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Unicode</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Unicode</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">HBO</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Asdfgh</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="2"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Asdfgh</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">42</td><td class="bb">HBO</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Asdfgh</td><td class="rb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2">總冠軍</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">33</td><td class="gb">Syx68011</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2" class="mb">Asdfgh</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Unicode</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">39</td><td class="bb">Syx68011</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">31</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="20"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">Unicode</td><td class="gb">50</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Nuonellyoun</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb" colspan="4"></td><td class="rb">Asdfgh</td><td class="rb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">Nuonellyoun</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="8"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="9"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">35</td><td class="bb">Chomatic.HP</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Chomatic.HP</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Nuonellyoun</td><td class="rb">0</td><td class="rb"></td><td colspan="2" class="tleft">(棄權)</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">42</td><td class="gb">Chomatic.HP</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td class="bb">50</td><td class="bb">Chomatic.HP</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Mike</td><td class="rb">15</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="27"></td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="17"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Mike</td><td class="gb">50</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="17"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="15"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">49</td><td class="bb">Caesar</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Mike</td><td class="rb">50</td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tleft"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="20"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="20"></td><td class="bb"></td><td class="gb">49</td><td class="gb">Caesar</td><td class="gb" colspan="2"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="36"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td class="bb">50</td><td class="bb">Raw</td><td class="bb" colspan="35"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="41"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="39"></td><td class="bb">Raw</td><td class="bb">47</td><td class="bb"></td><td colspan="2" class="tleft">(淘汰)</td></tr>
+			</table>
+		</div>
+	</div>
+
+	<div class="separator"></div>
+
+
+	<div class="battle-board-container" id="dmsdmt2008-container">
+		<div class="bg-title-container">
+			<div class="bg-title">
+				2008
+			</div>
+		</div>	
+		<div class="battle-board dragscroll">
+				<table id="dbsdmt2008" class="dbsdmt lr7" cellpadding="0" cellspacing="0">
+				<col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col>
+				<tr><td colspan="39" class="mb">2008 DBSDMT <span>賽程表</span></td></tr>
+				<tr><td colspan="39"></td></tr>
+				<tr><td colspan="3"></td><td colspan="17" class="bb"></td><td></td><td colspan="3" class="sb">Start</td><td></td><td colspan="8" class="rb">勝部賽程</td><td></td><td colspan="5" class="mb">冠軍賽程</td></tr>
+				<tr><td colspan="39"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2" class="bb">Round 7</td><td></td><td colspan="2" class="bb">Round 6</td><td></td><td colspan="2" class="bb">Round 5</td><td></td><td colspan="2" class="bb">Round 4</td><td></td><td colspan="2" class="bb">Round 3</td><td></td><td colspan="2" class="bb">Round 2</td><td></td><td colspan="3" class="sb">Round 1</td><td></td><td colspan="2" class="rb">Round 2</td><td></td><td colspan="2" class="rb">Round 3</td><td></td><td colspan="2" class="rb">Round 4</td><td></td><td colspan="5" class="mb">Final Round</td></tr>
+				<tr><td colspan="39"></td></tr>
+				<tr><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">37</td><td class="bb">[DB]Timothy</td><td class="bb" colspan="20"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]AJNeoK</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td colspan="2"></td><td class="bb"></td><td class="gb">18</td><td class="gb">[DB]StarLove</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]AJNeoK</td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">[DB]StarLove</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">[DB]AJNeoK</td><td class="rb">38</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]AJNeoK</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">[DB]AJNeoK</td><td class="gb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">18</td><td class="bb">[DB]SHON</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">[DB]Timothy</td><td class="rb">35</td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">20</td><td class="gb">[DB]SHON</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]AJNeoK</td><td class="bb"></td><td colspan="3"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]SHON</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">[DB]Timothy</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">[DB]Timothy</td><td class="gb">40</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="27"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]Tails</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">40</td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td></td><td></td><td class="gb" colspan="2"></td><td class="gb">[DB]Tails</td><td class="gb">40</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">27</td><td class="bb">[DB]Tails</td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">YSC</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">[DB]Tails</td><td class="rb">23</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">32</td><td class="gb">YSC</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">[DB]AJNeoK</td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">31</td><td class="bb">Jackgo0932</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td></td><td></td><td class="gb" colspan="2"></td><td class="gb">QQW94</td><td class="gb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">Jackgo0932</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">40</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="8"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td class="gb">17</td><td class="gb">Jackgo0932</td><td class="gb" colspan="2"></td><td colspan="8"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="30"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(棄權，淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">HBO</td><td class="bb" colspan="11"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">HBO</td><td class="gb">40</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">21</td><td class="bb">syx68011</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">syx68011</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">HBO</td><td class="rb">0</td><td class="rb"></td><td colspan="2" class="tleft">(棄權)</td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">39</td><td class="gb">syx68011</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="4"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">40</td><td class="bb">syx68011</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">teanzlink</td><td class="rb">28</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2">總冠軍</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">teanzlink</td><td class="gb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2" class="mb">QQW94</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">teanzlink</td><td class="bb" colspan="4"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">16</td><td class="bb">Shift</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">teanzlink</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td class="rb">[DB]Crazy</td><td class="rb">38</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="gb">16</td><td class="gb">Shift</td><td class="gb" colspan="2"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(種子)</td><td class="gb" colspan="2"></td><td class="gb">[DB]Crazy</td><td class="gb"></td><td class="rb" colspan="4"></td><td class="rb">[DB]Crazy</td><td class="rb">40</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="18"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="2">(淘汰)</td><td colspan="6"></td><td class="bb"></td><td class="bb">40</td><td class="bb">teanzlink</td><td class="bb" colspan="17"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="30"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td class="bb">38</td><td class="bb">[DB]Crazy</td><td class="bb" colspan="4"></td><td class="bb" colspan="2"></td><td class="bb" colspan="4"></td><td class="bb"></td><td class="bb" colspan="18"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td colspan="35"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="33"></td><td class="bb">[DB]AJNeoK</td><td class="bb">23</td><td class="bb"></td><td colspan="2" class="tleft">(淘汰)</td></tr>
+			</table>
+		</div>
+	</div>
+
+	<div class="separator"></div>
+
+	<div class="battle-board-container" id="dmsdmt2009-container">
+		<div class="bg-title-container">
+			<div class="bg-title">
+				2009
+			</div>
+		</div>	
+		<div class="battle-board dragscroll">
+			<table id="dbsdmt2009" class="dbsdmt lr7" cellpadding="0" cellspacing="0"><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col>
+				<tr><td colspan="42" class="mb">2009 DBSDMT <span>賽程表</span></td></tr>
+				<tr><td colspan="42"></td></tr>
+				<tr><td colspan="3"></td><td colspan="17" class="bb"></td><td></td><td colspan="3" class="sb">Start</td><td></td><td colspan="8" class="rb">勝部賽程</td><td></td><td colspan="8" class="mb">冠軍賽程</td></tr>
+				<tr><td colspan="42"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2" class="bb">Round 7</td><td></td><td colspan="2" class="bb">Round 6</td><td></td><td colspan="2" class="bb">Round 5</td><td></td><td colspan="2" class="bb">Round 4</td><td></td><td colspan="2" class="bb">Round 3</td><td></td><td colspan="2" class="bb">Round 2</td><td></td><td colspan="3" class="sb">Round 1</td><td></td><td colspan="2" class="rb">Round 2</td><td></td><td colspan="2" class="rb">Round 3</td><td></td><td colspan="2" class="rb">Round 4</td><td></td><td colspan="8" class="mb">Final Round</td></tr>
+				<tr><td colspan="42"></td></tr>
+				<tr><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">32</td><td class="bb">Unicode</td><td class="bb" colspan="20"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Crazy</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">33</td><td class="gb">Orcs</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Crazy</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Orcs</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Open</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="11"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Crazy</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Open</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">17</td><td class="bb">Orcs</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Open</td><td class="rb">45</td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">18</td><td class="gb">Dino</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Crazy</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">44</td><td class="bb">Dino</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Crazy</td><td class="rb">32</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="14"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="8"></td><td class="gb" colspan="2"></td><td class="gb">Crazy</td><td class="gb">45</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="11"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Mario</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Open</td><td class="rb">45</td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="gb" colspan="2"></td><td class="gb">Mario</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="3"></td><td colspan="2">(淘汰)</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(棄權、淘汰)</td><td class="bb"></td><td class="bb">0</td><td class="bb">Mario</td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">34</td><td class="bb">Shift</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Mario</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="5"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td class="bb">17</td><td class="bb">Crazy</td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">19</td><td class="gb">Shift</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="15"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">31</td><td class="bb">Syx68011</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">39</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Unicode</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Syx68011</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Unicode</td><td class="rb">45</td><td class="rb"></td><td colspan="5"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="8"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td class="gb">39</td><td class="gb">Syx68011</td><td class="gb" colspan="2"></td><td colspan="8"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="27"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">AJNeoK</td><td class="bb" colspan="20"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="21"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="8"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">30</td><td class="bb">904631</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td class="rb">Open</td><td class="rb">39</td><td class="rb"></td><td class="bb">Open</td><td class="bb">36</td><td class="bb"></td><td colspan="2" class="tleft">(淘汰)</td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">25</td><td class="gb">YSC</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">39</td><td class="bb">AJNeoK</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">YSC</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">YSC</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">AJNeoK</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">AJNeoK</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">YSC</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">AJNeoK</td><td class="rb">29</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2">總冠軍</td></tr>
+				<tr><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="18"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="2"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">904631</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2" class="mb">QQW94</td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">37</td><td class="bb">YSC</td><td class="bb"></td><td colspan="3"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">31</td><td class="bb">Shon</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">904631</td><td class="rb">29</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="17"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td class="gb">40</td><td class="gb">Shon</td><td class="gb" colspan="2"></td><td colspan="5"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="21"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Link</td><td class="bb" colspan="11"></td><td colspan="2"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">37</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td class="gb">40</td><td class="gb">Timothy</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">QQW94</td><td class="bb">45</td><td class="bb"></td><td colspan="2"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="6"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">36</td><td class="bb">Link</td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="bb">45</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">Link</td><td class="rb">41</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="gb" colspan="2"></td><td class="gb">Link</td><td class="gb">45</td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="11"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="12"></td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="9"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">39</td><td class="bb">Timothy</td><td class="bb"></td><td colspan="9"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">45</td><td class="rb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="24"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td class="gb">30</td><td class="gb">Starlove</td><td class="gb" colspan="2"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="14"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="3"></td><td class="gb"></td><td colspan="2"></td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="12"></td><td colspan="2" class="tright">(淘汰)</td><td class="bb"></td><td class="bb">25</td><td class="bb">Starlove</td><td class="bb"></td><td colspan="3"></td><td class="rb"></td><td class="rb">QQW94</td><td class="rb">45</td><td class="rb"></td><td colspan="5"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="17"></td><td class="gb"></td><td colspan="3"></td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="17"></td><td class="gb" colspan="2"></td><td class="gb">QQW94</td><td class="gb">45</td><td class="rb"></td><td colspan="8"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="2"></td><td colspan="3"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td colspan="30"></td><td class="bb"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td></td><td class="bb"></td><td class="bb">45</td><td class="bb">QQW94</td><td class="bb" colspan="29"></td><td colspan="2"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td colspan="35"></td><td class="bb"></td><td colspan="5"></td></tr>
+				<tr><td class="bb"></td><td class="bb" colspan="33"></td><td class="bb">QQW94</td><td class="bb">45</td><td class="bb"></td><td colspan="5"></td></tr>
+			</table>
+		</div>
+	</div>
+	
+	<change-log>
+		<div class="main">
+			<ul>
+				<li>2021/05/01：頁面建立</li>
+			</ul>
+		</div>
+	</change-log>
+
+	<footer>此頁面於 2021 年 05 月 01 日建立。</footer>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jarallax/1.12.0/jarallax.min.js"></script>
+	<script src="Scripts/DBScripts.js"></script>
+	<script src="Scripts/Data/DbsdmtInfoTable.js"></script>
+	<script src="Scripts/dragscroll.js"></script>
+	<script>
+		$(document).ready(function() {
+			// Creates parallax effect.
+			$(".jarallax").each(function() {
+				var t = $(this);
+				t.jarallax({ speed: 0 });
+			});
+
+			$("table.dbsdmt").each(function() {
+				let $t = $(this);
+				PrepareTable($t);
+
+				// Attach a delegated event handler.
+				$t.on("click mouseenter", ".pointer", function(e) { UpdateTableMenu(e, $t); });
+			});
+
+			// Menu.
+			$(document).resize(function(e) {
+				$("table.dbsdmt").each(function() { UpdateTableMenu(e, $(this)); });
+			});
+
+			// Background title.
+			BackgroundTitleParallax();
+			$(document)
+				.scroll(BackgroundTitleParallax)
+				.resize(BackgroundTitleParallax);
+
+			// Initialize portal.
+			$(".portal-orb").click(function() { OrbPortal($(this)); } );
+			UpdateOrbs();
+			$(document)
+				.scroll(UpdateOrbs)
+				.resize(UpdateOrbs);
+			
+			// Initializes changelog.
+			DBScripts.InitializeChangelog();
+		});
+
+		function ScrollToID(name) {
+			$("html, body")
+				.stop(true)
+				.animate({ scrollTop: $("#" + name).offset().top }, 1000);
+		}
+
+		function OrbPortal(jq) {
+			ScrollToID(jq.attr("orb-target"));
+		}
+
+		function UpdateOrbs() {
+			var y = window.scrollY + window.innerHeight * 0.5;
+
+			$(".portal-orb").each(function() {
+				var orb = $(this);
+				var story = $("#" + orb.attr("orb-target"));
+				var top = story.offset().top;
+				var bottom = top + story.height();
+				if (y >= top && y <= bottom) {
+					orb.addClass("selected");
+				}
+				else {
+					orb.removeClass("selected");
+				}
+			});
+		}
+
+		function BackgroundTitleParallax() {
+			$(".bg-title").each(function() {
+				let $t = $(this);
+				$t
+					.css("left", "calc(50% - " + ($t.width() * 0.5).toString() + "px)")
+					.css("top", "calc(50% - " + ($t.height() * 0.5).toString() + "px)")
+					.css("opacity", "1");
+			})
+		}
+
+		function UpdateTableMenu(e, $t) {
+			let $menu = $t.find(".menu");
+			let tableDom = $t[0];
+
+			function RemoveMenu() {
+				tableDom._DBSDMTName = undefined;
+				tableDom._DBSDMTRound = undefined;
+
+				// Remove current menu.
+				$menu.animate({
+					"height": "0",
+					"opacity": "0",
+					"margin-top": ($menu.height() * 0.5).toFixed(2) + "px"
+				}, 150, "linear", function() {
+					$(this).remove();
+				});
+			}
+
+			if (e.type === "resize" ||
+                (e.type === "click" && $menu.length > 0)) {
+				RemoveMenu();
+				return;
+			}
+
+			let table = $t[0]._DBSDMTPairTable;
+			
+			let $cell = $(e.target);
+			let name = $cell.data("name");
+			let round = $cell.data("round");
+			let roundTable = table[round];
+			let rlen = roundTable.length;
+			let p1, p2;
+			for (let i = 0; i < rlen; i++) {
+				p1 = roundTable[i];
+				if (p1.Name === name) {
+					p2 = (i & 1) == 0 ? roundTable[i + 1] : roundTable[i - 1];
+					break;
+				}
+			}
+
+			if (tableDom._DBSDMTName === name && tableDom._DBSDMTRound === round) {
+				return;
+			}
+
+			let tableId = $(tableDom).attr("id")
+
+			// Find information of this match.
+			let info;
+			try {
+				let infoTable = eval(tableId + "_InfoTable");
+				if (infoTable) {
+					function Check(p1, p2, i) {
+						return p1.Name == i.Name1 && p1.Score == i.Score1
+							&& p2.Name == i.Name2 && p2.Score == i.Score2;
+					}
+					for (let i of infoTable) {
+						if (Check(p1, p2, i) || Check(p2, p1, i)) {
+							info = i;
+							break;
+						}
+					}
+				}
+			}
+			catch {
+				info = undefined;
+			}
+
+			// If there's no match, create a dummy one.
+			if (!info) {
+				info = {
+					Name1: p1.Name,
+					Score1: p1.Score,
+					Name2: p2.Name,
+					Score2: p2.Score,
+					VideoJs: undefined,
+					DemoFile: undefined
+				};
+			}
+
+			let codes = [];
+			let p1s = p1.Score / Math.max(p1.Score, p2.Score),
+				p2s = p2.Score / Math.max(p1.Score, p2.Score);
+			codes.push("<div class='menu'>");
+			codes.push("<div class='table'>");
+			codes.push("<div class='trophy'>");
+			codes.push("<div>" + (p1s > p2s ? "<i class='fas fa-trophy'></i>" : "") + "</div>");
+			codes.push("<div></div>");
+			codes.push("<div>" + (p2s > p1s ? "<i class='fas fa-trophy'></i>" : "") + "</div>");
+			codes.push("</div>");
+			codes.push("<div class='name'>");
+			codes.push("<div class='" + (p1s > p2s ? "win" : "lose") + "'>" + p1.Name + "</div>");
+			codes.push("<div></div>");
+			codes.push("<div class='" + (p2s > p1s ? "win" : "lose") + "'>" + p2.Name + "</div>");
+			codes.push("</div>");
+			codes.push("<div>");
+			codes.push("<div class='img'><img src='Images/DoomCommon/" + (p1s >= 1 ? "PLAYF7" : p1s >= 0.5 ? "PLAYN0" : "PLAYW0") + ".png' /></div>");
+			codes.push("<div>vs</div>");
+			codes.push("<div class='img'><img src='Images/DoomCommon/" + (p2s >= 1 ? "PLAYF3" : p2s >= 0.5 ? "PLAYN0" : "PLAYW0") + ".png' /></div>");
+			codes.push("</div>");
+			codes.push("<div>");
+			codes.push("<div class='" + (p1s > p2s ? "win" : "lose") + "'>" + p1.Score + "</div>");
+			codes.push("<div></div>");
+			codes.push("<div class='" + (p2s > p1s ? "win" : "lose") + "'>" + p2.Score + "</div>");
+			codes.push("</div>");
+			codes.push("</div>");
+			codes.push(info.VideoJs || info.DemoFile ? "<hr>" : "");
+			codes.push(info.VideoJs ? "<a class='yt' href='SyncPlayer.html?videojs=" + tableId + "/" + info.VideoJs + "&title=" + info.Title + "' target='_blank' title='線上觀賞影片'><i class='fas fa-video'></i>&nbsp;比賽影片</a>" : "");
+			codes.push(info.DemoFile ? "<a class='demo' href='GameInfo/DemoInfo/" + tableId + "/" + info.DemoFile + "' title='下載錄影檔(.lmp)從模擬器撥放'><i class='fas fa-download'></i>&nbsp;Demo 下載</a>" : "");
+			codes.push("</div>");
+
+			// Add menu.
+			let $newMenu = $(codes.join(""));
+			$t.append($newMenu); // Append to table first so we can retrieve width and height.
+
+			let tOffset = $t.offset(),
+				cOffset = $cell.offset();
+			let tWidth = $t.width(),
+				tHeight = $t.height();
+			let cWidth = $cell.outerWidth(),
+				cHeight = $cell.outerHeight();
+			let mWidth = $newMenu.outerWidth(),
+				mHeight = $newMenu.outerHeight();
+			let x, y;
+			x = cOffset.left - tOffset.left + cWidth * 0.5;
+			y = (cOffset.top - tOffset.top) + (cHeight - mHeight) * 0.5;
+			y = Math.max(Math.min(y, tHeight - mHeight), 0);
+			
+			RemoveMenu();
+
+			$newMenu
+				.css("position", "absolute")
+				.css("left", x.toFixed(2) + "px")
+				.css("top", y.toFixed(2) + "px")
+				.fadeTo(100, 1);
+
+			// Saves data to check for the next time.
+			tableDom._DBSDMTName = name;
+			tableDom._DBSDMTRound = round;
+		}
+        
+		function GetLoseRound($t) {
+			return $t.hasClass("lr6") ? 5
+				: ($t.hasClass("lr7") ? 6
+				: ($t.hasClass("lr8") ? 7 : undefined));
+		}
+
+		function PrepareTable($t) {
+			let table = {};
+			let close = 2 + GetLoseRound($t) * 3;
+			let cwin = close + 5;
+			let $rows = $t.find("tr");
+			let rlen = $rows.length;
+			for (let r = 6; r < rlen; r += 2) {
+				let $cols = $("td", $rows[r]);
+				let clen = $cols.length;
+				let cpos = 0;
+				for (let c = 0; c < clen; c++) {
+					let $cell = $($cols[c]);
+					let cs = $cell.attr("colspan");
+					cs = typeof(cs) === "string" ? parseInt(cs) : 1;
+
+					cpos += cs;
+
+					let text = $cell.html();
+					if (text.length > 0 && !text.startsWith("(")) {
+						let round, score, doms;
+						if (cpos <= close) { // Losing round.
+							if ((cpos - 5) % 3 != 0) continue;
+							round = (cpos - close - 3) / 3;
+							score = parseInt($cell.prev().html());
+							doms = [$cell.prev(), $cell];
+						}
+						else if (cpos < cwin) { // Starting round.
+							if ((cpos != close + 3)) continue;
+							round = 0;
+							score = $cell.prev().html();
+							score = parseInt(score != "" ? score : $cell.next().html());
+							doms = [$cell.prev(), $cell, $cell.next()];
+						}
+						else { // Winning round.
+							if ((cpos - cwin - 1) % 3) continue;
+							round = (cpos - cwin + 2) / 3;
+							score = parseInt($cell.next().html());
+							doms = [$cell, $cell.next()];
+						}
+
+						if (isNaN(score)) continue;
+
+						if (!(round in table)) {
+							table[round] = [];
+						}
+						table[round].push({ Name: text, Score: score });
+						$(doms).each(function() {
+							$(this)
+								.addClass("pointer")
+								.data("name", text)
+								.data("round", round);
+						});
+					}
+				}
+			}
+
+			$t[0]._DBSDMTPairTable = table;
+		}
+		
+	</script>
+</body>
+</html>

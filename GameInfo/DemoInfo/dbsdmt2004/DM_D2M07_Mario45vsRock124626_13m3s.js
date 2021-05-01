@@ -1,0 +1,35 @@
+var singleDemoInfo = {
+	Game: "Doom2",
+	Activity: [
+		{ Tic: 1, Operation: "Map", MapName: "MAP07" },
+		{ Tic: 2, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 7, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 38, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "rock1246" },
+		{ Tic: 111, Operation: "Say", PlayerName: "rock1246", Message: "Z" },
+		{ Tic: 126, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "darway" },
+		{ Tic: 129, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "rock1246" },
+		{ Tic: 159, Operation: "SetPlayer", PlayerNumber: 2, PlayerName: "mario" },
+		{ Tic: 248, Operation: "Say", PlayerName: "darway", Message: "WAIT" },
+		{ Tic: 522, Operation: "Say", PlayerName: "rock1246", Message: "RESET XD" },
+		{ Tic: 555, Operation: "Map", MapName: "map07" },
+		{ Tic: 601, Operation: "Say", PlayerName: "darway", Message: "GO" },
+		{ Tic: 8201, Operation: "Say", PlayerName: "rock1246", Message: "COW" },
+		{ Tic: 8354, Operation: "Say", PlayerName: "rock1246", Message: "MY SISYER= =" },
+		{ Tic: 27248, Operation: "Kick", PlayerName: "rock1246", MessageType: 3 },
+		{ Tic: 27334, Operation: "Kick", PlayerName: "mario", MessageType: 3 },
+	],
+	ActivityTimeOffset: 15,
+	ActivityTimeScale: 0.9998,
+	Videos: [
+		{
+			PlayerName: "rock1246",
+			VideoID: "HUiM4hZ7Kjk",
+			ZeroTime: 1.1,
+		},
+		{
+			PlayerName: "mario",
+			VideoID: "JJxGgp6C6qI",
+			ZeroTime: 1.1,
+		},
+	],
+};

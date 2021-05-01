@@ -1,0 +1,38 @@
+var singleDemoInfo = {
+	Game: "Doom2",
+	Activity: [
+		{ Tic: 1, Operation: "Map", MapName: "MAP01" },
+		{ Tic: 2, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "mario" },
+		{ Tic: 28, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "mario" },
+		{ Tic: 51, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "bb" },
+		{ Tic: 58, Operation: "SetPlayer", PlayerNumber: 0, PlayerName: "mario" },
+		{ Tic: 80, Operation: "SetPlayer", PlayerNumber: 1, PlayerName: "bb" },
+		{ Tic: 82, Operation: "SetPlayer", PlayerNumber: 2, PlayerName: "aj" },
+		{ Tic: 266, Operation: "Say", PlayerName: "aj", Message: "START?" },
+		{ Tic: 428, Operation: "Say", PlayerName: "bb", Message: "G" },
+		{ Tic: 753, Operation: "Say", PlayerName: "mario", Message: "BB VS AJ !!" },
+		{ Tic: 42337, Operation: "Say", PlayerName: "aj", Message: "LAG XD" },
+		{ Tic: 42438, Operation: "Say", PlayerName: "bb", Message: "LAG.." },
+		{ Tic: 42504, Operation: "Say", PlayerName: "mario", Message: "YES" },
+		{ Tic: 53834, Operation: "Say", PlayerName: "bb", Message: "YOU WIN" },
+		{ Tic: 53936, Operation: "Say", PlayerName: "aj", Message: "XD" },
+		{ Tic: 54058, Operation: "Say", PlayerName: "mario", Message: "OK?" },
+		{ Tic: 54257, Operation: "Say", PlayerName: "bb", Message: "OK" },
+		{ Tic: 54345, Operation: "Say", PlayerName: "aj", Message: "OK" },
+		{ Tic: 54421, Operation: "Say", PlayerName: "mario", Message: "OK IS EXIT!!" },
+	],
+	ActivityTimeOffset: 0.0,
+	ActivityTimeScale: 0.9999,
+	Videos: [
+		{
+			PlayerName: "bb",
+			VideoID: "iW96YeQPXkA",
+			ZeroTime: 0.9,
+		},
+		{
+			PlayerName: "aj",
+			VideoID: "br4PAWKk32I",
+			ZeroTime: 0.9,
+		},
+	],
+};

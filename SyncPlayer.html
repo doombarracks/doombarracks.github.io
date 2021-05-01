@@ -729,10 +729,13 @@
 				var _syncTime = undefined;
 				var _syncMute = undefined;
 
+				var _resyncCounter = 0;
+
 				function CheckVideoSynchronization() {
 					if (!isFinite(_syncTime) || _syncTime < 0) return;
 
 					let synced = true;
+					let resync = false;
 
 					// Mute sound.
 					Sound.ForceMute(true);
@@ -760,6 +763,7 @@
 							switch (state) {
 								case YT.PlayerState.PLAYING:
 									p.seekTo(vt);
+									resync = true;
 									break;
 								case YT.PlayerState.BUFFERING:
 									pause = true;
@@ -769,6 +773,7 @@
 								case YT.PlayerState.PAUSED:
 								case YT.PlayerState.ENDED:
 									p.seekTo(vt);
+									resync = true;
 									break;
 							}
 
@@ -804,7 +809,25 @@
 							}
 						}
 					}
-					if (!synced) return;
+					
+					if (resync) {
+						_resyncCounter++;
+					}
+					else {
+						_resyncCounter = 0;
+					}
+
+					if (!synced) {
+						// Pause video if resync too many times.
+						if (_resyncCounter >= 20) {
+							_syncTime = undefined; // Cancel sync.
+							for (let k in _syncVideoList) {
+								_syncVideoList[k].Player.pauseVideo();
+							}
+						}
+
+						return;
+					}
 
 					// All synchronized. We can continue playing.
 					for (let k in _syncVideoList) {

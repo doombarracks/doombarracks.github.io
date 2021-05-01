@@ -35,7 +35,7 @@ var DBScripts = new function() {
 
 			let hide = main.children(".hide-htn");
 			if (hide.length == 0) {
-				hide = $("<div class='hide-htn'><i class='fa fa-times'></i></div>");
+				hide = $("<div class='hide-htn'><i class='fas fa-times'></i></div>");
 				main.append(hide);
 			}
 			hide.click(function() {
